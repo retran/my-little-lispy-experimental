@@ -30,7 +30,16 @@ namespace DSLM.Console
             {
                 return context.CallFunction(head.ToString(), tail);
             }
-            throw new NotImplementedException();
+
+            if (head.ToString() == "def")
+            {
+                var name = ((SymbolNode)tail.First()).Value;
+                var args = ((ListNode)tail.Skip(1).First()).Nodes.Select(n => (n as SymbolNode).Value);
+                var body = ((ListNode)tail.Skip(2).First());
+                context.DefFunction(name, args, body);
+                return null;
+            }
+            return Nodes;
         }
     }
 
@@ -140,36 +149,17 @@ namespace DSLM.Console
 
     public class EvalContext
     {
-        private readonly Dictionary<string, Func<IEnumerable<Node>, object>> _funcs;
+        private readonly Dictionary<string, Func<string, Node[], object>> _funcs;
+        private readonly Dictionary<string, string[]> _argMaps = new Dictionary<string, string[]>();
 
         public EvalContext()
         {
-            _funcs = new Dictionary<string, Func<IEnumerable<Node>, object>>()
+            _funcs = new Dictionary<string, Func<string, Node[], object>>()
             {
-                {"+", (nodes) =>
-                    {
-                        var values = nodes.ToArray();
-                        return (int)values[0].Eval(this) + (int)values[1].Eval(this);
-                    } 
-                },
-                {"-", (nodes) =>
-                    {
-                        var values = nodes.ToArray();
-                        return (int)values[0].Eval(this) - (int)values[1].Eval(this);
-                    } 
-                },
-                {"*", (nodes) =>
-                    {
-                        var values = nodes.ToArray();
-                        return (int)values[0].Eval(this) * (int)values[1].Eval(this);
-                    } 
-                },
-                {"/", (nodes) =>
-                    {
-                        var values = nodes.ToArray();
-                        return (int)values[0].Eval(this) / (int)values[1].Eval(this);
-                    } 
-                },
+                {"+", (name, args) => (int)args[0].Eval(this) + (int)args[1].Eval(this)},
+                {"-", (name, args) => (int)args[0].Eval(this) - (int)args[1].Eval(this)},
+                {"*", (name, args) => (int)args[0].Eval(this) * (int)args[1].Eval(this)},
+                {"/", (name, args) => (int)args[0].Eval(this) / (int)args[1].Eval(this)},
             };
         }
 
@@ -180,20 +170,69 @@ namespace DSLM.Console
 
         public object CallFunction(string name, IEnumerable<Node> args)
         {
-            return _funcs[name].Invoke(args);
+            return _funcs[name].Invoke(name, args.ToArray());
+        }
+
+        public ListNode ProvideArgs(string name, Node[] args, ListNode body)
+        {
+            var map = _argMaps[name];
+            return new ListNode()
+            {
+                Nodes = body.Nodes.Select<Node, Node>(node =>
+                {
+                    if (node is IntNode)
+                    {
+                        return new IntNode()
+                        {
+                            Value = ((IntNode) node).Value
+                        };
+                    }
+                    if (node is ListNode)
+                    {
+                        return ProvideArgs(name, args, (ListNode) node);
+                    }
+                    if (map.Contains(((SymbolNode) node).Value))
+                    {
+                        return new IntNode()
+                        {
+                            Value = (int) args[Array.IndexOf(map, ((SymbolNode) node).Value)].Eval(this)
+                        };
+                    }
+                    return new SymbolNode()
+                    {
+                        Value = ((SymbolNode)node).Value
+                    };
+                })
+            };
+        }
+
+        public void DefFunction(string name, IEnumerable<string> args, Node body)
+        {
+            _argMaps.Add(name, args.ToArray());
+            _funcs.Add(name, (funcName, funcArgs) =>
+            {
+                var baseBody = body;
+                return ProvideArgs(name, funcArgs, (ListNode) baseBody).Eval(this);
+            });
         }
     }
 
     class Program
     {
+        static readonly EvalContext Context = new EvalContext();
+
+        private static void Eval(string text)
+        {
+            System.Console.WriteLine(new Parser(new Lexer(text)).Parse().Eval(Context));
+        }
+
         static void Main(string[] args)
         {
-            string script = "(* (+ (* 2 2) (- 5 3)) 10)";
-            var lexer = new Lexer(script);
-            var parser = new Parser(lexer);
-            var node = parser.Parse();
-
-            System.Console.WriteLine(node.Eval(new EvalContext()));
+            Eval("(def square (x) (* x x))");
+            Eval("(def distance (x y) (+ (square x) (square y)))");
+            Eval("(distance 4 5)");
+            Eval("(distance 2 3)");
+            
             System.Console.ReadKey();
         }
     }
