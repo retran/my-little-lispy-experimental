@@ -228,12 +228,16 @@ namespace DSLM.Console
 
         static void Main(string[] args)
         {
-            Eval("(def square (x) (* x x))");
-            Eval("(def distance (x y) (+ (square x) (square y)))");
-            Eval("(distance 4 5)");
-            Eval("(distance 2 3)");
-            
-            System.Console.ReadKey();
+//            Eval("(def square (x) (* x x))");
+//            Eval("(def distance (x y) (+ (square x) (square y)))");
+//            Eval("(distance 4 5)");
+//            Eval("(distance 2 3)");
+
+            while (true)
+            {
+                System.Console.Write(" > ");
+                Eval(System.Console.ReadLine());
+            }
         }
     }
 }
