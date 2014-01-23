@@ -1,5 +1,4 @@
-﻿
-//          Examples:
+﻿//          Examples:
 //
 //            (define (square x) (* x x))
 //            (define (distance x y) (+ (square x) (square y)))
@@ -49,11 +48,10 @@ namespace DSLM.Console
         {
             if (!Quote)
             {
-                var nodes = (IEnumerable<Node>)Value;
-                var head = nodes.First().Value;
+                Node[] nodes = ((IEnumerable<Node>) Value).ToArray();
+                dynamic head = nodes.First().Value;
                 if (head is string)
                 {
-
                     if (context.HasDefinition(head.ToString()))
                     {
                         return context.Invoke(head.ToString(), nodes.Skip(1));
@@ -77,7 +75,7 @@ namespace DSLM.Console
                 .Replace(")", " ) ")
                 .Replace("'", " ' ")
                 .Replace("quote", " quote ")
-                .Split(new char[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+                .Split(new[] {' ', '\t', '\n'}, StringSplitOptions.RemoveEmptyEntries);
         }
 
         public void SetLine(string line)
@@ -108,7 +106,7 @@ namespace DSLM.Console
                 var nodes = new List<Node>();
                 while (_enumerator.Current != ")")
                 {
-                    bool valueQuote = false;
+                    bool valueQuote = listQuote;
                     int value;
                     if (_enumerator.Current == "'" || _enumerator.Current == "quote")
                     {
@@ -124,7 +122,7 @@ namespace DSLM.Console
                     }
                     else if (int.TryParse(_enumerator.Current, out value))
                     {
-                        nodes.Add(new Atom()
+                        nodes.Add(new Atom
                         {
                             Value = value,
                             Quote = valueQuote
@@ -132,7 +130,7 @@ namespace DSLM.Console
                     }
                     else
                     {
-                        nodes.Add(new Atom()
+                        nodes.Add(new Atom
                         {
                             Value = _enumerator.Current,
                             Quote = valueQuote
@@ -144,7 +142,7 @@ namespace DSLM.Console
                         throw new Exception("Syntax error");
                     }
                 }
-                return new List()
+                return new List
                 {
                     Value = nodes,
                     Quote = listQuote
@@ -156,9 +154,9 @@ namespace DSLM.Console
 
     public class LocalContext
     {
-        private Dictionary<string, dynamic> _locals; 
+        private readonly Dictionary<string, dynamic> _locals;
 
-        public LocalContext(Context context, IEnumerable<string> args, Node[] argValues)
+        public LocalContext(Context context, IEnumerable<string> args, IEnumerable<Node> argValues)
         {
             _locals = new Dictionary<string, dynamic>();
             foreach (var pair in args.Zip(argValues, (s, node) => new KeyValuePair<string, Node>(s, node)))
@@ -175,39 +173,39 @@ namespace DSLM.Console
 
     public class Context
     {
-        private readonly Dictionary<string, Func<Node[], dynamic>> _definitions;
         private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
-        private readonly Dictionary<string, dynamic> _globals = new Dictionary<string, dynamic>(); 
+        private readonly Dictionary<string, Func<Node[], dynamic>> _definitions;
+        private readonly Dictionary<string, dynamic> _globals = new Dictionary<string, dynamic>();
 
         public Context()
         {
-            _definitions = new Dictionary<string, Func<Node[], dynamic>>()
+            _definitions = new Dictionary<string, Func<Node[], dynamic>>
             {
                 {
-                    "define", (args) =>
+                    "define", args =>
                     {
-                        this.Define(args[0], args[1]);
+                        Define(args[0], args[1]);
                         return null;
                     }
                 },
-                {"+", (args) => args[0].Eval(this) + args[1].Eval(this)},
-                {"-", (args) => args[0].Eval(this) - args[1].Eval(this)},
-                {"*", (args) => args[0].Eval(this) * args[1].Eval(this)},
-                {"/", (args) => args[0].Eval(this) / args[1].Eval(this)},
-                {"=", (args) => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
-                {"<", (args) => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
-                {">", (args) => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
-                {"<=", (args) => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
-                {">=", (args) => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
-                {"<>", (args) => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
-                {"and", (args) => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
-                {"or", (args) => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
-                {"xor", (args) => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
-                {"not", (args) => args[0].Eval(this) != 1 ? 1 : 0},
+                {"+", args => args[0].Eval(this) + args[1].Eval(this)},
+                {"-", args => args[0].Eval(this) - args[1].Eval(this)},
+                {"*", args => args[0].Eval(this)*args[1].Eval(this)},
+                {"/", args => args[0].Eval(this)/args[1].Eval(this)},
+                {"=", args => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
+                {"<", args => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
+                {">", args => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
+                {"<=", args => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
+                {">=", args => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
+                {"<>", args => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
+                {"and", args => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
+                {"or", args => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
+                {"xor", args => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
+                {"not", args => args[0].Eval(this) != 1 ? 1 : 0},
                 {
-                    "if", (args) =>
+                    "if", args =>
                     {
-                        var condition = args[0].Eval(this);
+                        dynamic condition = args[0].Eval(this);
                         if (condition == 1)
                         {
                             return args[1].Eval(this);
@@ -216,12 +214,12 @@ namespace DSLM.Console
                     }
                 },
                 {
-                    "cond", (args) =>
+                    "cond", args =>
                     {
                         dynamic result = null;
-                        foreach (var arg in args)
+                        foreach (Node arg in args)
                         {
-                            result = this.Invoke("if", arg.Value.ToArray());
+                            result = Invoke("if", arg.Value.ToArray());
                             if (result != null)
                             {
                                 break;
@@ -233,14 +231,14 @@ namespace DSLM.Console
             };
         }
 
-        public bool HasDefinition(string name)
-        {
-            return _definitions.ContainsKey(name);
-        }
-
         public LocalContext LocalContext
         {
             get { return _callStack.Peek(); }
+        }
+
+        public bool HasDefinition(string name)
+        {
+            return _definitions.ContainsKey(name);
         }
 
         public dynamic Invoke(string name, IEnumerable<Node> args)
@@ -262,40 +260,41 @@ namespace DSLM.Console
         {
             if (definition is List)
             {
-                var name = (string)((IEnumerable<Node>) definition.Value).First().Value;
-                var args = ((IEnumerable<Node>) definition.Value).Skip(1).Select(node => (string)node.Value);
-                _definitions.Add(name, (values) =>
+                var name = (string) ((IEnumerable<Node>) definition.Value).First().Value;
+                IEnumerable<string> args =
+                    ((IEnumerable<Node>) definition.Value).Skip(1).Select(node => (string) node.Value);
+                _definitions.Add(name, values =>
                 {
                     var localContext = new LocalContext(this, args, values);
                     _callStack.Push(localContext);
-                    var result = body.Eval(this);
+                    dynamic result = body.Eval(this);
                     _callStack.Pop();
                     return result;
                 });
             }
             else
             {
-                _globals.Add((string)definition.Value, body.Eval(this));
+                _globals.Add((string) definition.Value, body.Eval(this));
             }
         }
     }
 
-    class Program
+    internal class Program
     {
-        static readonly Parser Parser = new Parser();
-        static readonly Context Context = new Context();
+        private static readonly Parser Parser = new Parser();
+        private static readonly Context Context = new Context();
 
         private static void Eval(string line)
         {
             Parser.SetLine(line);
-            var result = Parser.Parse().Eval(Context);
+            dynamic result = Parser.Parse().Eval(Context);
             if (result != null)
             {
                 System.Console.WriteLine(result.ToString());
             }
         }
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             while (true)
             {
