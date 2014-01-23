@@ -27,7 +27,17 @@ namespace DSLM.Console
         }
     }
 
-    public class Atom : Node { }
+    public class Atom : Node
+    {
+        public override dynamic Eval(Context context)
+        {
+            if (Value is string && !Quote)
+            {
+                return context.LocalContext.Lookup(Value);
+            }
+            return Value;
+        }
+    }
 
     public class List : Node
     {
@@ -40,9 +50,9 @@ namespace DSLM.Console
                 if (head is string)
                 {
 
-                    if (context.HasFunction(head.ToString()))
+                    if (context.HasDefinition(head.ToString()))
                     {
-                        return context.CallFunction(head.ToString(), nodes.Skip(1));
+                        return context.Invoke(head.ToString(), nodes.Skip(1));
                     }
                     throw new Exception(string.Format("Function '{0}' is not defined", head));
                 }
@@ -140,41 +150,60 @@ namespace DSLM.Console
         }
     }
 
+    public class LocalContext
+    {
+        private Dictionary<string, dynamic> _locals; 
+
+        public LocalContext(Context context, IEnumerable<string> args, Node[] argValues)
+        {
+            _locals = new Dictionary<string, dynamic>();
+            foreach (var pair in args.Zip(argValues, (s, node) => new KeyValuePair<string, Node>(s, node)))
+            {
+                _locals.Add(pair.Key, pair.Value.Eval(context));
+            }
+        }
+
+        public dynamic Lookup(string name)
+        {
+            return _locals[name];
+        }
+    }
+
     public class Context
     {
-        private readonly Dictionary<string, Func<string, Node[], dynamic>> _funcs;
-        private readonly Dictionary<string, string[]> _argMaps = new Dictionary<string, string[]>();
+        private readonly Dictionary<string, Func<Node[], dynamic>> _definitions;
+        private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>(); 
 
         public Context()
         {
-            _funcs = new Dictionary<string, Func<string, Node[], dynamic>>()
+            _definitions = new Dictionary<string, Func<Node[], dynamic>>()
             {
                 {
-                    "defun", (name, args) =>
+                    "defun", (args) =>
                     {
                         var funcName = args[0].Value.ToString();
                         var funcArgs = ((IEnumerable<Node>)args[1].Value).Select(n => (string)n.Value);
                         var body = args[2];
-                        this.DefFunction(funcName, funcArgs, body);
+                        this.Define(funcName, funcArgs, body);
                         return null;
                     }
                 },
-                {"+", (name, args) => args[0].Eval(this) + args[1].Eval(this)},
-                {"-", (name, args) => args[0].Eval(this) - args[1].Eval(this)},
-                {"*", (name, args) => args[0].Eval(this) * args[1].Eval(this)},
-                {"/", (name, args) => args[0].Eval(this) / args[1].Eval(this)},
-                {"=", (name, args) => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
-                {"<", (name, args) => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
-                {">", (name, args) => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
-                {"<=", (name, args) => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
-                {">=", (name, args) => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
-                {"<>", (name, args) => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
-                {"and", (name, args) => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
-                {"or", (name, args) => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
-                {"xor", (name, args) => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
-                {"not", (name, args) => args[0].Eval(this) != 1 ? 1 : 0},
+                {"+", (args) => args[0].Eval(this) + args[1].Eval(this)},
+                {"-", (args) => args[0].Eval(this) - args[1].Eval(this)},
+                {"*", (args) => args[0].Eval(this) * args[1].Eval(this)},
+                {"/", (args) => args[0].Eval(this) / args[1].Eval(this)},
+                {"=", (args) => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
+                {"<", (args) => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
+                {">", (args) => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
+                {"<=", (args) => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
+                {">=", (args) => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
+                {"<>", (args) => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
+                {"and", (args) => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
+                {"or", (args) => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
+                {"xor", (args) => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
+                {"not", (args) => args[0].Eval(this) != 1 ? 1 : 0},
                 {
-                    "if", (name, args) =>
+                    "if", (args) =>
                     {
                         var condition = args[0].Eval(this);
                         if (condition == 1)
@@ -185,12 +214,12 @@ namespace DSLM.Console
                     }
                 },
                 {
-                    "cond", (name, args) =>
+                    "cond", (args) =>
                     {
                         dynamic result = null;
                         foreach (var arg in args)
                         {
-                            result = _funcs["if"].Invoke("if", arg.Value.ToArray());
+                            result = this.Invoke("if", arg.Value.ToArray());
                             if (result != null)
                             {
                                 break;
@@ -202,54 +231,30 @@ namespace DSLM.Console
             };
         }
 
-        public bool HasFunction(string name)
+        public bool HasDefinition(string name)
         {
-            return _funcs.ContainsKey(name);
+            return _definitions.ContainsKey(name);
         }
 
-        public object CallFunction(string name, IEnumerable<Node> args)
+        public LocalContext LocalContext
         {
-            return _funcs[name].Invoke(name, args.ToArray());
+            get { return _callStack.Peek(); }
         }
 
-        public Node ProvideArgs(string name, Node[] args, Node body)
+        public object Invoke(string name, IEnumerable<Node> args)
         {
-            var map = _argMaps[name];
-            var bodyNodes = body is List ? (IEnumerable<Node>) body.Value : new Node[] {body}; 
-            var result = new List()
+            return _definitions[name].Invoke(args.ToArray());
+        }
+
+        public void Define(string name, IEnumerable<string> args, Node body)
+        {
+            _definitions.Add(name, (values) =>
             {
-                Quote = body.Quote,
-                Value = bodyNodes.Select<Node, Node>(node =>
-                {
-                    if (node is List)
-                    {
-                        return ProvideArgs(name, args, (List)node);
-                    }
-                    if (map.Contains((string)node.Value.ToString()) && !node.Quote)
-                    {
-                        return new Atom()
-                        {
-                            Quote = node.Quote,
-                            Value = args[Array.IndexOf(map, node.Value)].Eval(this)
-                        };
-                    }
-                    return new Atom()
-                    {
-                        Quote = node.Quote,
-                        Value = node.Value
-                    };
-                })
-            };
-            return body is List ? result : ((IEnumerable<Node>) result.Value).First();
-        }
-
-        public void DefFunction(string name, IEnumerable<string> args, Node body)
-        {
-            _argMaps.Add(name, args.ToArray());
-            _funcs.Add(name, (funcName, funcArgs) =>
-            {
-                var baseBody = body;
-                return ProvideArgs(name, funcArgs, baseBody).Eval(this);
+                var localContext = new LocalContext(this, args, values);
+                _callStack.Push(localContext);
+                var result = body.Eval(this);
+                _callStack.Pop();
+                return result;
             });
         }
     }
