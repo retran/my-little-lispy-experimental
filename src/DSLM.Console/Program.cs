@@ -1,12 +1,12 @@
 ﻿
 //          Examples:
 //
-//            (def square (x) (* x x))
-//            (def distance (x y) (+ (square x) (square y)))
+//            (defun square (x) (* x x))
+//            (defun distance (x y) (+ (square x) (square y)))
 //            (distance 4 5)
 //            (distance 2 3)
 //
-//            (def fact (v) (if (< v 2) 1 (* v (fact (- v 1)))))
+//            (defun fact (v) (if (< v 2) 1 (* v (fact (- v 1)))))
 //            (fact 5)
 //            (fact 10)            
 
@@ -43,7 +43,7 @@ namespace DSLM.Console
                 return context.CallFunction(head.ToString(), tail);
             }
 
-            if (head.ToString() == "def")
+            if (head.ToString() == "defun")
             {
                 var name = tail.First().Value;
                 var args = ((IEnumerable<Node>)tail.Skip(1).First().Value).Select(n => (string)n.Value);
