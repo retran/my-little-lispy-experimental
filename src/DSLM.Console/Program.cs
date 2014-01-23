@@ -1,9 +1,14 @@
 ﻿
-//          Example:
+//          Examples:
+//
 //            (def square (x) (* x x))
 //            (def distance (x y) (+ (square x) (square y)))
 //            (distance 4 5)
 //            (distance 2 3)
+//
+//            (def fact (v) (if (< v 2) 1 (* v (fact (- v 1)))))
+//            (fact 5)
+//            (fact 10)            
 
 using System;
 using System.Collections.Generic;
@@ -136,6 +141,23 @@ namespace DSLM.Console
                 {"-", (name, args) => (int)args[0].Eval(this) - (int)args[1].Eval(this)},
                 {"*", (name, args) => (int)args[0].Eval(this) * (int)args[1].Eval(this)},
                 {"/", (name, args) => (int)args[0].Eval(this) / (int)args[1].Eval(this)},
+                {"=", (name, args) => (int)args[0].Eval(this) == (int)args[1].Eval(this) ? 1 : 0},
+                {"<", (name, args) => (int)args[0].Eval(this) < (int)args[1].Eval(this) ? 1 : 0},
+                {">", (name, args) => (int)args[0].Eval(this) > (int)args[1].Eval(this) ? 1 : 0},
+                {"<=", (name, args) => (int)args[0].Eval(this) <= (int)args[1].Eval(this) ? 1 : 0},
+                {">=", (name, args) => (int)args[0].Eval(this) >= (int)args[1].Eval(this) ? 1 : 0},
+                {"<>", (name, args) => (int)args[0].Eval(this) != (int)args[1].Eval(this) ? 1 : 0},
+                {
+                    "if", (name, args) =>
+                    {
+                        var condition = (int) args[0].Eval(this);
+                        if (condition == 1)
+                        {
+                            return args[1].Eval(this);
+                        }
+                        return args.Length > 2 ? args[2].Eval(this) : null;
+                    }
+                },
             };
         }
 
