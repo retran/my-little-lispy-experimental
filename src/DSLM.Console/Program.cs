@@ -28,26 +28,26 @@ namespace DSLM.Console
 
     public class Atom : Node { }
 
-    public class ListNode : Node
+    public class List : Node
     {
-        public override object Eval(EvalContext context)
+        public bool Quote = false;
 
+        public override dynamic Eval(EvalContext context)
         {
-            var nodes = (IEnumerable<Node>)Value;
-            var head = nodes.First().Eval(context);
-            var tail = nodes.Skip(1);
-            if (context.HasFunction(head.ToString()))
+            if (!Quote)
             {
-                return context.CallFunction(head.ToString(), tail);
-            }
+                var nodes = (IEnumerable<Node>)Value;
+                var head = nodes.First().Value;
+                if (head is string)
+                {
 
-            if (head.ToString() == "defun")
-            {
-                var name = tail.First().Value;
-                var args = ((IEnumerable<Node>)tail.Skip(1).First().Value).Select(n => (string)n.Value);
-                var body = tail.Skip(2).First();
-                context.DefFunction(name, args, body);
-                return null;
+                    if (context.HasFunction(head.ToString()))
+                    {
+                        return context.CallFunction(head.ToString(), nodes.Skip(1));
+                    }
+                    throw new Exception("Function '{0}' is not defined", head);
+                }
+                throw new Exception("Syntax error");
             }
             return Value;
         }
@@ -73,6 +73,17 @@ namespace DSLM.Console
 
         public Node Parse()
         {
+            bool quote = false;
+
+            if (_enumerator.Current == "'")
+            {
+                quote = true;
+                if (!_enumerator.MoveNext())
+                {
+                    throw new Exception("Syntax error");
+                }
+            }
+
             if (_enumerator.Current == "(")
             {
                 if (!_enumerator.MoveNext())
@@ -83,7 +94,7 @@ namespace DSLM.Console
                 while (_enumerator.Current != ")")
                 {
                     int value;
-                    if (_enumerator.Current == "(")
+                    if (_enumerator.Current == "(" || _enumerator.Current == "'")
                     {
                         nodes.Add(Parse());
                     }
@@ -107,9 +118,10 @@ namespace DSLM.Console
                         throw new Exception("Syntax error");
                     }
                 }
-                return new ListNode()
+                return new List()
                 {
-                    Value = nodes
+                    Value = nodes,
+                    Quote = quote
                 };
             }
             throw new Exception("Syntax error");
@@ -125,6 +137,16 @@ namespace DSLM.Console
         {
             _funcs = new Dictionary<string, Func<string, Node[], dynamic>>()
             {
+                {
+                    "defun", (name, args) =>
+                    {
+                        var funcName = args[0].Value.ToString();
+                        var funcArgs = ((IEnumerable<Node>)args[1].Value).Select(n => (string)n.Value);
+                        var body = args[2];
+                        this.DefFunction(funcName, funcArgs, body);
+                        return null;
+                    }
+                },
                 {"+", (name, args) => args[0].Eval(this) + args[1].Eval(this)},
                 {"-", (name, args) => args[0].Eval(this) - args[1].Eval(this)},
                 {"*", (name, args) => args[0].Eval(this) * args[1].Eval(this)},
@@ -178,18 +200,18 @@ namespace DSLM.Console
             return _funcs[name].Invoke(name, args.ToArray());
         }
 
-        public ListNode ProvideArgs(string name, Node[] args, ListNode body)
+        public List ProvideArgs(string name, Node[] args, List body)
         {
             var map = _argMaps[name];
-            return new ListNode()
+            return new List()
             {
                 Value = ((IEnumerable<Node>)body.Value).Select<Node, Node>(node =>
                 {
-                    if (node is ListNode)
+                    if (node is List)
                     {
-                        return ProvideArgs(name, args, (ListNode) node);
+                        return ProvideArgs(name, args, (List)node);
                     }
-                    if (map.Contains((string)node.Value))
+                    if (map.Contains((string)node.Value.ToString()))
                     {
                         return new Atom()
                         {
@@ -210,7 +232,7 @@ namespace DSLM.Console
             _funcs.Add(name, (funcName, funcArgs) =>
             {
                 var baseBody = body;
-                return ProvideArgs(name, funcArgs, (ListNode) baseBody).Eval(this);
+                return ProvideArgs(name, funcArgs, (List)baseBody).Eval(this);
             });
         }
     }
@@ -241,7 +263,7 @@ namespace DSLM.Console
                 }
                 catch (Exception e)
                 {
-                    System.Console.WriteLine(e.Message);                    
+                    System.Console.WriteLine(e.Message);
                 }
             }
         }
