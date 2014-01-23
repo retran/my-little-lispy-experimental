@@ -1,4 +1,11 @@
-﻿using System;
+﻿
+//          Example:
+//            (def square (x) (* x x))
+//            (def distance (x y) (+ (square x) (square y)))
+//            (distance 4 5)
+//            (distance 2 3)
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -53,24 +60,9 @@ namespace DSLM.Console
         }
     }
 
-    public class Lexer
+    public class Parser
     {
-        private readonly IEnumerator<string> _enumerator;
-
-        public Lexer(string script)
-        {
-            _enumerator = Tokenize(script).GetEnumerator();
-        }
-
-        public bool MoveNext()
-        {
-            return _enumerator.MoveNext();
-        }
-
-        public string Current
-        {
-            get { return _enumerator.Current; }
-        }
+        private IEnumerator<string> _enumerator;
 
         private IEnumerable<string> Tokenize(string script)
         {
@@ -79,43 +71,30 @@ namespace DSLM.Console
                 .Replace(")", " ) ")
                 .Split(new char[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
-    }
 
-    public class Parser
-    {
-        private readonly Lexer _lexer;
-
-        public Parser(Lexer lexer)
+        public void SetLine(string line)
         {
-            _lexer = lexer;
-            if (!_lexer.MoveNext())
-            {
-                throw new Exception("Unexpected eof");
-            }
+            _enumerator = Tokenize(line).GetEnumerator();
+            _enumerator.MoveNext();
         }
 
         public Node Parse()
         {
-            return ParseImpl();
-        }
-
-        private Node ParseImpl()
-        {
-            if (_lexer.Current == "(")
+            if (_enumerator.Current == "(")
             {
-                if (!_lexer.MoveNext())
+                if (!_enumerator.MoveNext())
                 {
                     throw new Exception("Syntax error");
                 }
                 var nodes = new List<Node>();
-                while (_lexer.Current != ")")
+                while (_enumerator.Current != ")")
                 {
                     int value;
-                    if (_lexer.Current == "(")
+                    if (_enumerator.Current == "(")
                     {
-                        nodes.Add(ParseImpl());
+                        nodes.Add(Parse());
                     }
-                    else if (int.TryParse(_lexer.Current, out value))
+                    else if (int.TryParse(_enumerator.Current, out value))
                     {
                         nodes.Add(new IntNode()
                         {
@@ -126,11 +105,11 @@ namespace DSLM.Console
                     {
                         nodes.Add(new SymbolNode()
                         {
-                            Value = _lexer.Current
+                            Value = _enumerator.Current
                         });
                     }
 
-                    if (!_lexer.MoveNext())
+                    if (!_enumerator.MoveNext())
                     {
                         throw new Exception("Syntax error");
                     }
@@ -140,10 +119,7 @@ namespace DSLM.Console
                     Nodes = nodes
                 };
             }
-            else
-            {
-                throw new Exception("Syntax error");
-            }
+            throw new Exception("Syntax error");
         }
     }
 
@@ -219,24 +195,28 @@ namespace DSLM.Console
 
     class Program
     {
+        static readonly Parser Parser = new Parser();
         static readonly EvalContext Context = new EvalContext();
 
-        private static void Eval(string text)
+        private static void Eval(string line)
         {
-            System.Console.WriteLine(new Parser(new Lexer(text)).Parse().Eval(Context));
+            Parser.SetLine(line);
+            System.Console.WriteLine(Parser.Parse().Eval(Context));
         }
 
         static void Main(string[] args)
         {
-//            Eval("(def square (x) (* x x))");
-//            Eval("(def distance (x y) (+ (square x) (square y)))");
-//            Eval("(distance 4 5)");
-//            Eval("(distance 2 3)");
-
             while (true)
             {
                 System.Console.Write(" > ");
-                Eval(System.Console.ReadLine());
+                try
+                {
+                    Eval(System.Console.ReadLine());
+                }
+                catch (Exception e)
+                {
+                    System.Console.WriteLine(e.Message);                    
+                }
             }
         }
     }
