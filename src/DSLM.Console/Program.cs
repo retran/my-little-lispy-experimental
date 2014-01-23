@@ -137,6 +137,10 @@ namespace DSLM.Console
                 {"<=", (name, args) => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
                 {">=", (name, args) => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
                 {"<>", (name, args) => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
+                {"and", (name, args) => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
+                {"or", (name, args) => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
+                {"xor", (name, args) => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
+                {"not", (name, args) => args[0].Eval(this) != 1 ? 1 : 0},
                 {
                     "if", (name, args) =>
                     {
@@ -146,6 +150,21 @@ namespace DSLM.Console
                             return args[1].Eval(this);
                         }
                         return args.Length > 2 ? args[2].Eval(this) : null;
+                    }
+                },
+                {
+                    "cond", (name, args) =>
+                    {
+                        dynamic result = null;
+                        foreach (var arg in args)
+                        {
+                            result = _funcs["if"].Invoke("if", arg.Value.ToArray());
+                            if (result != null)
+                            {
+                                break;
+                            }
+                        }
+                        return result;
                     }
                 },
             };
