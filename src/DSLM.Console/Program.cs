@@ -18,9 +18,10 @@ namespace DSLM.Console
 {
     public abstract class Node
     {
+        public bool Quote = false;
         public dynamic Value;
 
-        public virtual dynamic Eval(EvalContext context)
+        public virtual dynamic Eval(Context context)
         {
             return Value;
         }
@@ -30,9 +31,7 @@ namespace DSLM.Console
 
     public class List : Node
     {
-        public bool Quote = false;
-
-        public override dynamic Eval(EvalContext context)
+        public override dynamic Eval(Context context)
         {
             if (!Quote)
             {
@@ -45,7 +44,7 @@ namespace DSLM.Console
                     {
                         return context.CallFunction(head.ToString(), nodes.Skip(1));
                     }
-                    throw new Exception("Function '{0}' is not defined", head);
+                    throw new Exception(string.Format("Function '{0}' is not defined", head));
                 }
                 throw new Exception("Syntax error");
             }
@@ -62,6 +61,8 @@ namespace DSLM.Console
             return script
                 .Replace("(", " ( ")
                 .Replace(")", " ) ")
+                .Replace("'", " ' ")
+                .Replace("quote", " quote ")
                 .Split(new char[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
@@ -71,17 +72,17 @@ namespace DSLM.Console
             _enumerator.MoveNext();
         }
 
-        public Node Parse()
+        public Node Parse(bool quote = false)
         {
-            bool quote = false;
+            bool listQuote = quote;
 
-            if (_enumerator.Current == "'")
+            if (_enumerator.Current == "'" || _enumerator.Current == "quote")
             {
-                quote = true;
-                if (!_enumerator.MoveNext())
+                if (!_enumerator.MoveNext() || quote)
                 {
                     throw new Exception("Syntax error");
                 }
+                listQuote = true;
             }
 
             if (_enumerator.Current == "(")
@@ -93,23 +94,34 @@ namespace DSLM.Console
                 var nodes = new List<Node>();
                 while (_enumerator.Current != ")")
                 {
+                    bool valueQuote = false;
                     int value;
-                    if (_enumerator.Current == "(" || _enumerator.Current == "'")
+                    if (_enumerator.Current == "'" || _enumerator.Current == "quote")
                     {
-                        nodes.Add(Parse());
+                        valueQuote = true;
+                        if (!_enumerator.MoveNext())
+                        {
+                            throw new Exception("Syntax error");
+                        }
+                    }
+                    if (_enumerator.Current == "(")
+                    {
+                        nodes.Add(Parse(valueQuote));
                     }
                     else if (int.TryParse(_enumerator.Current, out value))
                     {
                         nodes.Add(new Atom()
                         {
-                            Value = value
+                            Value = value,
+                            Quote = valueQuote
                         });
                     }
                     else
                     {
                         nodes.Add(new Atom()
                         {
-                            Value = _enumerator.Current
+                            Value = _enumerator.Current,
+                            Quote = valueQuote
                         });
                     }
 
@@ -121,19 +133,19 @@ namespace DSLM.Console
                 return new List()
                 {
                     Value = nodes,
-                    Quote = quote
+                    Quote = listQuote
                 };
             }
             throw new Exception("Syntax error");
         }
     }
 
-    public class EvalContext
+    public class Context
     {
         private readonly Dictionary<string, Func<string, Node[], dynamic>> _funcs;
         private readonly Dictionary<string, string[]> _argMaps = new Dictionary<string, string[]>();
 
-        public EvalContext()
+        public Context()
         {
             _funcs = new Dictionary<string, Func<string, Node[], dynamic>>()
             {
@@ -200,18 +212,19 @@ namespace DSLM.Console
             return _funcs[name].Invoke(name, args.ToArray());
         }
 
-        public List ProvideArgs(string name, Node[] args, List body)
+        public List ProvideArgs(string name, Node[] args, Node body)
         {
             var map = _argMaps[name];
+            var bodyNodes = body is List ? (IEnumerable<Node>) body.Value : new Node[] {body}; 
             return new List()
             {
-                Value = ((IEnumerable<Node>)body.Value).Select<Node, Node>(node =>
+                Value = bodyNodes.Select<Node, Node>(node =>
                 {
                     if (node is List)
                     {
                         return ProvideArgs(name, args, (List)node);
                     }
-                    if (map.Contains((string)node.Value.ToString()))
+                    if (map.Contains((string)node.Value.ToString()) && !node.Quote)
                     {
                         return new Atom()
                         {
@@ -232,7 +245,7 @@ namespace DSLM.Console
             _funcs.Add(name, (funcName, funcArgs) =>
             {
                 var baseBody = body;
-                return ProvideArgs(name, funcArgs, (List)baseBody).Eval(this);
+                return ProvideArgs(name, funcArgs, baseBody).Eval(this);
             });
         }
     }
@@ -240,7 +253,7 @@ namespace DSLM.Console
     class Program
     {
         static readonly Parser Parser = new Parser();
-        static readonly EvalContext Context = new EvalContext();
+        static readonly Context Context = new Context();
 
         private static void Eval(string line)
         {
