@@ -18,26 +18,26 @@ namespace DSLM.Console
 {
     public abstract class Node
     {
-        public abstract object Eval(EvalContext context);
-    }
+        public dynamic Value;
 
-    public class IntNode : Node
-    {
-        public int Value;
-        public override object Eval(EvalContext context)
+        public virtual dynamic Eval(EvalContext context)
         {
             return Value;
         }
     }
 
+    public class IntNode : Node { }
+
+    public class SymbolNode : Node { }
+
     public class ListNode : Node
     {
-        public IEnumerable<Node> Nodes;
-
         public override object Eval(EvalContext context)
+
         {
-            var head = Nodes.First().Eval(context);
-            var tail = Nodes.Skip(1);
+            var nodes = (IEnumerable<Node>)Value;
+            var head = nodes.First().Eval(context);
+            var tail = nodes.Skip(1);
             if (context.HasFunction(head.ToString()))
             {
                 return context.CallFunction(head.ToString(), tail);
@@ -45,22 +45,12 @@ namespace DSLM.Console
 
             if (head.ToString() == "def")
             {
-                var name = ((SymbolNode)tail.First()).Value;
-                var args = ((ListNode)tail.Skip(1).First()).Nodes.Select(n => (n as SymbolNode).Value);
-                var body = ((ListNode)tail.Skip(2).First());
+                var name = tail.First().Value;
+                var args = ((IEnumerable<Node>)tail.Skip(1).First().Value).Select(n => (string)n.Value);
+                var body = tail.Skip(2).First();
                 context.DefFunction(name, args, body);
                 return null;
             }
-            return Nodes;
-        }
-    }
-
-    public class SymbolNode : Node
-    {
-        public string Value;
-
-        public override object Eval(EvalContext context)
-        {
             return Value;
         }
     }
@@ -121,7 +111,7 @@ namespace DSLM.Console
                 }
                 return new ListNode()
                 {
-                    Nodes = nodes
+                    Value = nodes
                 };
             }
             throw new Exception("Syntax error");
@@ -130,27 +120,27 @@ namespace DSLM.Console
 
     public class EvalContext
     {
-        private readonly Dictionary<string, Func<string, Node[], object>> _funcs;
+        private readonly Dictionary<string, Func<string, Node[], dynamic>> _funcs;
         private readonly Dictionary<string, string[]> _argMaps = new Dictionary<string, string[]>();
 
         public EvalContext()
         {
-            _funcs = new Dictionary<string, Func<string, Node[], object>>()
+            _funcs = new Dictionary<string, Func<string, Node[], dynamic>>()
             {
-                {"+", (name, args) => (int)args[0].Eval(this) + (int)args[1].Eval(this)},
-                {"-", (name, args) => (int)args[0].Eval(this) - (int)args[1].Eval(this)},
-                {"*", (name, args) => (int)args[0].Eval(this) * (int)args[1].Eval(this)},
-                {"/", (name, args) => (int)args[0].Eval(this) / (int)args[1].Eval(this)},
-                {"=", (name, args) => (int)args[0].Eval(this) == (int)args[1].Eval(this) ? 1 : 0},
-                {"<", (name, args) => (int)args[0].Eval(this) < (int)args[1].Eval(this) ? 1 : 0},
-                {">", (name, args) => (int)args[0].Eval(this) > (int)args[1].Eval(this) ? 1 : 0},
-                {"<=", (name, args) => (int)args[0].Eval(this) <= (int)args[1].Eval(this) ? 1 : 0},
-                {">=", (name, args) => (int)args[0].Eval(this) >= (int)args[1].Eval(this) ? 1 : 0},
-                {"<>", (name, args) => (int)args[0].Eval(this) != (int)args[1].Eval(this) ? 1 : 0},
+                {"+", (name, args) => args[0].Eval(this) + args[1].Eval(this)},
+                {"-", (name, args) => args[0].Eval(this) - args[1].Eval(this)},
+                {"*", (name, args) => args[0].Eval(this) * args[1].Eval(this)},
+                {"/", (name, args) => args[0].Eval(this) / args[1].Eval(this)},
+                {"=", (name, args) => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
+                {"<", (name, args) => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
+                {">", (name, args) => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
+                {"<=", (name, args) => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
+                {">=", (name, args) => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
+                {"<>", (name, args) => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
                 {
                     "if", (name, args) =>
                     {
-                        var condition = (int) args[0].Eval(this);
+                        var condition = args[0].Eval(this);
                         if (condition == 1)
                         {
                             return args[1].Eval(this);
@@ -176,7 +166,7 @@ namespace DSLM.Console
             var map = _argMaps[name];
             return new ListNode()
             {
-                Nodes = body.Nodes.Select<Node, Node>(node =>
+                Value = ((IEnumerable<Node>)body.Value).Select<Node, Node>(node =>
                 {
                     if (node is IntNode)
                     {
@@ -189,16 +179,16 @@ namespace DSLM.Console
                     {
                         return ProvideArgs(name, args, (ListNode) node);
                     }
-                    if (map.Contains(((SymbolNode) node).Value))
+                    if (map.Contains((string)node.Value))
                     {
                         return new IntNode()
                         {
-                            Value = (int) args[Array.IndexOf(map, ((SymbolNode) node).Value)].Eval(this)
+                            Value = args[Array.IndexOf(map, node.Value)].Eval(this)
                         };
                     }
                     return new SymbolNode()
                     {
-                        Value = ((SymbolNode)node).Value
+                        Value = node.Value
                     };
                 })
             };
@@ -223,7 +213,11 @@ namespace DSLM.Console
         private static void Eval(string line)
         {
             Parser.SetLine(line);
-            System.Console.WriteLine(Parser.Parse().Eval(Context));
+            var result = Parser.Parse().Eval(Context);
+            if (result != null)
+            {
+                System.Console.WriteLine(result.ToString());
+            }
         }
 
         static void Main(string[] args)
