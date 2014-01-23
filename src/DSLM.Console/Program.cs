@@ -26,9 +26,7 @@ namespace DSLM.Console
         }
     }
 
-    public class IntNode : Node { }
-
-    public class SymbolNode : Node { }
+    public class Atom : Node { }
 
     public class ListNode : Node
     {
@@ -91,14 +89,14 @@ namespace DSLM.Console
                     }
                     else if (int.TryParse(_enumerator.Current, out value))
                     {
-                        nodes.Add(new IntNode()
+                        nodes.Add(new Atom()
                         {
                             Value = value
                         });
                     }
                     else
                     {
-                        nodes.Add(new SymbolNode()
+                        nodes.Add(new Atom()
                         {
                             Value = _enumerator.Current
                         });
@@ -187,25 +185,18 @@ namespace DSLM.Console
             {
                 Value = ((IEnumerable<Node>)body.Value).Select<Node, Node>(node =>
                 {
-                    if (node is IntNode)
-                    {
-                        return new IntNode()
-                        {
-                            Value = ((IntNode) node).Value
-                        };
-                    }
                     if (node is ListNode)
                     {
                         return ProvideArgs(name, args, (ListNode) node);
                     }
                     if (map.Contains((string)node.Value))
                     {
-                        return new IntNode()
+                        return new Atom()
                         {
                             Value = args[Array.IndexOf(map, node.Value)].Eval(this)
                         };
                     }
-                    return new SymbolNode()
+                    return new Atom()
                     {
                         Value = node.Value
                     };
