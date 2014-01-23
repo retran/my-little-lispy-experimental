@@ -1,14 +1,18 @@
 ﻿
 //          Examples:
 //
-//            (defun square (x) (* x x))
-//            (defun distance (x y) (+ (square x) (square y)))
+//            (define (square x) (* x x))
+//            (define (distance x y) (+ (square x) (square y)))
 //            (distance 4 5)
 //            (distance 2 3)
 //
-//            (defun fact (v) (if (< v 2) 1 (* v (fact (- v 1)))))
+//            (define (fact v) (if (< v 2) 1 (* v (fact (- v 1)))))
 //            (fact 5)
 //            (fact 10)            
+//
+//            (define constx 5)
+//            (define consty 5)
+//            (distance constx consty)
 
 using System;
 using System.Collections.Generic;
@@ -33,7 +37,7 @@ namespace DSLM.Console
         {
             if (Value is string && !Quote)
             {
-                return context.LocalContext.Lookup(Value);
+                return context.Lookup(Value);
             }
             return Value;
         }
@@ -172,19 +176,17 @@ namespace DSLM.Console
     public class Context
     {
         private readonly Dictionary<string, Func<Node[], dynamic>> _definitions;
-        private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>(); 
+        private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
+        private readonly Dictionary<string, dynamic> _globals = new Dictionary<string, dynamic>(); 
 
         public Context()
         {
             _definitions = new Dictionary<string, Func<Node[], dynamic>>()
             {
                 {
-                    "defun", (args) =>
+                    "define", (args) =>
                     {
-                        var funcName = args[0].Value.ToString();
-                        var funcArgs = ((IEnumerable<Node>)args[1].Value).Select(n => (string)n.Value);
-                        var body = args[2];
-                        this.Define(funcName, funcArgs, body);
+                        this.Define(args[0], args[1]);
                         return null;
                     }
                 },
@@ -241,21 +243,40 @@ namespace DSLM.Console
             get { return _callStack.Peek(); }
         }
 
-        public object Invoke(string name, IEnumerable<Node> args)
+        public dynamic Invoke(string name, IEnumerable<Node> args)
         {
             return _definitions[name].Invoke(args.ToArray());
         }
 
-        public void Define(string name, IEnumerable<string> args, Node body)
+        public dynamic Lookup(string name)
         {
-            _definitions.Add(name, (values) =>
+            dynamic value;
+            if (!_globals.TryGetValue(name, out value))
             {
-                var localContext = new LocalContext(this, args, values);
-                _callStack.Push(localContext);
-                var result = body.Eval(this);
-                _callStack.Pop();
-                return result;
-            });
+                value = LocalContext.Lookup(name);
+            }
+            return value;
+        }
+
+        public void Define(Node definition, Node body)
+        {
+            if (definition is List)
+            {
+                var name = (string)((IEnumerable<Node>) definition.Value).First().Value;
+                var args = ((IEnumerable<Node>) definition.Value).Skip(1).Select(node => (string)node.Value);
+                _definitions.Add(name, (values) =>
+                {
+                    var localContext = new LocalContext(this, args, values);
+                    _callStack.Push(localContext);
+                    var result = body.Eval(this);
+                    _callStack.Pop();
+                    return result;
+                });
+            }
+            else
+            {
+                _globals.Add((string)definition.Value, body.Eval(this));
+            }
         }
     }
 
