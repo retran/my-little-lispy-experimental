@@ -212,12 +212,13 @@ namespace DSLM.Console
             return _funcs[name].Invoke(name, args.ToArray());
         }
 
-        public List ProvideArgs(string name, Node[] args, Node body)
+        public Node ProvideArgs(string name, Node[] args, Node body)
         {
             var map = _argMaps[name];
             var bodyNodes = body is List ? (IEnumerable<Node>) body.Value : new Node[] {body}; 
-            return new List()
+            var result = new List()
             {
+                Quote = body.Quote,
                 Value = bodyNodes.Select<Node, Node>(node =>
                 {
                     if (node is List)
@@ -228,15 +229,18 @@ namespace DSLM.Console
                     {
                         return new Atom()
                         {
+                            Quote = node.Quote,
                             Value = args[Array.IndexOf(map, node.Value)].Eval(this)
                         };
                     }
                     return new Atom()
                     {
+                        Quote = node.Quote,
                         Value = node.Value
                     };
                 })
             };
+            return body is List ? result : ((IEnumerable<Node>) result.Value).First();
         }
 
         public void DefFunction(string name, IEnumerable<string> args, Node body)
