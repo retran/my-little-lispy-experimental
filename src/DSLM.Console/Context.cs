@@ -61,7 +61,29 @@ namespace DSLM.Console
                         return result;
                     }
                 },
+                {
+                    "quote", args =>
+                    {
+                        foreach (var node in args)
+                        {
+                            Quote(node);
+                        }
+                        return args;
+                    }
+                },
             };
+        }
+
+        private void Quote(Node node)
+        {
+            node.Quote = true;
+            if (node is List)
+            {
+                foreach (var child in node.Value)
+                {
+                    Quote(child);
+                }
+            }
         }
 
         public LocalContext LocalContext

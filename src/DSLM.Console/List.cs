@@ -22,7 +22,7 @@ namespace DSLM.Console
                 }
                 throw new Exception("Syntax error");
             }
-            return Value;
+            return ((IEnumerable<Node>)Value).ToArray();
         }
     }
 }

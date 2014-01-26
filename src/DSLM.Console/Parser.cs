@@ -27,7 +27,7 @@ namespace DSLM.Console
         {
             bool listQuote = quote;
 
-            if (_enumerator.Current == "'" || _enumerator.Current == "quote")
+            if (_enumerator.Current == "'")
             {
                 if (!_enumerator.MoveNext() || quote)
                 {
@@ -47,7 +47,7 @@ namespace DSLM.Console
                 {
                     bool valueQuote = listQuote;
                     int value;
-                    if (_enumerator.Current == "'" || _enumerator.Current == "quote")
+                    if (_enumerator.Current == "'")
                     {
                         valueQuote = true;
                         if (!_enumerator.MoveNext())
