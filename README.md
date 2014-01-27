@@ -1,5 +1,5 @@
-damn-small-lisp-machine
-========================
+my-little-lispy
+===============
 
 Overview
 --------
