@@ -9,8 +9,7 @@ namespace MyLittleLispy.CLI
 
 		private static dynamic Eval(string line)
 		{
-			Parser.SetLine(line);
-			return Parser.Parse().Eval(Context);
+			return Parser.Parse(line).Eval(Context);
 		}
 
 		private static void Main(string[] args)

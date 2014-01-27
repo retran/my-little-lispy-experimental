@@ -16,12 +16,6 @@ namespace MyLittleLispy.CLI
                 .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        public void SetLine(string line)
-        {
-            _enumerator = Tokenize(line).GetEnumerator();
-            _enumerator.MoveNext();
-        }
-
         private Node Call()
         {
             Syntax.Assert(_enumerator.Current == "(");
@@ -87,8 +81,11 @@ namespace MyLittleLispy.CLI
             };
         }
 
-        public Node Parse()
+        public Node Parse(string line)
         {
+            _enumerator = Tokenize(line).GetEnumerator();
+            _enumerator.MoveNext();
+
             return Call();
         }
     }
