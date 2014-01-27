@@ -19,7 +19,7 @@ namespace MyLittleLispy.CLI
 			{
 				Console.Write(" > ");
 				try
-				{
+				{   
 					var value = Eval(Console.ReadLine());
 					Console.WriteLine(value == null ? "(null)" : value.ToString());
 				}

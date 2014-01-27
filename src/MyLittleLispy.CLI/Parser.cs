@@ -3,91 +3,93 @@ using System.Collections.Generic;
 
 namespace MyLittleLispy.CLI
 {
-	public class Parser
-	{
-		private IEnumerator<string> _enumerator;
+    public class Parser
+    {
+        private IEnumerator<string> _enumerator;
 
-		private IEnumerable<string> Tokenize(string script)
-		{
-			return script
-				.Replace("(", " ( ")
-				.Replace(")", " ) ")
-				.Replace("'", " ' ")
-				.Replace("quote", " quote ")
-				.Split(new[] {' ', '\t', '\n'}, StringSplitOptions.RemoveEmptyEntries);
-		}
+        private IEnumerable<string> Tokenize(string script)
+        {
+            return script
+                .Replace("(", " ( ")
+                .Replace(")", " ) ")
+                .Replace("'", " ' ")
+                .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
+        }
 
-		public void SetLine(string line)
-		{
-			_enumerator = Tokenize(line).GetEnumerator();
-			_enumerator.MoveNext();
-		}
+        public void SetLine(string line)
+        {
+            _enumerator = Tokenize(line).GetEnumerator();
+            _enumerator.MoveNext();
+        }
 
-		public Node Parse(bool quote = false)
-		{
-			bool listQuote = quote;
+        private Node Call()
+        {
+            Syntax.Assert(_enumerator.Current == "(");
+            _enumerator.MoveNext();
+            
+            var function = Atom().Value as string;
+            Syntax.Assert(function != null);
+            
+            var arguments = List().Value as IEnumerable<Node>;
+            Syntax.Assert(arguments != null);            
+            
+            Syntax.Assert(_enumerator.Current == ")");
+            _enumerator.MoveNext();
+            
+            return new Call()
+            {
+                Function = function,
+                Value = arguments,
+                Quote = false
+            };
+        }
 
-			if (_enumerator.Current == "'")
-			{
-				if (!_enumerator.MoveNext() || quote)
-				{
-					throw new Exception("Syntax error");
-				}
-				listQuote = true;
-			}
+        private Node List()
+        {
+            var list = new List<Node>();
+            
+            while (_enumerator.Current != ")")
+            {
+                list.Add(Atom());
+            }
 
-			if (_enumerator.Current == "(")
-			{
-				if (!_enumerator.MoveNext())
-				{
-					throw new Exception("Syntax error");
-				}
-				var nodes = new List<Node>();
-				while (_enumerator.Current != ")")
-				{
-					bool valueQuote = listQuote;
-					int value;
-					if (_enumerator.Current == "'")
-					{
-						valueQuote = true;
-						if (!_enumerator.MoveNext())
-						{
-							throw new Exception("Syntax error");
-						}
-					}
-					if (_enumerator.Current == "(")
-					{
-						nodes.Add(Parse(valueQuote));
-					}
-					else if (int.TryParse(_enumerator.Current, out value))
-					{
-						nodes.Add(new Atom
-						{
-							Value = value,
-							Quote = valueQuote
-						});
-					}
-					else
-					{
-						nodes.Add(new Atom
-						{
-							Value = _enumerator.Current,
-							Quote = valueQuote
-						});
-					}
+            return new List()
+            {
+                Quote = false,
+                Value = list
+            };
+        }
 
-					if (!_enumerator.MoveNext())
-					{
-						throw new Exception("Syntax error");
-					}
-				}
-				return new List
-				{
-					Value = nodes,
-					Quote = listQuote
-				};
-			}
-			throw new Exception("Syntax error");
-		}
-	}
+        private Node Atom()
+        {
+            if (_enumerator.Current == "(")
+            {
+                return Call();
+            }
+
+            string rawValue = _enumerator.Current;
+            _enumerator.MoveNext();
+
+            int value;
+            if (int.TryParse(rawValue, out value))
+            {
+                return new Atom()
+                {
+                    Quote = false,
+                    Value = value
+                };   
+            }
+            
+            return new Atom()
+            {
+                Quote = false,
+                Value = rawValue
+            };
+        }
+
+        public Node Parse()
+        {
+            return Call();
+        }
+    }
 }

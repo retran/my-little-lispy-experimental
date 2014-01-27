@@ -50,7 +50,8 @@ namespace MyLittleLispy.CLI
 					"cond", args =>
 					{
 						dynamic result = null;
-						foreach (Node arg in args)
+						
+                        foreach (Node arg in args)
 						{
 							result = Invoke("if", arg.Value.ToArray());
 							if (result != null)
@@ -58,19 +59,10 @@ namespace MyLittleLispy.CLI
 								break;
 							}
 						}
-						return result;
+						
+                        return result;
 					}
-				},
-				{
-					"quote", args =>
-					{
-						foreach (Node node in args)
-						{
-							Quote(node);
-						}
-						return args;
-					}
-				},
+				}
 			};
 		}
 
@@ -79,49 +71,64 @@ namespace MyLittleLispy.CLI
 			get { return _callStack.Peek(); }
 		}
 
-		private void Quote(Node node)
-		{
-			node.Quote = true;
-			if (node is List)
-			{
-				foreach (dynamic child in node.Value)
-				{
-					Quote(child);
-				}
-			}
-		}
+	    public bool HasLocalContext()
+	    {
+	        return _callStack.Any();
+	    }
 
 		public bool HasDefinition(string name)
 		{
 			return _definitions.ContainsKey(name);
 		}
 
-		public dynamic Invoke(string name, IEnumerable<Node> args)
+		public dynamic Invoke(string name, IEnumerable<Node> args = null)
 		{
-			return _definitions[name].Invoke(args.ToArray());
-		}
+            if (HasDefinition(name))
+            {
+                return _definitions[name].Invoke(args != null ? args.ToArray() : new Node[] { });
+            }
 
-		public dynamic Lookup(string name)
-		{
-			dynamic value;
-			if (!_globals.TryGetValue(name, out value))
-			{
-				value = LocalContext.Lookup(name);
-			}
-			return value;
-		}
+            dynamic value = null;
+		    if (HasLocalContext())
+		    {
+		        value = LocalContext.Lookup(name);
+                if (value != null)
+                {
+                    return value;
+                }
+            }
+		    
+            if (_globals.TryGetValue(name, out value))
+		    {
+		        return value;
+		    }
+            
+            throw new SymbolNotDefinedException();
+        }
 
 		public void Define(Node definition, Node body)
 		{
-			if (definition is List)
-			{
-				var name = (string) ((IEnumerable<Node>) definition.Value).First().Value;
-				IEnumerable<string> args =
-					((IEnumerable<Node>) definition.Value).Skip(1).Select(node => (string) node.Value);
+		    string name = string.Empty;
+            var args = new Node[] { }; 
+		    
+            if (definition is Call)
+		    {
+		        name = (definition as Call).Function;
+		        args = ((IEnumerable<Node>) definition.Value).ToArray();
+		        Syntax.Assert(args.All(node => node.Value is string));
+		    }
+		    else
+		    {
+		        Syntax.Assert(definition.Value is string);
+		        name = (string) definition.Value;
+		    }
+		    
+            if (body is Call)
+            {
 				_definitions.Add(name, values =>
 				{
-					var localContext = new LocalContext(this, args, values);
-					_callStack.Push(localContext);
+                    var localContext = new LocalContext(this, args.Select(node => (string)node.Value), values);
+                    _callStack.Push(localContext);
 					dynamic result = body.Eval(this);
 					_callStack.Pop();
 					return result;
@@ -129,7 +136,7 @@ namespace MyLittleLispy.CLI
 			}
 			else
 			{
-				_globals.Add((string) definition.Value, body.Eval(this));
+				_globals.Add(name, body.Eval(this));
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Xml.Schema;
 
 namespace MyLittleLispy.CLI
 {
@@ -18,7 +19,12 @@ namespace MyLittleLispy.CLI
 
 		public dynamic Lookup(string name)
 		{
-			return _locals[name];
+		    dynamic value = null;
+		    if (_locals.TryGetValue(name, out value))
+		    {
+		        return value;
+		    }
+			return null;
 		}
 	}
 }
