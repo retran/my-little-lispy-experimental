@@ -12,7 +12,7 @@ namespace MyLittleLispy.CLI
             return script
                 .Replace("(", " ( ")
                 .Replace(")", " ) ")
-                .Replace("'", " ' ")
+                .Replace("`", " ` ")
                 .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
@@ -39,16 +39,41 @@ namespace MyLittleLispy.CLI
                 return Expression();
             }
 
+            if (_enumerator.Current == "`")
+            {
+                return Quote();
+            }
+
             var rawValue = _enumerator.Current;
             _enumerator.MoveNext();
+
+            if (rawValue == "#t")
+            {
+                return new Constant(new Bool(true));
+            }
+
+            if (rawValue == "#f")
+            {
+                return new Constant(new Bool(false));
+            }
 
             int value;
             if (int.TryParse(rawValue, out value))
             {
-                return new Int(value);
+                return new Constant(new Integer(value));
             }
 
-            return new Symbol(rawValue);
+            return new Symbol(new String(rawValue));
+        }
+
+        private Node Quote()
+        {
+            _enumerator.MoveNext();
+            return new Expression(new []
+            {
+                new Symbol(new String("quote")), 
+                Atom()
+            });
         }
 
         public Node Parse(string line)

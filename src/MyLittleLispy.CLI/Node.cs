@@ -2,7 +2,9 @@ namespace MyLittleLispy.CLI
 {
 	public abstract class Node
 	{
-		public bool Quote = false;
-	    public abstract dynamic Eval(Context context, bool qoute = false);
-	}
+	    public Value Value { get; protected set; }
+
+	    public abstract Value Eval(Context context);
+        public abstract Value Quote(Context context);
+    }
 }

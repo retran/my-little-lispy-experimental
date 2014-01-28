@@ -6,20 +6,20 @@ namespace MyLittleLispy.CLI
 {
 	public class LocalContext
 	{
-		private readonly Dictionary<string, dynamic> _locals;
+		private readonly Dictionary<string, Value> _locals;
 
-		public LocalContext(Context context, IEnumerable<string> args, IEnumerable<Node> argValues)
+		public LocalContext(Context context, IEnumerable<string> args, IEnumerable<Value> values)
 		{
-			_locals = new Dictionary<string, dynamic>();
-			foreach (var pair in args.Zip(argValues, (s, node) => new KeyValuePair<string, Node>(s, node)))
+			_locals = new Dictionary<string, Value>();
+			foreach (var pair in args.Zip(values, (s, value) => new KeyValuePair<string, Value>(s, value)))
 			{
-				_locals.Add(pair.Key, pair.Value.Eval(context));
+				_locals.Add(pair.Key, pair.Value);
 			}
 		}
 
-		public dynamic Lookup(string name)
+		public Value Lookup(string name)
 		{
-		    dynamic value = null;
+		    Value value = null;
 		    if (_locals.TryGetValue(name, out value))
 		    {
 		        return value;

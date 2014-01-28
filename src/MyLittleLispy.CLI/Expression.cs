@@ -22,15 +22,15 @@ namespace MyLittleLispy.CLI
             get { return _nodes.Skip(1); }
         }
 
-        public override dynamic Eval(Context context, bool qoute = false)
-        {
-            if (qoute || Quote)
-            {
-                return _nodes;
-            }
-            
+        public override Value Eval(Context context)
+        {          
             Syntax.Assert(Head is Symbol);
-            return context.Invoke(Head.Eval(context, true), Tail);
+            return context.Invoke(Head.Value.Get<string>(), Tail);
+        }
+
+        public override Value Quote(Context context)
+        {
+            return new List(_nodes.Select(node => node.Quote(context)));
         }
     }
 }

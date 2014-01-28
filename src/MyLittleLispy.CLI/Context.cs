@@ -1,50 +1,47 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 
 namespace MyLittleLispy.CLI
 {
 	public class Context
 	{
 		private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
-		private readonly Dictionary<string, Func<Node[], dynamic>> _definitions;
-		private readonly Dictionary<string, dynamic> _globals = new Dictionary<string, dynamic>();
+        private readonly Dictionary<string, Func<Node[], Value>> _definitions;
+		private readonly Dictionary<string, Value> _globals = new Dictionary<string, Value>();
 
 		public Context()
 		{
-			_definitions = new Dictionary<string, Func<Node[], dynamic>>
+			_definitions = new Dictionary<string, Func<Node[], Value>>
 			{
 				{
 					"define", args =>
 					{
 						Define(args[0], args[1]);
-						return null;
+						return Null.Value;
 					}
 				},
-				{"+", args => args[0].Eval(this) + args[1].Eval(this)},
-				{"-", args => args[0].Eval(this) - args[1].Eval(this)},
-				{"*", args => args[0].Eval(this)*args[1].Eval(this)},
-				{"/", args => args[0].Eval(this)/args[1].Eval(this)},
-				{"=", args => args[0].Eval(this) == args[1].Eval(this) ? 1 : 0},
-				{"<", args => args[0].Eval(this) < args[1].Eval(this) ? 1 : 0},
-				{">", args => args[0].Eval(this) > args[1].Eval(this) ? 1 : 0},
-				{"<=", args => args[0].Eval(this) <= args[1].Eval(this) ? 1 : 0},
-				{">=", args => args[0].Eval(this) >= args[1].Eval(this) ? 1 : 0},
-				{"<>", args => args[0].Eval(this) != args[1].Eval(this) ? 1 : 0},
-				{"and", args => args[0].Eval(this) == 1 && args[1].Eval(this) == 1 ? 1 : 0},
-				{"or", args => args[0].Eval(this) == 1 || args[1].Eval(this) == 1 ? 1 : 0},
-				{"xor", args => args[0].Eval(this) == 1 ^ args[1].Eval(this) == 1 ? 1 : 0},
-				{"not", args => args[0].Eval(this) != 1 ? 1 : 0},
+				{"quote", args => args[0].Quote(this)},
+                {"list", args => new List(args.Select(node => node.Eval(this)))},
+				{"+", args => args[0].Eval(this).Add(args[1].Eval(this)) },
+				{"-", args => args[0].Eval(this).Substract(args[1].Eval(this))},
+				{"*", args => args[0].Eval(this).Multiple(args[1].Eval(this))},
+				{"/", args => args[0].Eval(this).Divide(args[1].Eval(this))},
+				{"=", args => args[0].Eval(this).Equal(args[1].Eval(this))},
+				{"<", args => args[0].Eval(this).Lesser(args[1].Eval(this))},
+				{">", args => args[0].Eval(this).Greater(args[1].Eval(this))},
+				{"<=", args => args[0].Eval(this).LesserEqual(args[1].Eval(this))},
+				{">=", args => args[0].Eval(this).GreaterEqual(args[1].Eval(this))},
+				{"<>", args => args[0].Eval(this).NotEqual(args[1].Eval(this))},
+				{"and", args => args[0].Eval(this).And(args[1].Eval(this))},
+				{"or", args => args[0].Eval(this).Or(args[1].Eval(this))},
+				{"xor", args => args[0].Eval(this).Xor(args[1].Eval(this))},
+				{"not", args => args[0].Eval(this).Not()},
 				{
-					"if", args =>
-					{
-						dynamic condition = args[0].Eval(this);
-						if (condition == 1)
-						{
-							return args[1].Eval(this);
-						}
-						return args.Length > 2 ? args[2].Eval(this) : null;
-					}
+					"if", args => args[0].Eval(this).Get<bool>() 
+					    ? args[1].Eval(this) 
+					    : (args.Length > 2 ? args[2].Eval(this) : Null.Value)
 				}
 			};
 		}
@@ -64,14 +61,14 @@ namespace MyLittleLispy.CLI
 			return _definitions.ContainsKey(name);
 		}
 
-		public dynamic Invoke(string name, IEnumerable<Node> args = null)
+		public Value Invoke(string name, IEnumerable<Node> args = null)
 		{
             if (HasDefinition(name))
             {
                 return _definitions[name].Invoke(args != null ? args.ToArray() : new Node[] { });
             }
 
-            dynamic value = null;
+            Value value = null;
 		    if (HasLocalContext())
 		    {
 		        value = LocalContext.Lookup(name);
@@ -91,27 +88,18 @@ namespace MyLittleLispy.CLI
 
 		public void Define(Node definition, Node body)
 		{
-		    string name = string.Empty;
-            var args = new string[] { }; 
-		    
-            if (definition is Expression)
-            {
-                var nodes = (IEnumerable<Node>)definition.Eval(this, true).ToArray();
-                Syntax.Assert(nodes.All(node => node is Symbol));
-		        name = nodes.First().Eval(this, true);
-                args = nodes.Skip(1).Select(node => (string)node.Eval(this, true)).ToArray();
-		    }
-		    else
-		    {
-		        Syntax.Assert(definition is Symbol);
-		        name = (string) definition.Eval(this, true);
-		    }
-		    
+		    var def = definition is Expression
+		        ? definition.Quote(this).Get<IEnumerable<Value>>().Select(value => value.Get<string>())
+		        : new[] {definition.Quote(this).Get<string>()};
+
+		    var name = def.First();
+            var args = def.Skip(1);
+
             if (body is Expression)
             {
 				_definitions.Add(name, values =>
 				{
-                    var localContext = new LocalContext(this, args, values);
+                    var localContext = new LocalContext(this, args, values.Select(value => value.Eval(this)));
                     _callStack.Push(localContext);
 					dynamic result = body.Eval(this);
 					_callStack.Pop();

@@ -41,17 +41,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Atom.cs" />
+    <Compile Include="Bool.cs" />
+    <Compile Include="Constant.cs" />
     <Compile Include="Expression.cs" />
     <Compile Include="Context.cs" />
+    <Compile Include="Integer.cs" />
+    <Compile Include="List.cs" />
     <Compile Include="LocalContext.cs" />
     <Compile Include="Node.cs" />
+    <Compile Include="Null.cs" />
     <Compile Include="Parser.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="String.cs" />
+    <Compile Include="Symbol.cs" />
     <Compile Include="SymbolNotDefinedException.cs" />
     <Compile Include="Syntax.cs" />
     <Compile Include="SyntaxErrorException.cs" />
+    <Compile Include="Value.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
