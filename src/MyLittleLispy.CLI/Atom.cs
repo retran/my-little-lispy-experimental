@@ -1,17 +1,37 @@
-using System.Runtime.Remoting.Messaging;
-
 namespace MyLittleLispy.CLI
 {
-    public class Atom : Node
+    public abstract class Atom : Node
     {
-        public override dynamic Eval(Context context)
+    }
+
+    public class Symbol : Atom
+    {
+        private readonly string _value;
+
+        public override dynamic Eval(Context context, bool qoute = false)
         {
-            if (!(Value is string) || Quote)
-            {
-                return Value;
-            }
-    
-            return context.Invoke(Value);
+            return Quote || qoute ? _value : context.Invoke(_value);
+        }
+
+        public Symbol(string value)
+        {
+            _value = value;
         }
     }
+
+    public class Int : Atom
+    {
+        private readonly int _value;
+
+        public Int(int value)
+        {
+            _value = value;
+        }
+
+        public override dynamic Eval(Context context, bool qoute = false)
+        {
+            return _value;
+        }
+    }
+
 }

@@ -16,69 +16,39 @@ namespace MyLittleLispy.CLI
                 .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
 
-        private Node Call()
+        private Node Expression()
         {
             Syntax.Assert(_enumerator.Current == "(");
             _enumerator.MoveNext();
-            
-            var function = Atom().Value as string;
-            Syntax.Assert(function != null);
-            
-            var arguments = List().Value as IEnumerable<Node>;
-            Syntax.Assert(arguments != null);            
-            
-            Syntax.Assert(_enumerator.Current == ")");
-            _enumerator.MoveNext();
-            
-            return new Call()
-            {
-                Function = function,
-                Value = arguments,
-                Quote = false
-            };
-        }
 
-        private Node List()
-        {
-            var list = new List<Node>();
-            
+            var nodes = new List<Node>();
             while (_enumerator.Current != ")")
             {
-                list.Add(Atom());
-            }
+                nodes.Add(Atom());
+            }        
+            Syntax.Assert(_enumerator.Current == ")");
+            _enumerator.MoveNext();
 
-            return new List()
-            {
-                Quote = false,
-                Value = list
-            };
+            return new Expression(nodes);
         }
 
         private Node Atom()
         {
             if (_enumerator.Current == "(")
             {
-                return Call();
+                return Expression();
             }
 
-            string rawValue = _enumerator.Current;
+            var rawValue = _enumerator.Current;
             _enumerator.MoveNext();
 
             int value;
             if (int.TryParse(rawValue, out value))
             {
-                return new Atom()
-                {
-                    Quote = false,
-                    Value = value
-                };   
+                return new Int(value);
             }
-            
-            return new Atom()
-            {
-                Quote = false,
-                Value = rawValue
-            };
+
+            return new Symbol(rawValue);
         }
 
         public Node Parse(string line)
@@ -86,7 +56,7 @@ namespace MyLittleLispy.CLI
             _enumerator = Tokenize(line).GetEnumerator();
             _enumerator.MoveNext();
 
-            return Call();
+            return Expression();
         }
     }
 }

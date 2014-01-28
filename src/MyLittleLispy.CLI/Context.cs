@@ -45,23 +45,6 @@ namespace MyLittleLispy.CLI
 						}
 						return args.Length > 2 ? args[2].Eval(this) : null;
 					}
-				},
-				{
-					"cond", args =>
-					{
-						dynamic result = null;
-						
-                        foreach (Node arg in args)
-						{
-							result = Invoke("if", arg.Value.ToArray());
-							if (result != null)
-							{
-								break;
-							}
-						}
-						
-                        return result;
-					}
 				}
 			};
 		}
@@ -109,25 +92,26 @@ namespace MyLittleLispy.CLI
 		public void Define(Node definition, Node body)
 		{
 		    string name = string.Empty;
-            var args = new Node[] { }; 
+            var args = new string[] { }; 
 		    
-            if (definition is Call)
-		    {
-		        name = (definition as Call).Function;
-		        args = ((IEnumerable<Node>) definition.Value).ToArray();
-		        Syntax.Assert(args.All(node => node.Value is string));
+            if (definition is Expression)
+            {
+                var nodes = (IEnumerable<Node>)definition.Eval(this, true).ToArray();
+                Syntax.Assert(nodes.All(node => node is Symbol));
+		        name = nodes.First().Eval(this, true);
+                args = nodes.Skip(1).Select(node => (string)node.Eval(this, true)).ToArray();
 		    }
 		    else
 		    {
-		        Syntax.Assert(definition.Value is string);
-		        name = (string) definition.Value;
+		        Syntax.Assert(definition is Symbol);
+		        name = (string) definition.Eval(this, true);
 		    }
 		    
-            if (body is Call)
+            if (body is Expression)
             {
 				_definitions.Add(name, values =>
 				{
-                    var localContext = new LocalContext(this, args.Select(node => (string)node.Value), values);
+                    var localContext = new LocalContext(this, args, values);
                     _callStack.Push(localContext);
 					dynamic result = body.Eval(this);
 					_callStack.Pop();
