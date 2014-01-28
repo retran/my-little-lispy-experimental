@@ -32,5 +32,30 @@ namespace MyLittleLispy.CLI
                 ? Car().ToString()
                 : string.Format("[{0} . {1}]", Car(), Cdr());
         }
+
+        public override T Get<T>()
+        {
+            if (typeof (T) == typeof (IEnumerable<Value>))
+            {
+                return (T)Flatten();
+            }
+            return ((Value) this).Get<T>();
+        }
+
+        private IEnumerable<Value> Flatten()
+        {
+            var list = new List<Value>();
+            Value current = this;
+            do
+            {
+                list.Add(current.Car());
+                current = current.Cdr();
+            } while (current is Cons);
+            if (current != Null.Value)
+            {
+                list.Add(current);
+            }
+            return list;
+        }
     }
 }

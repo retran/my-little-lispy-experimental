@@ -99,7 +99,7 @@ namespace MyLittleLispy.CLI
             _enumerator = Tokenize(line).GetEnumerator();
             _enumerator.MoveNext();
 
-            return Expression();
+            return Atom();
         }
     }
 }
