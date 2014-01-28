@@ -34,24 +34,9 @@ namespace MyLittleLispy.CLI
             return new Bool(_value > arg.Get<int>());
         }
 
-        public override Value GreaterEqual(Value arg)
-        {
-            return new Bool(_value >= arg.Get<int>());
-        }
-
         public override Value Lesser(Value arg)
         {
             return new Bool(_value < arg.Get<int>());
-        }
-
-        public override Value LesserEqual(Value arg)
-        {
-            return new Bool(_value <= arg.Get<int>());
-        }
-
-        public override Value NotEqual(Value arg)
-        {
-            return new Bool(_value != arg.Get<int>());
         }
     }
 }

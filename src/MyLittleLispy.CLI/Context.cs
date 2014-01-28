@@ -31,12 +31,8 @@ namespace MyLittleLispy.CLI
 				{"=", args => args[0].Eval(this).Equal(args[1].Eval(this))},
 				{"<", args => args[0].Eval(this).Lesser(args[1].Eval(this))},
 				{">", args => args[0].Eval(this).Greater(args[1].Eval(this))},
-				{"<=", args => args[0].Eval(this).LesserEqual(args[1].Eval(this))},
-				{">=", args => args[0].Eval(this).GreaterEqual(args[1].Eval(this))},
-				{"<>", args => args[0].Eval(this).NotEqual(args[1].Eval(this))},
 				{"and", args => args[0].Eval(this).And(args[1].Eval(this))},
 				{"or", args => args[0].Eval(this).Or(args[1].Eval(this))},
-				{"xor", args => args[0].Eval(this).Xor(args[1].Eval(this))},
 				{"not", args => args[0].Eval(this).Not()},
 			    {
 			        "cond", args =>

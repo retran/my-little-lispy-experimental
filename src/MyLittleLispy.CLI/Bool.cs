@@ -19,19 +19,9 @@ namespace MyLittleLispy.CLI
             return new Bool(!_value);
         }
 
-        public override Value Xor(Value arg)
-        {
-            return new Bool(_value ^ arg.Get<bool>());
-        }
-
         public override Value Equal(Value arg)
         {
             return new Bool(_value == arg.Get<bool>());
-        }
-
-        public override Value NotEqual(Value arg)
-        {
-            return new Bool(_value != arg.Get<bool>());
         }
     }
 }

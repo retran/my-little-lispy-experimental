@@ -50,32 +50,12 @@ namespace MyLittleLispy.CLI
             throw new InvalidOperationException();
         }
 
-        public virtual Value LesserEqual(Value arg)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public virtual Value GreaterEqual(Value arg)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public virtual Value NotEqual(Value arg)
-        {
-            throw new InvalidOperationException();
-        }
-
         public virtual Value And(Value arg)
         {
             throw new InvalidOperationException();
         }
 
         public virtual Value Or(Value arg)
-        {
-            throw new InvalidOperationException();
-        }
-
-        public virtual Value Xor(Value arg)
         {
             throw new InvalidOperationException();
         }
