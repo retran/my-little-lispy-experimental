@@ -42,7 +42,41 @@ namespace MyLittleLispy.CLI
 					"if", args => args[0].Eval(this).Get<bool>() 
 					    ? args[1].Eval(this) 
 					    : (args.Length > 2 ? args[2].Eval(this) : Null.Value)
-				}
+				},
+			    {
+			        "cond", args =>
+			        {
+			            Syntax.Assert(args.All(arg => arg is ConditionalClause));
+			            
+                        var clauses = args.Cast<ConditionalClause>();
+			            var last = clauses.Last();
+			            if (last.IsElse(this))
+			            {
+			                clauses = clauses.Take(clauses.Count() - 1);
+			            }
+			            else
+			            {
+			                last = null;
+			            }
+
+                        Syntax.Assert(clauses.All(clause => !clause.IsElse(this)));
+
+			            foreach (var clause in clauses)
+			            {
+			                if (clause.IsTrue(this))
+			                {
+			                    return clause.Eval(this);
+			                }
+			            }
+
+			            if (last != null)
+			            {
+			                return last.Eval(this);
+			            }
+
+			            return Null.Value;
+			        }
+			    }
 			};
 		}
 

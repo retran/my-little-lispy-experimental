@@ -10,6 +10,8 @@ namespace MyLittleLispy.CLI
         private IEnumerable<string> Tokenize(string script)
         {
             return script
+                .Replace("[", " [ ")
+                .Replace("]", " ] ")
                 .Replace("(", " ( ")
                 .Replace(")", " ) ")
                 .Replace("`", " ` ")
@@ -39,6 +41,11 @@ namespace MyLittleLispy.CLI
                 return Expression();
             }
 
+            if (_enumerator.Current == "[")
+            {
+                return ConditionalClause();
+            }
+
             if (_enumerator.Current == "`")
             {
                 return Quote();
@@ -64,6 +71,17 @@ namespace MyLittleLispy.CLI
             }
 
             return new Symbol(new String(rawValue));
+        }
+
+        private Node ConditionalClause()
+        {
+            _enumerator.MoveNext();
+            var nodes = new List<Node>();
+            nodes.Add(Atom());
+            nodes.Add(Atom());
+            Syntax.Assert(_enumerator.Current == "]");
+            _enumerator.MoveNext();
+            return new ConditionalClause(nodes);
         }
 
         private Node Quote()

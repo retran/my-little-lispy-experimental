@@ -20,7 +20,7 @@ namespace MyLittleLispy.CLI
 				try
 				{   
 					var value = Eval(Console.ReadLine());
-					Console.WriteLine(value == null ? "(null)" : value.ToString());
+					Console.WriteLine(" => {0}", value.ToString());
 				}
 				catch (Exception e)
 				{

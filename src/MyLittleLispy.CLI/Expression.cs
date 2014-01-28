@@ -5,21 +5,21 @@ namespace MyLittleLispy.CLI
 {
     public class Expression : Node
     {
-        private readonly IEnumerable<Node> _nodes;
+        protected readonly IEnumerable<Node> Nodes;
 
         public Expression(IEnumerable<Node> nodes)
         {
-            _nodes = nodes;
+            Nodes = nodes;
         }
 
         public Node Head
         {
-            get { return _nodes.First(); }
+            get { return Nodes.First(); }
         }
 
         public IEnumerable<Node> Tail
         {
-            get { return _nodes.Skip(1); }
+            get { return Nodes.Skip(1); }
         }
 
         public override Value Eval(Context context)
@@ -30,7 +30,7 @@ namespace MyLittleLispy.CLI
 
         public override Value Quote(Context context)
         {
-            return new List(_nodes.Select(node => node.Quote(context)));
+            return new List(Nodes.Select(node => node.Quote(context)));
         }
     }
 }
