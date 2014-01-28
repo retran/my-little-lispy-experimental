@@ -5,15 +5,15 @@ using System.Runtime.CompilerServices;
 
 namespace MyLittleLispy.CLI
 {
-	public class Context
-	{
-		private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
+    public class Context
+    {
+        private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
         private readonly Dictionary<string, Func<Node[], Value>> _definitions;
-		private readonly Dictionary<string, Value> _globals = new Dictionary<string, Value>();
+        private readonly Dictionary<string, Value> _globals = new Dictionary<string, Value>();
 
-		public Context()
-		{
-			_definitions = new Dictionary<string, Func<Node[], Value>>
+        public Context()
+        {
+            _definitions = new Dictionary<string, Func<Node[], Value>>
 			{
 				{
 					"define", args =>
@@ -23,7 +23,7 @@ namespace MyLittleLispy.CLI
 					}
 				},
 				{"quote", args => args[0].Quote(this)},
-                {"list", args => new List(args.Select(node => node.Eval(this)))},
+                {"list", args => new Cons(args.Select(node => node.Eval(this)))},
 				{"+", args => args[0].Eval(this).Add(args[1].Eval(this)) },
 				{"-", args => args[0].Eval(this).Substract(args[1].Eval(this))},
 				{"*", args => args[0].Eval(this).Multiple(args[1].Eval(this))},
@@ -38,11 +38,6 @@ namespace MyLittleLispy.CLI
 				{"or", args => args[0].Eval(this).Or(args[1].Eval(this))},
 				{"xor", args => args[0].Eval(this).Xor(args[1].Eval(this))},
 				{"not", args => args[0].Eval(this).Not()},
-				{
-					"if", args => args[0].Eval(this).Get<bool>() 
-					    ? args[1].Eval(this) 
-					    : (args.Length > 2 ? args[2].Eval(this) : Null.Value)
-				},
 			    {
 			        "cond", args =>
 			        {
@@ -69,81 +64,79 @@ namespace MyLittleLispy.CLI
 			                }
 			            }
 
-			            if (last != null)
-			            {
-			                return last.Eval(this);
-			            }
-
-			            return Null.Value;
+			            return last != null ? last.Eval(this) : Null.Value;
 			        }
-			    }
-			};
-		}
+			    },
+                {"cons", args => new Cons(new [] { args[0].Eval(this), args[1].Eval(this) })},
+                {"car", args => args[0].Eval(this).Car()},
+                {"cdr", args => args[0].Eval(this).Cdr()},
+            };
+        }
 
-		public LocalContext LocalContext
-		{
-			get { return _callStack.Peek(); }
-		}
+        public LocalContext LocalContext
+        {
+            get { return _callStack.Peek(); }
+        }
 
-	    public bool HasLocalContext()
-	    {
-	        return _callStack.Any();
-	    }
+        public bool HasLocalContext()
+        {
+            return _callStack.Any();
+        }
 
-		public bool HasDefinition(string name)
-		{
-			return _definitions.ContainsKey(name);
-		}
+        public bool HasDefinition(string name)
+        {
+            return _definitions.ContainsKey(name);
+        }
 
-		public Value Invoke(string name, IEnumerable<Node> args = null)
-		{
+        public Value Invoke(string name, IEnumerable<Node> args = null)
+        {
             if (HasDefinition(name))
             {
                 return _definitions[name].Invoke(args != null ? args.ToArray() : new Node[] { });
             }
 
             Value value = null;
-		    if (HasLocalContext())
-		    {
-		        value = LocalContext.Lookup(name);
+            if (HasLocalContext())
+            {
+                value = LocalContext.Lookup(name);
                 if (value != null)
                 {
                     return value;
                 }
             }
-		    
+
             if (_globals.TryGetValue(name, out value))
-		    {
-		        return value;
-		    }
-            
+            {
+                return value;
+            }
+
             throw new SymbolNotDefinedException();
         }
 
-		public void Define(Node definition, Node body)
-		{
-		    var def = definition is Expression
-		        ? definition.Quote(this).Get<IEnumerable<Value>>().Select(value => value.Get<string>())
-		        : new[] {definition.Quote(this).Get<string>()};
+        public void Define(Node definition, Node body)
+        {
+            var def = definition is Expression
+                ? definition.Quote(this).Get<IEnumerable<Value>>().Select(value => value.Get<string>())
+                : new[] { definition.Quote(this).Get<string>() };
 
-		    var name = def.First();
+            var name = def.First();
             var args = def.Skip(1);
 
             if (body is Expression)
             {
-				_definitions.Add(name, values =>
-				{
+                _definitions.Add(name, values =>
+                {
                     var localContext = new LocalContext(this, args, values.Select(value => value.Eval(this)));
                     _callStack.Push(localContext);
-					dynamic result = body.Eval(this);
-					_callStack.Pop();
-					return result;
-				});
-			}
-			else
-			{
-				_globals.Add(name, body.Eval(this));
-			}
-		}
-	}
+                    dynamic result = body.Eval(this);
+                    _callStack.Pop();
+                    return result;
+                });
+            }
+            else
+            {
+                _globals.Add(name, body.Eval(this));
+            }
+        }
+    }
 }

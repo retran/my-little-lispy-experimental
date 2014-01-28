@@ -30,7 +30,7 @@ namespace MyLittleLispy.CLI
 
         public override Value Quote(Context context)
         {
-            return new List(Nodes.Select(node => node.Quote(context)));
+            return new Cons(Nodes.Select(node => node.Quote(context)));
         }
     }
 }

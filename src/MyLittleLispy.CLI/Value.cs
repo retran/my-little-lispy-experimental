@@ -84,6 +84,16 @@ namespace MyLittleLispy.CLI
         {
             throw new InvalidOperationException();
         }
+
+        public virtual Value Car()
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual Value Cdr()
+        {
+            throw new InvalidOperationException();
+        }
     }
     
     public abstract class Value<T> : Value

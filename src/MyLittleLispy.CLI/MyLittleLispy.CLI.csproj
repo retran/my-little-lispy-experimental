@@ -47,7 +47,7 @@
     <Compile Include="Expression.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Integer.cs" />
-    <Compile Include="List.cs" />
+    <Compile Include="Cons.cs" />
     <Compile Include="LocalContext.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Null.cs" />
