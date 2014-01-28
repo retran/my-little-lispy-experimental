@@ -1,7 +1,9 @@
 my-little-lispy
 ===============
 
-Overview
+Experimental implementation of simple scheme-like lisp dialect interpreter for using as DSL engine in .net software.
+
+Features
 --------
 
 Examples
@@ -13,7 +15,7 @@ Examples
 (square 10)
 
 (define constx 5)
-(define consty 5)
+(define consty (+ constx 10))
 
 (define (distance x y) (+ (square x) (square y)))
 (distance 4 5)
