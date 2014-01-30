@@ -6,7 +6,7 @@ using MyLittleLispy.Parser;
 namespace MyLittleLispy.Tests
 {
     [TestClass]
-    public class ArithmeticsTestCase
+    public class Arithmetics
     {
         private Context _context;
         private Parser.Parser _parser;
@@ -62,7 +62,7 @@ namespace MyLittleLispy.Tests
         }
 
         [TestMethod]
-        public void ComplexExpressionWithIntegersShouldCalculateProperly()
+        public void ComplexExpressionWithIntegersShouldEvaluateProperly()
         {
             Assert.AreEqual(6, _parser.Parse("(+ 2 (* 2 2))").Eval(_context).Get<int>());
             Assert.AreEqual(94, _parser.Parse("(- (* 10 10) 6)").Eval(_context).Get<int>());

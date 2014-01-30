@@ -4,7 +4,7 @@ using MyLittleLispy.Parser;
 namespace MyLittleLispy.Tests
 {
     [TestClass]
-    public class DefineTestCase
+    public class Define
     {
         private Context _context;
         private Parser.Parser _parser;
