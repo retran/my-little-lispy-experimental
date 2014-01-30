@@ -12,9 +12,7 @@ namespace MyLittleLispy.Runtime
 
         public Cons(IEnumerable<Value> values) 
             : base(values.Skip(1).Any() 
-                ? new Tuple<Value, Value>(values.First(), values.Skip(1).Count() > 1 
-                    ? new Cons(values.Skip(1)) 
-                    : values.Skip(1).First()) 
+                ? new Tuple<Value, Value>(values.First(), new Cons(values.Skip(1))) 
                 : new Tuple<Value, Value>(values.First(), Null.Value)) { }
 
         public override Value Car()
@@ -29,9 +27,7 @@ namespace MyLittleLispy.Runtime
 
         public override string ToString()
         {
-            return Cdr() == Null.Value
-                ? Car().ToString()
-                : string.Format("[{0} . {1}]", Car(), Cdr());
+            return string.Format("[{0} . {1}]", Car(), Cdr());
         }
 
         public override T To<T>()

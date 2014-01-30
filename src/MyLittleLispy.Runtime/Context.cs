@@ -31,7 +31,7 @@ namespace MyLittleLispy.Runtime
 			    {"cond", Cond},
                 {"cons", args =>
                 {
-                    return new Cons(new[] {args[0].Eval(this), args[1].Eval(this)});
+                    return new Cons(args[0].Eval(this), args[1].Eval(this));
                 }},
                 {"car", args => args[0].Eval(this).Car()},
                 {"cdr", args => args[0].Eval(this).Cdr()},

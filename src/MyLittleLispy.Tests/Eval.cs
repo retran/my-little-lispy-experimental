@@ -1,5 +1,6 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using MyLittleLispy.Hosting;
+using MyLittleLispy.Runtime;
 
 namespace MyLittleLispy.Tests
 {
@@ -21,6 +22,9 @@ namespace MyLittleLispy.Tests
             Assert.AreEqual("true", _engine.Execute("(eval `(cond ((< 5 10) `true) (else `false)))").To<string>());
             Assert.AreEqual(4, _engine.Execute("(eval (cons `+ (cons 2 2)))").To<int>());
             Assert.AreEqual(4, _engine.Execute("(eval (list `+ 2 2))").To<int>());
+
+            Assert.AreEqual(Null.Value, _engine.Execute("(eval `(define x 10))"));
+            Assert.AreEqual(10, _engine.Execute("(eval `x)").To<int>());
         }
     }
 }
