@@ -18,6 +18,7 @@ namespace MyLittleLispy.Tests
         public void EvalShouldEvaluteQuotedExpression()
         {
             Assert.AreEqual(12, _engine.Execute("(eval `(+ 2 (* 5 2)))").To<int>());
+            Assert.AreEqual("true", _engine.Execute("(eval `(cond ((< 5 10) `true) (else `false)))").To<string>());
         }
     }
 }

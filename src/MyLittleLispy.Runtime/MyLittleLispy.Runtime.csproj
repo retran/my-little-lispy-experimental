@@ -40,7 +40,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bool.cs" />
-    <Compile Include="ConditionalClause.cs" />
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />

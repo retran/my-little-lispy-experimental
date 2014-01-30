@@ -15,13 +15,7 @@ namespace MyLittleLispy.Runtime
         {
             _definitions = new Dictionary<string, Func<Node[], Value>>
 			{
-				{
-					"define", args =>
-					{
-						Define(args[0], args[1]);
-						return Null.Value;
-					}
-				},
+				{"define", args => Define(args[0], args[1])},
 				{"quote", args => args[0].Quote(this)},
                 {"list", args => new Cons(args.Select(node => node.Eval(this)))},
 				{"+", args => args[0].Eval(this).Add(args[1].Eval(this)) },
@@ -34,40 +28,40 @@ namespace MyLittleLispy.Runtime
 				{"and", args => args[0].Eval(this).And(args[1].Eval(this))},
 				{"or", args => args[0].Eval(this).Or(args[1].Eval(this))},
 				{"not", args => args[0].Eval(this).Not()},
-			    {
-			        "cond", args =>
-			        {
-			            Syntax.Assert(args.All(arg => arg is ConditionalClause));
-			            
-                        var clauses = args.Cast<ConditionalClause>();
-			            var last = clauses.Last();
-			            if (last.IsElse(this))
-			            {
-			                clauses = clauses.Take(clauses.Count() - 1);
-			            }
-			            else
-			            {
-			                last = null;
-			            }
-
-                        Syntax.Assert(clauses.All(clause => !clause.IsElse(this)));
-
-			            foreach (var clause in clauses)
-			            {
-			                if (clause.IsTrue(this))
-			                {
-			                    return clause.Eval(this);
-			                }
-			            }
-
-			            return last != null ? last.Eval(this) : Null.Value;
-			        }
-			    },
-                {"cons", args => new Cons(new [] { args[0].Eval(this), args[1].Eval(this) })},
+			    {"cond", Cond},
+                {"cons", args => new Cons(new [] { args[0].Eval(this), args[1].Eval(this)})},
                 {"car", args => args[0].Eval(this).Car()},
                 {"cdr", args => args[0].Eval(this).Cdr()},
 			    {"eval", args => args[0].Eval(this).ToExpression().Eval(this)}
             };
+        }
+
+        private Value Cond(Node[] args)
+        {
+            var clauses = args.Cast<Expression>();
+            var last = clauses.Last();
+
+            var checkElse = new Func<Expression, bool>(clause => 
+                clause.Head is Symbol && clause.Head.Quote(this).To<string>() == "else");
+
+            if (checkElse(last))
+            {
+                clauses = clauses.Take(clauses.Count() - 1);
+            }
+            else
+            {
+                last = null;
+            }
+
+            Syntax.Assert(clauses.All(clause => !checkElse(clause)));
+            foreach (var clause in clauses)
+            {
+                if (clause.Head.Eval(this).To<bool>())
+                {
+                    return clause.Tail.Single().Eval(this);
+                }
+            }
+            return last != null ? last.Tail.Single().Eval(this) : Null.Value;
         }
 
         public LocalContext LocalContext
@@ -110,7 +104,7 @@ namespace MyLittleLispy.Runtime
             throw new SymbolNotDefinedException();
         }
 
-        public void Define(Node definition, Node body)
+        public Value Define(Node definition, Node body)
         {
             var def = definition is Expression
                 ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>())
@@ -141,6 +135,7 @@ namespace MyLittleLispy.Runtime
                     _globals.Add(name, body.Eval(this));
                 }
             }
+            return Null.Value;
         }
     }
 }
