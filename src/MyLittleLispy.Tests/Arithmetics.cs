@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
-using MyLittleLispy.Parser;
+using MyLittleLispy.Runtime;
 
 namespace MyLittleLispy.Tests
 {
@@ -9,13 +9,13 @@ namespace MyLittleLispy.Tests
     public class Arithmetics
     {
         private Context _context;
-        private Parser.Parser _parser;
+        private Runtime.Parser _parser;
 
         [TestInitialize]
         public void SetUp()
         {
             _context = new Context();
-            _parser = new Parser.Parser();            
+            _parser = new Runtime.Parser();            
         }
 
         [TestMethod]

@@ -1,6 +1,6 @@
-using MyLittleLispy.Parser;
+using MyLittleLispy.Runtime;
 
-namespace MyLittleLispy.Parser
+namespace MyLittleLispy.Runtime
 {
     public class Integer : Value<int>
     {

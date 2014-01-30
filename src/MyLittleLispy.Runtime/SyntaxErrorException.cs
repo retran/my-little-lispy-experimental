@@ -1,6 +1,6 @@
 using System;
 
-namespace MyLittleLispy.Parser
+namespace MyLittleLispy.Runtime
 {
     public class SyntaxErrorException : Exception { }
 }

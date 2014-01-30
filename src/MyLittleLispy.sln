@@ -10,7 +10,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLittleLispy.Parser", "MyLittleLispy.Parser\MyLittleLispy.Parser.csproj", "{C7BAD0DB-2BAF-45D0-BE12-BBB29F4E7631}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLittleLispy.Runtime", "MyLittleLispy.Runtime\MyLittleLispy.Runtime.csproj", "{C7BAD0DB-2BAF-45D0-BE12-BBB29F4E7631}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyLittleLispy.Tests", "MyLittleLispy.Tests\MyLittleLispy.Tests.csproj", "{30234772-F196-4F3A-B0BA-27CBCA314C73}"
 EndProject

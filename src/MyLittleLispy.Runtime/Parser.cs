@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace MyLittleLispy.Parser
+namespace MyLittleLispy.Runtime
 {
     public class Parser
     {
