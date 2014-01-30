@@ -73,6 +73,8 @@ namespace MyLittleLispy.Runtime
         {
             throw new InvalidOperationException();
         }
+
+        public abstract Node ToExpression();
     }
     
     public abstract class Value<T> : Value
@@ -92,6 +94,11 @@ namespace MyLittleLispy.Runtime
         public override string ToString()
         {
             return _value.ToString();
-        }   
+        }
+
+        public override Node ToExpression()
+        {
+            return new Constant(this);
+        }
     }
 }

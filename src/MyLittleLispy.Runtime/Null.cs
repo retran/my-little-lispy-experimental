@@ -8,5 +8,10 @@ namespace MyLittleLispy.Runtime
         {
             return "null";
         }
+
+        public override Node ToExpression()
+        {
+            return new Constant(this);
+        }
     }
 }

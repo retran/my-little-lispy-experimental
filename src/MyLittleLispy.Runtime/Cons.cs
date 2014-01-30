@@ -57,5 +57,10 @@ namespace MyLittleLispy.Runtime
             }
             return list;
         }
+
+        public override Node ToExpression()
+        {
+            return new Expression(this.To<IEnumerable<Value>>().Select(v => v.ToExpression()));
+        }
     }
 }

@@ -66,6 +66,7 @@ namespace MyLittleLispy.Runtime
                 {"cons", args => new Cons(new [] { args[0].Eval(this), args[1].Eval(this) })},
                 {"car", args => args[0].Eval(this).Car()},
                 {"cdr", args => args[0].Eval(this).Cdr()},
+			    {"eval", args => args[0].Eval(this).ToExpression().Eval(this)}
             };
         }
 
