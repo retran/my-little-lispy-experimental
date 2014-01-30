@@ -9,9 +9,9 @@ namespace MyLittleLispy.Runtime
             return (Value<T>)this;
         }
 
-        public virtual T Get<T>()
+        public virtual T To<T>()
         {
-            return Cast<T>().Get();
+            return Cast<T>().GetClrValue();
         }
 
         public virtual Value Add(Value arg)
@@ -84,7 +84,7 @@ namespace MyLittleLispy.Runtime
             _value = value;
         }
 
-        public T Get()
+        public T GetClrValue()
         {
             return _value;
         }

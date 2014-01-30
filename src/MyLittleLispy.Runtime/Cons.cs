@@ -33,13 +33,13 @@ namespace MyLittleLispy.Runtime
                 : string.Format("[{0} . {1}]", Car(), Cdr());
         }
 
-        public override T Get<T>()
+        public override T To<T>()
         {
             if (typeof (T) == typeof (IEnumerable<Value>))
             {
                 return (T)Flatten();
             }
-            return ((Value) this).Get<T>();
+            return ((Value) this).To<T>();
         }
 
         private IEnumerable<Value> Flatten()

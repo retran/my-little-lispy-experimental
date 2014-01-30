@@ -112,8 +112,8 @@ namespace MyLittleLispy.Runtime
         public void Define(Node definition, Node body)
         {
             var def = definition is Expression
-                ? definition.Quote(this).Get<IEnumerable<Value>>().Select(value => value.Get<string>())
-                : new[] { definition.Quote(this).Get<string>() };
+                ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>())
+                : new[] { definition.Quote(this).To<string>() };
 
             var name = def.First();
             var args = def.Skip(1);

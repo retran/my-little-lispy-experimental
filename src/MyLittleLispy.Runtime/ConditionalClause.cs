@@ -10,12 +10,12 @@ namespace MyLittleLispy.Runtime
 
         public bool IsTrue(Context context)
         {
-            return Nodes.First().Eval(context).Get<bool>();
+            return Nodes.First().Eval(context).To<bool>();
         }
 
         public bool IsElse(Context context)
         {
-            return Nodes.First() is Symbol && Nodes.First().Quote(context).Get<string>() == "else";
+            return Nodes.First() is Symbol && Nodes.First().Quote(context).To<string>() == "else";
         }
 
         public override Value Eval(Context context)

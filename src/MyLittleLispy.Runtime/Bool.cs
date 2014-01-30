@@ -6,12 +6,12 @@ namespace MyLittleLispy.Runtime
 
         public override Value And(Value arg)
         {
-            return new Bool(_value && arg.Get<bool>());
+            return new Bool(_value && arg.To<bool>());
         }
 
         public override Value Or(Value arg)
         {
-            return new Bool(_value || arg.Get<bool>());
+            return new Bool(_value || arg.To<bool>());
         }
 
         public override Value Not()
@@ -21,7 +21,7 @@ namespace MyLittleLispy.Runtime
 
         public override Value Equal(Value arg)
         {
-            return new Bool(_value == arg.Get<bool>());
+            return new Bool(_value == arg.To<bool>());
         }
     }
 }

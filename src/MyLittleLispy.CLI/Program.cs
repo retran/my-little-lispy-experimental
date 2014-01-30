@@ -1,18 +1,12 @@
 ﻿using System;
-
+using MyLittleLispy.Hosting;
 using MyLittleLispy.Runtime;
 
 namespace MyLittleLispy.CLI
 {
 	internal class Program
 	{
-		private static readonly Runtime.Parser Parser = new Runtime.Parser();
-		private static readonly Context Context = new Context();
-
-		private static dynamic Eval(string line)
-		{
-			return Parser.Parse(line).Eval(Context);
-		}
+        private static readonly ScriptEngine Engine = new ScriptEngine();
 
 		private static void Main(string[] args)
 		{
@@ -20,9 +14,8 @@ namespace MyLittleLispy.CLI
 			{
 				Console.Write(" > ");
 				try
-				{   
-					var value = Eval(Console.ReadLine());
-					Console.WriteLine(" => {0}", value.ToString());
+				{
+				    Console.WriteLine(" => {0}", Engine.Execute(Console.ReadLine()));
 				}
 				catch (Exception e)
 				{

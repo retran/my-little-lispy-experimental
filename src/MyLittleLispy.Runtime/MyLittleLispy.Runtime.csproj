@@ -7,8 +7,8 @@
     <ProjectGuid>{C7BAD0DB-2BAF-45D0-BE12-BBB29F4E7631}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLittleLispy.Parser</RootNamespace>
-    <AssemblyName>MyLittleLispy.Parser</AssemblyName>
+    <RootNamespace>MyLittleLispy.Runtime</RootNamespace>
+    <AssemblyName>MyLittleLispy.Runtime</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>

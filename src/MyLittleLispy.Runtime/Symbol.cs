@@ -9,7 +9,7 @@ namespace MyLittleLispy.Runtime
 
         public override Value Eval(Context context)
         {
-            return context.Invoke(Value.Get<string>());
+            return context.Invoke(Value.To<string>());
         }
 
         public override Value Quote(Context context)
