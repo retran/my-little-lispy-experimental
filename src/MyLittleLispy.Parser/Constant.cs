@@ -1,15 +1,15 @@
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
-    public class Symbol : Node
+    public class Constant : Node
     {
-        public Symbol(String value)
+        public Constant(Value value)
         {
             Value = value;
         }
 
         public override Value Eval(Context context)
         {
-            return context.Invoke(Value.Get<string>());
+            return Value;
         }
 
         public override Value Quote(Context context)

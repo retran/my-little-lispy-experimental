@@ -4,16 +4,15 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{FE6A0755-D76C-4130-B963-0065C915FFFA}</ProjectGuid>
-    <OutputType>Exe</OutputType>
+    <ProjectGuid>{C7BAD0DB-2BAF-45D0-BE12-BBB29F4E7631}</ProjectGuid>
+    <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>MyLittleLispy.CLI</RootNamespace>
-    <AssemblyName>MyLittleLispy.CLI</AssemblyName>
+    <RootNamespace>MyLittleLispy.Parser</RootNamespace>
+    <AssemblyName>MyLittleLispy.Parser</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -23,7 +22,6 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
-    <PlatformTarget>AnyCPU</PlatformTarget>
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
@@ -41,14 +39,24 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Program.cs" />
+    <Compile Include="Bool.cs" />
+    <Compile Include="ConditionalClause.cs" />
+    <Compile Include="Cons.cs" />
+    <Compile Include="Constant.cs" />
+    <Compile Include="Context.cs" />
+    <Compile Include="Expression.cs" />
+    <Compile Include="Integer.cs" />
+    <Compile Include="LocalContext.cs" />
+    <Compile Include="Node.cs" />
+    <Compile Include="Null.cs" />
+    <Compile Include="Parser.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-  </ItemGroup>
-  <ItemGroup>
-    <ProjectReference Include="..\MyLittleLispy.Parser\MyLittleLispy.Parser.csproj">
-      <Project>{c7bad0db-2baf-45d0-be12-bbb29f4e7631}</Project>
-      <Name>MyLittleLispy.Parser</Name>
-    </ProjectReference>
+    <Compile Include="String.cs" />
+    <Compile Include="Symbol.cs" />
+    <Compile Include="SymbolNotDefinedException.cs" />
+    <Compile Include="Syntax.cs" />
+    <Compile Include="SyntaxErrorException.cs" />
+    <Compile Include="Value.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -1,6 +1,6 @@
 using System;
 
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
     public class SymbolNotDefinedException : Exception { }
 }

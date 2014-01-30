@@ -1,4 +1,6 @@
-namespace MyLittleLispy.CLI
+using MyLittleLispy.Parser;
+
+namespace MyLittleLispy.Parser
 {
     public class Integer : Value<int>
     {

@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Xml.Schema;
 
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
 	public class LocalContext
 	{

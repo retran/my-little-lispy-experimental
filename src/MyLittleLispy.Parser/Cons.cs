@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
     public class Cons : Value<Tuple<Value, Value>>
     {

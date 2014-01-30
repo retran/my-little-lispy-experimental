@@ -1,7 +1,6 @@
 using System;
-using System.ComponentModel;
 
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
     public abstract class Value
     {

@@ -1,10 +1,12 @@
 ﻿using System;
 
+using MyLittleLispy.Parser;
+
 namespace MyLittleLispy.CLI
 {
 	internal class Program
 	{
-		private static readonly Parser Parser = new Parser();
+		private static readonly Parser.Parser Parser = new Parser.Parser();
 		private static readonly Context Context = new Context();
 
 		private static dynamic Eval(string line)

@@ -1,4 +1,4 @@
-namespace MyLittleLispy.CLI
+namespace MyLittleLispy.Parser
 {
     public class Bool : Value<bool>
     {
