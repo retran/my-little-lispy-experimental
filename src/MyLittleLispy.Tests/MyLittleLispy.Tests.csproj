@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="ArithmeticsTestCase.cs" />
+    <Compile Include="DefineTestCase.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

@@ -131,7 +131,14 @@ namespace MyLittleLispy.Parser
             }
             else
             {
-                _globals.Add(name, body.Eval(this));
+                if (_globals.ContainsKey(name))
+                {
+                    _globals[name] = body.Eval(this);
+                }
+                else
+                {
+                    _globals.Add(name, body.Eval(this));
+                }
             }
         }
     }
