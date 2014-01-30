@@ -29,7 +29,10 @@ namespace MyLittleLispy.Runtime
 				{"or", args => args[0].Eval(this).Or(args[1].Eval(this))},
 				{"not", args => args[0].Eval(this).Not()},
 			    {"cond", Cond},
-                {"cons", args => new Cons(new [] { args[0].Eval(this), args[1].Eval(this)})},
+                {"cons", args =>
+                {
+                    return new Cons(new[] {args[0].Eval(this), args[1].Eval(this)});
+                }},
                 {"car", args => args[0].Eval(this).Car()},
                 {"cdr", args => args[0].Eval(this).Cdr()},
 			    {"eval", args => args[0].Eval(this).ToExpression().Eval(this)}

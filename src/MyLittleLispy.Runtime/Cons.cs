@@ -7,14 +7,15 @@ namespace MyLittleLispy.Runtime
     public class Cons : Value<Tuple<Value, Value>>
     {
         public Cons(Value head, Value tail) : base(new Tuple<Value, Value>(head, tail)) { }
-
+            
         public Cons(Value head) : base(new Tuple<Value, Value>(head, Null.Value)) { }
 
         public Cons(IEnumerable<Value> values) 
-            : base(new Tuple<Value, Value>(values.First(), 
-                values.Skip(1).Any() 
-                ? (Value) new Cons(values.Skip(1)) 
-                : Null.Value)) { }
+            : base(values.Skip(1).Any() 
+                ? new Tuple<Value, Value>(values.First(), values.Skip(1).Count() > 1 
+                    ? new Cons(values.Skip(1)) 
+                    : values.Skip(1).First()) 
+                : new Tuple<Value, Value>(values.First(), Null.Value)) { }
 
         public override Value Car()
         {

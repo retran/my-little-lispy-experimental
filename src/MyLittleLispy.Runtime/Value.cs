@@ -79,7 +79,7 @@ namespace MyLittleLispy.Runtime
     
     public abstract class Value<T> : Value
     {
-        protected readonly T _value;
+        protected T _value;
 
         protected Value(T value)
         {
