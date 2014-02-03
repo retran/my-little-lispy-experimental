@@ -142,7 +142,7 @@ namespace MyLittleLispy.Runtime
             var name = def.First();
             var args = def.Skip(1);
 
-            if (body is Expression)
+            if (definition is Expression)
             {
                 _definitions.Add(name, values => InvokeExpression(body, args, values));
             }
