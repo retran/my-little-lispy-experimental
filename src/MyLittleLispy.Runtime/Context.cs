@@ -17,6 +17,7 @@ namespace MyLittleLispy.Runtime
 			{
 				{"define", args => Define(args[0], args[1])},
 				{"quote", args => args[0].Quote(this)},
+                {"lambda", args => new Lambda(args[0], args[1])},
                 {"list", args => new Cons(args.Select(node => node.Eval(this)))},
 				{"+", args => args[0].Eval(this).Add(args[1].Eval(this)) },
 				{"-", args => args[0].Eval(this).Substract(args[1].Eval(this))},
@@ -44,7 +45,7 @@ namespace MyLittleLispy.Runtime
             var clauses = args.Cast<Expression>();
             var last = clauses.Last();
 
-            var checkElse = new Func<Expression, bool>(clause => 
+            var checkElse = new Func<Expression, bool>(clause =>
                 clause.Head is Symbol && clause.Head.Quote(this).To<string>() == "else");
 
             if (checkElse(last))
@@ -82,13 +83,8 @@ namespace MyLittleLispy.Runtime
             return _definitions.ContainsKey(name);
         }
 
-        public Value Invoke(string name, IEnumerable<Node> args = null)
+        public Value Lookup(string name)
         {
-            if (HasDefinition(name))
-            {
-                return _definitions[name].Invoke(args != null ? args.ToArray() : new Node[] { });
-            }
-
             Value value = null;
             if (HasLocalContext())
             {
@@ -107,6 +103,33 @@ namespace MyLittleLispy.Runtime
             return Null.Value;
         }
 
+        public Value Invoke(Node head, IEnumerable<Node> args = null)
+        {
+            Value call = head.Eval(this);
+
+            if (call == Null.Value && head is Symbol)
+            {
+                call = head.Quote(this);
+            }
+
+            if (call is String)
+            {
+                var name = call.To<string>();
+                if (HasDefinition(name))
+                {
+                    return _definitions[name].Invoke(args != null ? args.ToArray() : new Node[] { });
+                }
+            }
+            else if (call is Lambda)
+            {
+                var lambda = (Lambda)call;
+                return InvokeExpression(lambda.Body,
+                    lambda.Args.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>()),
+                    args != null ? args.ToArray() : new Node[] { });
+            }
+            throw new SymbolNotDefinedException();
+        }
+
         public Value Define(Node definition, Node body)
         {
             var def = definition is Expression
@@ -118,14 +141,7 @@ namespace MyLittleLispy.Runtime
 
             if (body is Expression)
             {
-                _definitions.Add(name, values =>
-                {
-                    var localContext = new LocalContext(this, args, values.Select(value => value.Eval(this)));
-                    _callStack.Push(localContext);
-                    dynamic result = body.Eval(this);
-                    _callStack.Pop();
-                    return result;
-                });
+                _definitions.Add(name, values => InvokeExpression(body, args, values));
             }
             else
             {
@@ -139,6 +155,15 @@ namespace MyLittleLispy.Runtime
                 }
             }
             return Null.Value;
+        }
+
+        private Value InvokeExpression(Node body, IEnumerable<string> args, Node[] values)
+        {
+            var localContext = new LocalContext(this, args, values.Select(value => value.Eval(this)));
+            _callStack.Push(localContext);
+            dynamic result = body.Eval(this);
+            _callStack.Pop();
+            return result;
         }
     }
 }

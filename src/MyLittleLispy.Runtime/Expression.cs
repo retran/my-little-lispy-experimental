@@ -24,8 +24,7 @@ namespace MyLittleLispy.Runtime
 
         public override Value Eval(Context context)
         {          
-            Syntax.Assert(Head is Symbol);
-            return context.Invoke(Head.Value.To<string>(), Tail);
+            return context.Invoke(Head, Tail);
         }
 
         public override Value Quote(Context context)
