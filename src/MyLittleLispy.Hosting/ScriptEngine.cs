@@ -11,6 +11,9 @@ namespace MyLittleLispy.Hosting
         {
             _context = new Context();
             _parser = new Parser();
+
+            var builtins = new BuiltinsModule();
+            builtins.Import(_parser, _context);
         }
 
         public Value Execute(string line)

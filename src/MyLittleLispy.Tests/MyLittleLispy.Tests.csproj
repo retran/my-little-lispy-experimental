@@ -51,6 +51,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Arithmetics.cs" />
+    <Compile Include="Builtins.cs" />
     <Compile Include="Define.cs" />
     <Compile Include="Eval.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

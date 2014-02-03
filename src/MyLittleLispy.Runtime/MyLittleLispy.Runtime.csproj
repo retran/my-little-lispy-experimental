@@ -40,10 +40,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Bool.cs" />
+    <Compile Include="BuiltinsModule.cs" />
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Expression.cs" />
+    <Compile Include="IModule.cs" />
     <Compile Include="Integer.cs" />
     <Compile Include="LocalContext.cs" />
     <Compile Include="Node.cs" />

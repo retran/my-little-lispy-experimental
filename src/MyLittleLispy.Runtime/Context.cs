@@ -104,7 +104,7 @@ namespace MyLittleLispy.Runtime
                 return value;
             }
 
-            throw new SymbolNotDefinedException();
+            return Null.Value;
         }
 
         public Value Define(Node definition, Node body)
