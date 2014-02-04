@@ -24,26 +24,19 @@ namespace MyLittleLispy.Tests
 
             Assert.AreEqual(Null.Value, _engine.Execute("(define expr (+ ten 15))"));
 
-            Assert.AreEqual(10, _engine.Execute("(ten)").To<int>());
-            Assert.AreEqual(20, _engine.Execute("(twenty)").To<int>());
-            Assert.AreEqual(30, _engine.Execute("(thirty)").To<int>());
-            Assert.AreEqual(25, _engine.Execute("(expr)").To<int>());
-
             Assert.AreEqual(10, _engine.Execute("ten").To<int>());
             Assert.AreEqual(20, _engine.Execute("twenty").To<int>());
             Assert.AreEqual(30, _engine.Execute("thirty").To<int>());
-            Assert.AreEqual(25, _engine.Execute("(expr)").To<int>());
+            Assert.AreEqual(25, _engine.Execute("expr").To<int>());
         }
 
         [TestMethod]
         public void RedefinedGlobalShouldEvaluateToItsNewValue()
         {
             Assert.AreEqual(Null.Value, _engine.Execute("(define ten 10)"));
-            Assert.AreEqual(10, _engine.Execute("(ten)").To<int>());
             Assert.AreEqual(10, _engine.Execute("ten").To<int>());
 
             Assert.AreEqual(Null.Value, _engine.Execute("(define ten 100)"));
-            Assert.AreEqual(100, _engine.Execute("(ten)").To<int>());
             Assert.AreEqual(100, _engine.Execute("ten").To<int>());
         }
 

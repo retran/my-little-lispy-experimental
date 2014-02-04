@@ -1,3 +1,7 @@
+using System.Collections;
+using System.Collections.Generic;
+using System.Linq;
+
 namespace MyLittleLispy.Runtime
 {
     public class String : Value<string>
@@ -12,13 +16,19 @@ namespace MyLittleLispy.Runtime
 
     public class Lambda : Value
     {
-        public Lambda(Node args, Node body)
+        public Lambda(string[] args, Node body)
         {
             Args = args;
             Body = body;
         }
 
-        public Node Args { get; private set; }
+        public Lambda(Context context, Node args, Node body)
+        {
+            Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
+            Body = body;
+        }
+
+        public string[] Args { get; private set; }
 
         public Node Body { get; private set; }
 

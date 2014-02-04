@@ -12,6 +12,7 @@ namespace MyLittleLispy.Runtime
             return script
                 .Replace("(", " ( ")
                 .Replace(")", " ) ")
+                .Replace("'", " ' ")
                 .Replace("`", " ` ")
                 .Split(new[] { ' ', '\t', '\n' }, StringSplitOptions.RemoveEmptyEntries);
         }
@@ -39,7 +40,7 @@ namespace MyLittleLispy.Runtime
                 return Expression();
             }
 
-            if (_enumerator.Current == "`")
+            if (_enumerator.Current == "'")
             {
                 return Quote();
             }

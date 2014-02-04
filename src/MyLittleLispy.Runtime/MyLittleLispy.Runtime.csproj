@@ -41,6 +41,7 @@
   <ItemGroup>
     <Compile Include="Bool.cs" />
     <Compile Include="BuiltinsModule.cs" />
+    <Compile Include="ClrLambdaBody.cs" />
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />

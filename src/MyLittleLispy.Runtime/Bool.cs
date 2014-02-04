@@ -4,6 +4,11 @@ namespace MyLittleLispy.Runtime
     {
         public Bool(bool value) : base(value) { }
 
+        public override string ToString()
+        {
+            return _value ? "#t" : "#f";
+        }
+
         public override Value And(Value arg)
         {
             return new Bool(_value && arg.To<bool>());
