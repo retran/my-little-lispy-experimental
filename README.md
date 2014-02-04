@@ -30,3 +30,17 @@ Examples
 
 Todo
 ----
+
+- real static scoping
+- more types (maybe static typing?)
+- backquotes
+- macro
+- more standart builtins (atom?, list?, etc)
+- closures
+- continuations
+- documentation
+
+- tail recursion optimisation
+- .net interoperability
+- realtime compilation
+- implementation of some standarts like CLOS
