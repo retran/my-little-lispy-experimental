@@ -1,15 +1,12 @@
-﻿using System.Text;
-using System.Threading;
-using MyLittleLispy.Hosting;
-using MyLittleLispy.Runtime;
+﻿using MyLittleLispy.Hosting;
 
 namespace MyLittleLispy.CLI
 {
-    internal class Program
+	internal class Program
 	{
 		private static void Main(string[] args)
 		{
-		    new Repl(new ScriptEngine()).Loop();
+			new Repl(new ScriptEngine()).Loop();
 		}
 	}
 }
