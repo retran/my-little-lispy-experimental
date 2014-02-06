@@ -1,7 +1,10 @@
+using System;
+
 namespace MyLittleLispy.Runtime
 {
 	public class Integer : Value<int>
 	{
+
 		public Integer(int value) : base(value)
 		{
 		}

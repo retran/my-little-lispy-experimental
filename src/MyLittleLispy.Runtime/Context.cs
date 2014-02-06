@@ -6,8 +6,7 @@ namespace MyLittleLispy.Runtime
 {
 	public class Context
 	{
-		private readonly Stack<LocalContext> _callStack = new Stack<LocalContext>();
-		private readonly Dictionary<string, Value> _globals = new Dictionary<string, Value>();
+		private readonly Stack<Scope> _scopes = new Stack<Scope>();
 		private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
 
 		public Context()
@@ -27,26 +26,42 @@ namespace MyLittleLispy.Runtime
 						return clause != null ? clause.Tail.Single().Eval(this) : Null.Value;
 					}
 				},
+				{"let", Let}
 			};
+
+			EnterScope();
+		}
+
+		private Value Let(Node[] args)
+		{
+			var scopeArgs = new List<string>();
+			var scopeValues = new List<Value>();
+
+			foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
+			{
+				scopeArgs.Add(clause.Head.Quote(this).To<string>());
+				scopeValues.Add(clause.Tail.Single().Eval(this));
+			}
+
+			EnterScope(scopeArgs, scopeValues);
+			var result = args[1].Eval(this);
+			LeaveScope();
+
+			return result;
 		}
 
 		public Value Lookup(string name)
 		{
 			Value value;
-			if (_callStack.Any())
+
+			foreach (var scope in _scopes)
 			{
-				value = _callStack.Peek().Lookup(name);
+				value = scope.Lookup(name);
 				if (value != null)
 				{
 					return value;
 				}
 			}
-
-			if (_globals.TryGetValue(name, out value))
-			{
-				return value;
-			}
-
 			return Null.Value;
 		}
 
@@ -89,34 +104,41 @@ namespace MyLittleLispy.Runtime
 
 			if (definition is Expression)
 			{
-				SetGlobal(name, new Lambda(args, body));
+				Bind(name, new Lambda(args, body));
 			}
 			else
 			{
-				SetGlobal(name, body.Eval(this));
+				Bind(name, body.Eval(this));
 			}
 
 			return Null.Value;
 		}
 
-		public void SetGlobal(string name, Value value)
+		public void Bind(string name, Value value)
 		{
-			if (_globals.ContainsKey(name))
-			{
-				_globals[name] = value;
-			}
-			else
-			{
-				_globals.Add(name, value);
-			}
+			_scopes.Peek().Bind(name, value);
+		}
+
+		public void EnterScope()
+		{
+			_scopes.Push(new Scope(new string[] { }, new Value[] { }));
+		}
+
+		public void EnterScope(IEnumerable<string> args, IEnumerable<Value> values )
+		{
+			_scopes.Push(new Scope(args, values));
+		}
+
+		public void LeaveScope()
+		{
+			_scopes.Pop();			
 		}
 
 		private Value InvokeLambda(Lambda lambda, Node[] values)
 		{
-			var localContext = new LocalContext(lambda.Args, values.Select(value => value.Eval(this)));
-			_callStack.Push(localContext);
+			EnterScope(lambda.Args, values.Select(value => value.Eval(this)));
 			Value result = lambda.Body.Eval(this);
-			_callStack.Pop();
+			LeaveScope();
 			return result;
 		}
 	}

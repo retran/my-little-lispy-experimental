@@ -14,47 +14,47 @@ namespace MyLittleLispy.Runtime
 
 		public void Import(Parser parser, Context context)
 		{
-			context.SetGlobal("+", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("+", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Add(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("-", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("-", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Substract(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("*", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("*", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Multiple(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("/", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("/", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Divide(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("=", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("=", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Equal(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("<", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("<", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Lesser(c.Lookup("b"))))
 				);
 
-			context.SetGlobal(">", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind(">", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Greater(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("and", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("and", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").And(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("or", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
+			context.Bind("or", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Or(c.Lookup("b"))))
 				);
 
-			context.SetGlobal("not", new Lambda(new[] {"a"}, new ClrLambdaBody(
+			context.Bind("not", new Lambda(new[] {"a"}, new ClrLambdaBody(
 				c => c.Lookup("a").Not()))
 				);
 
-			context.SetGlobal("car", new Lambda(new[] {"a"}, new ClrLambdaBody(
+			context.Bind("car", new Lambda(new[] {"a"}, new ClrLambdaBody(
 				c => c.Lookup("a").Car()))
 				);
 
