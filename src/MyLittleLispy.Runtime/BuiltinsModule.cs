@@ -8,8 +8,7 @@ namespace MyLittleLispy.Runtime
 		{
 			"(define (<= x y) (or (< x y) (= x y)))",
 			"(define (>= x y) (or (> x y) (= x y)))",
-			"(define (xor x y) (and (or x y) (not (and x y))))",
-			"(define (if condition then-clause else-clause) (cond ((condition) then-clause) (else else-clause)))"
+			"(define (xor x y) (and (or x y) (not (and x y))))"
 		};
 
 		public void Import(Parser parser, Context context)

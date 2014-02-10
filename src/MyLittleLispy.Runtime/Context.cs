@@ -22,8 +22,23 @@ namespace MyLittleLispy.Runtime
 				{
 					"cond", args =>
 					{
-						Expression clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => c.Head.Eval(this).To<bool>());
+						var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => c.Head.Eval(this).To<bool>());
 						return clause != null ? clause.Tail.Single().Eval(this) : Null.Value;
+					}
+				},
+				{
+					"if", args =>
+					{
+						var condition = args[0].Eval(this).To<bool>();
+						if (condition)
+						{
+							return args[1].Eval(this);
+						}
+						if (args.Length > 2)
+						{
+							return args[2].Eval(this);
+						}
+						return Null.Value;
 					}
 				},
 				{"let", Let}

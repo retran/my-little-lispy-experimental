@@ -24,17 +24,17 @@ namespace MyLittleLispy.Tests
 		}
 
 		[Test]
-		public void IfWithFalseExpressionReturnsThenClause()
+		public void IfWithFalseExpressionReturnsElseClause()
 		{
-			Assert.AreEqual(Null.Value, _engine.Execute("(if #f `then)"));
-			Assert.AreEqual("else", _engine.Execute("(if #f `then `else)").To<string>());
+			Assert.AreEqual(Null.Value, _engine.Execute("(if #f 'then)"));
+			Assert.AreEqual("else", _engine.Execute("(if #f 'then 'else)").To<string>());
 		}
 
 		[Test]
 		public void IfWithTrueExpressionReturnsThenClause()
 		{
-			Assert.AreEqual("then", _engine.Execute("(if #t `then)").To<string>());
-			Assert.AreEqual("then", _engine.Execute("(if #t `then `else)").To<string>());
+			Assert.AreEqual("then", _engine.Execute("(if #t 'then)").To<string>());
+			Assert.AreEqual("then", _engine.Execute("(if #t 'then 'else)").To<string>());
 		}
 
 		[Test]
