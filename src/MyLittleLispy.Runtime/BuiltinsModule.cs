@@ -13,51 +13,58 @@ namespace MyLittleLispy.Runtime
 
 		public void Import(Parser parser, Context context)
 		{
+			context.Bind("halt", new Lambda(new string[] { "code" }, new ClrLambdaBody(
+				c =>
+				{
+					throw new HaltException(c.Lookup("code").To<int>());
+				}))
+			);
+
 			context.Bind("+", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Add(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("-", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Substract(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("*", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Multiple(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("/", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Divide(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("=", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Equal(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("<", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Lesser(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind(">", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Greater(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("and", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").And(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("or", new Lambda(new[] {"a", "b"}, new ClrLambdaBody(
 				c => c.Lookup("a").Or(c.Lookup("b"))))
-				);
+			);
 
 			context.Bind("not", new Lambda(new[] {"a"}, new ClrLambdaBody(
 				c => c.Lookup("a").Not()))
-				);
+			);
 
 			context.Bind("car", new Lambda(new[] {"a"}, new ClrLambdaBody(
 				c => c.Lookup("a").Car()))
-				);
+			);
 
-			foreach (string define in _builtins)
+			foreach (var define in _builtins)
 			{
 				parser.Parse(define).Eval(context);
 			}

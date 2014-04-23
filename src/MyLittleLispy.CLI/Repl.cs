@@ -1,6 +1,7 @@
 using System;
 using System.Linq;
 using MyLittleLispy.Hosting;
+using MyLittleLispy.Runtime;
 
 namespace MyLittleLispy.CLI
 {
@@ -13,18 +14,18 @@ namespace MyLittleLispy.CLI
 			_engine = engine;
 		}
 
-		public void Loop()
+		public int Loop()
 		{
 			while (true)
 			{
 				Console.Write(" > ");
 				try
 				{
-					string line = Console.ReadLine();
+					var line = Console.ReadLine();
 
 					while (true)
 					{
-						int count = line.Count(c => c == '(') - line.Count(c => c == ')');
+						var count = line.Count(c => c == '(') - line.Count(c => c == ')');
 						if (count == 0)
 						{
 							break;
@@ -34,6 +35,10 @@ namespace MyLittleLispy.CLI
 						line = line + Console.ReadLine();
 					}
 					Console.WriteLine(" => {0}", _engine.Execute(line));
+				}
+				catch (HaltException e)
+				{
+					return e.Code;
 				}
 				catch (Exception e)
 				{

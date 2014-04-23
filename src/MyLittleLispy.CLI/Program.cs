@@ -4,9 +4,9 @@ namespace MyLittleLispy.CLI
 {
 	internal class Program
 	{
-		private static void Main(string[] args)
+		private static int Main(string[] args)
 		{
-			new Repl(new ScriptEngine()).Loop();
+			return new Repl(new ScriptEngine()).Loop();
 		}
 	}
 }

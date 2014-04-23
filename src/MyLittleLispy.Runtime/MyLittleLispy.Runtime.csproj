@@ -46,6 +46,7 @@
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="Expression.cs" />
+    <Compile Include="HaltException.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="Integer.cs" />
     <Compile Include="Scope.cs" />

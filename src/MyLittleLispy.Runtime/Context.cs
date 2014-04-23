@@ -67,11 +67,9 @@ namespace MyLittleLispy.Runtime
 
 		public Value Lookup(string name)
 		{
-			Value value;
-
 			foreach (var scope in _scopes)
 			{
-				value = scope.Lookup(name);
+				Value value = scope.Lookup(name);
 				if (value != null)
 				{
 					return value;
