@@ -2,7 +2,7 @@ using System;
 
 namespace MyLittleLispy.Runtime
 {
-	public class SymbolNotDefinedException : Exception
-	{
-	}
+    public class SymbolNotDefinedException : Exception
+    {
+    }
 }

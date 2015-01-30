@@ -1,13 +1,13 @@
 namespace MyLittleLispy.Runtime
 {
-	public static class Syntax
+    public static class Syntax
+    {
+	public static void Assert(bool condition)
 	{
-		public static void Assert(bool condition)
-		{
-			if (!condition)
-			{
-				throw new SyntaxErrorException();
-			}
-		}
+	    if (!condition)
+	    {
+		throw new SyntaxErrorException();
+	    }
 	}
+    }
 }
