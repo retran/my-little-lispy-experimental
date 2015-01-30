@@ -6,7 +6,7 @@ namespace MyLittleLispy.Runtime
 {
 	public class Context
 	{
-		private readonly Stack<Scope> _scopes = new Stack<Scope>();
+		private readonly Stack<Frame> _callStack = new Stack<Frame>();
 		private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
 
 		public Context()
@@ -41,35 +41,46 @@ namespace MyLittleLispy.Runtime
 						return Null.Value;
 					}
 				},
-				{"let", Let}
+				{"let", Let},
+			    {
+			        "progn", args =>
+			        {
+			            Value value = Null.Value;
+			            foreach (var arg in args)
+			            {
+			                value = arg.Eval(this);
+			            }
+			            return value;
+			        }
+			    }
 			};
 
-			EnterScope();
+			BeginFrame();
 		}
 
 		private Value Let(Node[] args)
 		{
-			var scopeArgs = new List<string>();
-			var scopeValues = new List<Value>();
+			var frameArgs = new List<string>();
+			var frameValues = new List<Value>();
 
 			foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
 			{
-				scopeArgs.Add(clause.Head.Quote(this).To<string>());
-				scopeValues.Add(clause.Tail.Single().Eval(this));
+				frameArgs.Add(clause.Head.Quote(this).To<string>());
+				frameValues.Add(clause.Tail.Single().Eval(this));
 			}
 
-			EnterScope(scopeArgs, scopeValues);
+			BeginFrame(frameArgs, frameValues);
 			var result = args[1].Eval(this);
-			LeaveScope();
+			EndFrame();
 
 			return result;
 		}
 
 		public Value Lookup(string name)
 		{
-			foreach (var scope in _scopes)
+			foreach (var frame in _callStack)
 			{
-				Value value = scope.Lookup(name);
+				Value value = frame.Lookup(name);
 				if (value != null)
 				{
 					return value;
@@ -129,29 +140,29 @@ namespace MyLittleLispy.Runtime
 
 		public void Bind(string name, Value value)
 		{
-			_scopes.Peek().Bind(name, value);
+			_callStack.Peek().Bind(name, value);
 		}
 
-		public void EnterScope()
+		public void BeginFrame()
 		{
-			_scopes.Push(new Scope(new string[] { }, new Value[] { }));
+			_callStack.Push(new Frame(new string[] { }, new Value[] { }));
 		}
 
-		public void EnterScope(IEnumerable<string> args, IEnumerable<Value> values )
+		public void BeginFrame(IEnumerable<string> args, IEnumerable<Value> values )
 		{
-			_scopes.Push(new Scope(args, values));
+			_callStack.Push(new Frame(args, values));
 		}
 
-		public void LeaveScope()
+		public void EndFrame()
 		{
-			_scopes.Pop();			
+			_callStack.Pop();			
 		}
 
 		private Value InvokeLambda(Lambda lambda, Node[] values)
 		{
-			EnterScope(lambda.Args, values.Select(value => value.Eval(this)));
+			BeginFrame(lambda.Args, values.Select(value => value.Eval(this)));
 			Value result = lambda.Body.Eval(this);
-			LeaveScope();
+			EndFrame();
 			return result;
 		}
 	}

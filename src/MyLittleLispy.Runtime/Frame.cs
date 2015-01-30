@@ -4,11 +4,11 @@ using System.Runtime.InteropServices;
 
 namespace MyLittleLispy.Runtime
 {
-	public class Scope
+	public class Frame
 	{
 		private readonly Dictionary<string, Value> _locals;
 
-		public Scope(IEnumerable<string> args, IEnumerable<Value> values)
+		public Frame(IEnumerable<string> args, IEnumerable<Value> values)
 		{
 			_locals = new Dictionary<string, Value>();
 			foreach (var pair in args.Zip(values, (s, value) => new KeyValuePair<string, Value>(s, value)))

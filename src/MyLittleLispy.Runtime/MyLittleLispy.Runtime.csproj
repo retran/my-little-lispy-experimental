@@ -49,7 +49,7 @@
     <Compile Include="HaltException.cs" />
     <Compile Include="IModule.cs" />
     <Compile Include="Integer.cs" />
-    <Compile Include="Scope.cs" />
+    <Compile Include="Frame.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Null.cs" />
     <Compile Include="Parser.cs" />
