@@ -42,17 +42,38 @@ namespace MyLittleLispy.Runtime
 					}
 				},
 				{"let", Let},
-			    {
-			        "progn", args =>
-			        {
-			            Value value = Null.Value;
-			            foreach (var arg in args)
-			            {
-			                value = arg.Eval(this);
-			            }
-			            return value;
-			        }
-			    }
+				{
+				    "set!", args =>
+				    {
+					var name = args[0].Eval(this).To<string>();
+					var value = args[1].Eval(this);
+
+					_callStack.Peek().Bind(name, value);
+					
+					return value;
+				    }
+				},
+				{
+				    "progn", args =>
+				    {
+					Value value = Null.Value;
+					foreach (var arg in args)
+					{
+					    value = arg.Eval(this);
+					}
+					return value;
+				    }
+				},
+				{
+				    "while", args =>
+				    {
+					while (args[0].Eval(this).To<bool>())
+					{
+					    args[1].Eval(this);
+					}
+					return Null.Value;
+				    }
+				}
 			};
 
 			BeginFrame();

@@ -2,11 +2,11 @@
 
 namespace MyLittleLispy.CLI
 {
-	internal class Program
+    internal class Program
+    {
+	private static int Main(string[] args)
 	{
-		private static int Main(string[] args)
-		{
-			return new Repl(new ScriptEngine()).Loop();
-		}
+	    return new Repl(new ScriptEngine()).Loop();
 	}
+    }
 }
