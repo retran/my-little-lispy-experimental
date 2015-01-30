@@ -64,6 +64,10 @@ namespace MyLittleLispy.Runtime
 				c => c.Lookup("a").Car()))
 			);
 
+			context.Bind("cdr", new Lambda(new[] {"a"}, new ClrLambdaBody(
+				c => c.Lookup("a").Cdr()))
+			);
+
 			foreach (var define in _builtins)
 			{
 				parser.Parse(define).Eval(context);
