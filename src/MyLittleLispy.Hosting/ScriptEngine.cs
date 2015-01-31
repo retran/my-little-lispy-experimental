@@ -25,9 +25,14 @@ namespace MyLittleLispy.Hosting
 
 	public Value Execute(Stream stream)
 	{
-	    var sr = new StreamReader(stream);
-	    var script = sr.ReadToEnd();
-	    
+	    using(var sr = new StreamReader(stream))
+	    {
+		return Execute(sr.ReadToEnd());
+	    }
+	}
+	
+	public Value Execute(string script)
+	{	    
 	    Value result = Null.Value;	    
 	    var count = 0;
 
@@ -43,12 +48,11 @@ namespace MyLittleLispy.Hosting
 		if (script[i] == ')')
 		{
 		    count--;
-		}
-
-		if (count == 0)
-		{
-		    result = _parser.Parse(sb.ToString()).Eval(_context);
-		    sb = new StringBuilder(); // TODO как-то можно очистить?
+		    if (count == 0)
+		    {
+			result = _parser.Parse(sb.ToString()).Eval(_context);
+			sb = new StringBuilder(); // TODO как-то можно очистить?
+		    }
 		}
 	    }
 
