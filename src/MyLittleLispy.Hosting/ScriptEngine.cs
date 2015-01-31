@@ -16,7 +16,7 @@ namespace MyLittleLispy.Hosting
 	    builtins.Import(_parser, _context);
 	}
 
-	public Value Execute(string line)
+	public Value Evaluate(string line)
 	{
 	    return _parser.Parse(line).Eval(_context);
 	}

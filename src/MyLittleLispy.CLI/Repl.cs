@@ -34,7 +34,7 @@ namespace MyLittleLispy.CLI
 			Console.Write(" ... ");
 			line = line + Console.ReadLine();
 		    }
-		    Console.WriteLine(" => {0}", _engine.Execute(line));
+		    Console.WriteLine(" => {0}", _engine.Evaluate(line));
 		}
 		catch (HaltException e)
 		{
