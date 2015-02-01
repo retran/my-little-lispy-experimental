@@ -54,7 +54,7 @@ namespace MyLittleLispy.Runtime
 			}
 		    },
 		    {
-			"progn", args =>
+			"begin", args =>
 			{
 			    Value value = Null.Value;
 			    foreach (var arg in args)
