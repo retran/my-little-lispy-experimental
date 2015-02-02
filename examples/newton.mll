@@ -24,7 +24,7 @@
   (< (abs (- (square guess) x)) 1))
 
 (define (sqrt x)
-  (sqrt-iter 1.0 x))
+  (sqrt-iter 1 x))
 
 (p (sqrt 9))
 (p (sqrt 25))
