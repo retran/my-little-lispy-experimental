@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2011/08/nuspec.xsd">
+  <metadata>
+    <version>0.1</version>
+    <authors>Andrew Vasilyev</authors>
+    <owners>Andrew Vasilyev</owners>
+    <id>MyLittleLispy</id>
+    <title>My Little Lispy</title>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>Simple and fast scheme-like lisp implementation</description>
+    <copyright>Copyright Corvus Alba 2015</copyright>
+    <dependencies>
+    </dependencies>
+  </metadata>
+  <files>
+    <file src="bin\CorvusAlba.MyLittleLispy.Hosting.dll" target="CorvusAlba.MyLittleLispy.Hosting.dll" />
+    <file src="bin\CorvusAlba.MyLittleLispy.Runtime.dll" target="CorvusAlba.MyLittleLispy.Runtime.dll" />
+  </files>
+</package>
