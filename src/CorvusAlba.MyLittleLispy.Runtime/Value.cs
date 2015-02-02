@@ -24,6 +24,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    throw new InvalidOperationException();
 	}
 
+	public virtual Value Negate()
+	{
+	    throw new InvalidOperationException();
+	}
+	
 	public virtual Value Multiple(Value arg)
 	{
 	    throw new InvalidOperationException();

@@ -19,6 +19,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return new Integer(ClrValue - arg.To<int>());
 	}
 
+	public virtual Value Negate()
+	{
+	    return new Integer(0 - ClrValue);
+	}
+	
 	public override Value Multiple(Value arg)
 	{
 	    return new Integer(ClrValue*arg.To<int>());

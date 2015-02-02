@@ -28,7 +28,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    context.Bind("-",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
-						      c.Lookup("a").Substract(c.Lookup("b")))));
+					    {
+						var b = c.Lookup("b");
+						if (b != Null.Value)
+						{
+						    return c.Lookup("a").Substract(b);
+						}
+						return c.Lookup("a").Negate();
+					    })));
 
 	    context.Bind("*",
 			 new Lambda(new[] {"a", "b"},
