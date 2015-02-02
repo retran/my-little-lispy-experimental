@@ -13,7 +13,7 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="bin\CorvusAlba.MyLittleLispy.Hosting.dll" target="CorvusAlba.MyLittleLispy.Hosting.dll" />
-    <file src="bin\CorvusAlba.MyLittleLispy.Runtime.dll" target="CorvusAlba.MyLittleLispy.Runtime.dll" />
+    <file src=".\bin\CorvusAlba.MyLittleLispy.Hosting.dll" target="CorvusAlba.MyLittleLispy.Hosting.dll" />
+    <file src=".\bin\CorvusAlba.MyLittleLispy.Runtime.dll" target="CorvusAlba.MyLittleLispy.Runtime.dll" />
   </files>
 </package>

@@ -49,10 +49,12 @@
     <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Hosting\CorvusAlba.MyLittleLispy.Hosting.csproj">
       <Project>{3CA23A34-28EE-4C88-ADEA-176826A07A61}</Project>
       <Name>CorvusAlba.MyLittleLispy.Hosting</Name>
+      <private>True</private>
     </ProjectReference>
     <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Runtime\CorvusAlba.MyLittleLispy.Runtime.csproj">
       <Project>{c7bad0db-2baf-45d0-be12-bbb29f4e7631}</Project>
       <Name>CorvusAlba.MyLittleLispy.Runtime</Name>
+      <private>True</private>
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
