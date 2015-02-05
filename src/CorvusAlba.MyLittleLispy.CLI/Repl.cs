@@ -1,4 +1,5 @@
 using System;
+using System.Diagnostics;
 using System.Linq;
 using CorvusAlba.MyLittleLispy.Hosting;
 using CorvusAlba.MyLittleLispy.Runtime;
@@ -34,7 +35,18 @@ namespace CorvusAlba.MyLittleLispy.CLI
 			Console.Write(" ... ");
 			line = line + Console.ReadLine();
 		    }
-		    Console.WriteLine(" => {0}", _engine.Evaluate(line));
+		    Stopwatch sw = new Stopwatch();
+		    sw.Start();
+		    var value = _engine.Evaluate(line);
+		    sw.Stop();
+
+		    TimeSpan ts = sw.Elapsed;
+		    string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}:{3:000}",
+						       ts.Hours, ts.Minutes, ts.Seconds,
+						       ts.Milliseconds);
+
+		    Console.WriteLine(" => {0}", value);
+		    Console.WriteLine("(elapsed {0})", elapsedTime);
 		}
 		catch (HaltException e)
 		{
