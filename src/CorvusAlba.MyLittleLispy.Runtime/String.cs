@@ -18,6 +18,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
     public class Lambda : Value
     {
+	public IEnumerable<Frame> Frames { get; private set; }
+	
 	public Lambda(string[] args, Node body)
 	{
 	    Args = args;
@@ -28,6 +30,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
 	    Body = body;
+	    Frames = context.Scope.Export();
 	}
 
 	public string[] Args { get; private set; }

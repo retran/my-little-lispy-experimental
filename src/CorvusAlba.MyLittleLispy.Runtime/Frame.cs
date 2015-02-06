@@ -38,6 +38,22 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    throw new SymbolNotDefinedException();
 	}
 
+	public IEnumerable<Frame> Export()
+	{
+	    return _frames.Reverse().ToArray();
+	}
+	
+	public void Import(IEnumerable<Frame> frames)
+	{
+	    if (frames != null)
+	    {
+		foreach (var frame in frames)
+		{
+		    _frames.Push(frame);
+		}
+	    }
+	}
+	
 	public void Bind(string name, Value value)
 	{
 	    _frames.Peek().Bind(name, value);

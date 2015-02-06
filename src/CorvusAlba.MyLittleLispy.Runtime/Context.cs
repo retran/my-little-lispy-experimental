@@ -189,6 +189,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    try
 	    {
 		BeginScope();
+		Scope.Import(lambda.Frames);
 		Scope.BeginFrame(lambda.Args, arguments);
 		Value result = lambda.Body.Eval(this);
 		Scope.EndFrame();

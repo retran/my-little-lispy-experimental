@@ -5,9 +5,9 @@
 (define add1
   (make-adder 1))
 
-(add1 10)
+(p (add1 10))
 
 (define sub1
   (make-adder -1))
 
-(sub1 10)
+(p (sub1 10))
