@@ -8,6 +8,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public ClrLambdaBody(Func<Context, Value> implementation)
 	{
+
 	    _implementation = implementation;
 	}
 
