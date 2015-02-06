@@ -125,10 +125,21 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Invoke(Node head, IEnumerable<Node> args = null)
 	{
-	    Value call = head.Eval(this);
-	    if (call == Null.Value && head is Symbol)
+	    Value call;
+	    try
 	    {
-		call = head.Quote(this);
+		call = head.Eval(this);
+	    }
+	    catch (SymbolNotDefinedException)
+	    {
+		if (head is Symbol)
+		{
+		    call = head.Quote(this);
+		}
+		else
+		{
+		    throw;
+		}
 	    }
 
 	    if (call is String)

@@ -35,14 +35,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		return _globalScope.Lookup(name);
 	    }
 
-	    return Null.Value;
+	    throw new SymbolNotDefinedException();
 	}
 
 	public void Bind(string name, Value value)
 	{
 	    _frames.Peek().Bind(name, value);
 	}
-	
+
 	public void BeginFrame()
 	{
 	    _frames.Push(new Frame(new string[] { }, new Value[] { }));
