@@ -241,7 +241,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    {
 		Scope.Import(lambda.Frames);
 		Scope.BeginFrame(lambda.Args, arguments);
-		Value result = lambda.Body.Eval(this);
+		Value result = new TailCall(this, lambda.Body);
 		Scope.EndFrame();
 		return result;
 	    }
