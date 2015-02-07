@@ -187,7 +187,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		var name = call.To<string>();
 		if (_specialForms.ContainsKey(name))
 		{
-		    return _specialForms[name].Invoke(args != null ? args.ToArray() : new Node[] {});
+		    var value = _specialForms[name].Invoke(args != null ? args.ToArray() : new Node[] {});
+		    if (Scope.IsTrampolin)
+		    {
+			value = Trampolin(value);
+		    }
+		    return value;
 		}
 	    }
 	    else
