@@ -1,9 +1,13 @@
-(define x 0)
-
-(define (loop)
+(define (loop-impl a)
+  (let ((b (+ a 1)))
     (begin
-      (p x)
-      (set! 'x (+ x 1))
-      (loop)))
+      (p b)
+      (loop-impl b))))
 
-(p (loop))
+(define (start-loop)
+  (loop-impl 0))
+
+(start-loop)
+
+
+
