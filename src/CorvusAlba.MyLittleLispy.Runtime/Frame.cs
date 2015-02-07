@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
 
@@ -23,16 +24,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return _locals.TryGetValue(name, out value) ? value : null;
 	}
 
+	public bool Set(string name, Value value)
+	{
+	    if (!_locals.ContainsKey(name))
+	    {
+		return false;
+	    }
+	    _locals[name] = value;
+	    return true;
+	}
+	
 	public void Bind(string name, Value value)
 	{
 	    if (_locals.ContainsKey(name))
 	    {
-		_locals[name] = value;
+		throw new Exception(); // TODO proper exception
 	    }
-	    else
-	    {
-		_locals.Add(name, value);
-	    }
+	    _locals.Add(name, value);
 	}
     }
 }

@@ -43,9 +43,29 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		return _globalScope.Lookup(name);
 	    }
 
-	    throw new SymbolNotDefinedException();
+	    throw new SymbolNotDefinedException(name);
 	}
 
+	public void Set(string name, Value value)
+	{
+	    foreach (var frame in _frames)
+	    {
+		if (frame.Set(name, value))
+		{
+		    return;
+		}
+	    }
+
+	    if (_globalScope != null)
+	    {
+		_globalScope.Set(name, value);
+	    }
+	    else
+	    {
+		throw new SymbolNotDefinedException(name);
+	    }
+	}
+	
 	public IEnumerable<Frame> Export()
 	{
 	    return _frames.Reverse().ToArray();

@@ -54,23 +54,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
-		    {"eval", args => args[0].Eval(this).ToExpression().Eval(this)},
+		    {"eval", args => Trampolin(Trampolin(args[0].Eval(this)).ToExpression().Eval(this))},
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
-		    {"list", args => new Cons(args.Select(node => node.Eval(this)).ToArray())},
-		    {"cons", args => new Cons(args[0].Eval(this), args[1].Eval(this))},
+		    {"list", args => new Cons(args.Select(node => Trampolin(node.Eval(this))).ToArray())},
+		    {"cons", args => new Cons(Trampolin(args[0].Eval(this)), Trampolin(args[1].Eval(this)))},
 		    {"lambda", args => new Lambda(this, args[0], args[1])},
 		    {
 			"cond", args =>
 			{
-			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => c.Head.Eval(this).To<bool>());
+			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampolin(c.Head.Eval(this)).To<bool>());
 			    return clause != null ? (Value) new TailCall(this, clause.Tail.Single()) : Null.Value;
 			}
 		    },
 		    {
 			"if", args =>
 			{
-			    var condition = args[0].Eval(this).To<bool>();
+			    var condition = Trampolin(args[0].Eval(this)).To<bool>();
 			    if (condition)
 			    {
 				return new TailCall(this, args[1]);
@@ -86,11 +86,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"set!", args =>
 			{
-			    var name = args[0].Eval(this).To<string>();
-			    var value = args[1].Eval(this);
-
-			    Scope.Bind(name, value);
-					
+			    var name = Trampolin(args[0].Eval(this)).To<string>();
+			    var value = Trampolin(args[1].Eval(this));
+			    Scope.Set(name, value);
 			    return value;
 			}
 		    },
@@ -99,7 +97,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			{
 			    foreach (var arg in args.Take(args.Count() - 1))
 			    {
-				arg.Eval(this);
+				Trampolin(arg.Eval(this));
 			    }
 			    return new TailCall(this, args.Last());
 			}
@@ -107,9 +105,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"while", args =>
 			{
-			    while (args[0].Eval(this).To<bool>())
+			    while (Trampolin(args[0].Eval(this)).To<bool>())
 			    {
-				args[1].Eval(this);
+				Trampolin(args[1].Eval(this));
 			    }
 			    return Null.Value;
 			}
@@ -206,7 +204,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		}
 	    }
 
-	    throw new SymbolNotDefinedException();
+	    throw new SymbolNotDefinedException("");
 	}
 
 	public Value Define(Node definition, Node body)
