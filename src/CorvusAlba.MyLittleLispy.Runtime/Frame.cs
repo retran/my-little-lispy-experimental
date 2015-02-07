@@ -38,7 +38,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    if (_locals.ContainsKey(name))
 	    {
-		throw new Exception(); // TODO proper exception
+		_locals[name] = value;
 	    }
 	    _locals.Add(name, value);
 	}

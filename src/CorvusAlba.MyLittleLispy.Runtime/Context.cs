@@ -235,7 +235,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	private Value InvokeLambda(Lambda lambda, Node[] values)
 	{
-	    var arguments = values.Select(value => value.Eval(this)).ToArray();
+	    var arguments = values.Select(value => Trampolin(value.Eval(this))).ToArray();
 	    BeginScope();
 	    try
 	    {
