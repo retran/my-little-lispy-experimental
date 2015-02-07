@@ -4,6 +4,38 @@ using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
+    public class TailCall : Value
+    {
+	private IEnumerable<Frame> _frames;
+	public Node Body { get; private set; }
+
+	public TailCall(Context context, Node body)
+	{
+	    _frames = context.Scope.Export();
+	    Body = body;
+	}
+
+	public override Node ToExpression()
+	{
+	    return Body;
+	}
+
+	public Value Call(Context context)
+	{
+	    context.BeginScope();
+	    try
+	    {
+		context.Scope.Import(_frames);
+		Value result = Body.Eval(context);
+		return result;
+	    }
+	    finally
+	    {
+		context.EndScope();
+	    }
+	}
+    }
+    
     public class Context
     {
 	private readonly Stack<Scope> _callStack = new Stack<Scope>();
@@ -32,7 +64,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			"cond", args =>
 			{
 			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => c.Head.Eval(this).To<bool>());
-			    return clause != null ? clause.Tail.Single().Eval(this) : Null.Value;
+			    return clause != null ? (Value) new TailCall(this, clause.Tail.Single()) : Null.Value;
 			}
 		    },
 		    {
@@ -41,11 +73,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    var condition = args[0].Eval(this).To<bool>();
 			    if (condition)
 			    {
-				return args[1].Eval(this);
+				return new TailCall(this, args[1]);
 			    }
 			    if (args.Length > 2)
 			    {
-				return args[2].Eval(this);
+				return new TailCall(this, args[2]);
 			    }
 			    return Null.Value;
 			}
@@ -65,12 +97,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"begin", args =>
 			{
-			    Value value = Null.Value;
-			    foreach (var arg in args)
+			    foreach (var arg in args.Take(args.Count() - 1))
 			    {
-				value = arg.Eval(this);
+				arg.Eval(this);
 			    }
-			    return value;
+			    return new TailCall(this, args.Last());
 			}
 		    },
 		    {
@@ -102,7 +133,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 
 	    Scope.BeginFrame(frameArgs, frameValues);
-	    var result = args[1].Eval(this);
+	    var result = new TailCall(this, args[1]);
 	    Scope.EndFrame();
 
 	    return result;
@@ -123,6 +154,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return Scope.Lookup(name);
 	}
 
+	public Value Trampolin(Value value)
+	{
+	    var tailCall = value as TailCall;
+	    while (tailCall != null)
+	    {
+		value = tailCall.Call(this);
+		tailCall = value as TailCall;
+	    }
+	    return value;
+	}
+	
 	public Value Invoke(Node head, IEnumerable<Node> args = null)
 	{
 	    Value call;
@@ -155,7 +197,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		var lambda = call as Lambda;
 		if (lambda != null)
 		{
-		    return InvokeLambda(lambda, args != null ? args.ToArray() : new Node[] {});
+		    var value = InvokeLambda(lambda, args != null ? args.ToArray() : new Node[] {});
+		    if (Scope.IsTrampolin)
+		    {
+			value = Trampolin(value);
+		    }
+		    return value;
 		}
 	    }
 
@@ -186,9 +233,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	private Value InvokeLambda(Lambda lambda, Node[] values)
 	{
 	    var arguments = values.Select(value => value.Eval(this)).ToArray();
+	    BeginScope();
 	    try
 	    {
-		BeginScope();
 		Scope.Import(lambda.Frames);
 		Scope.BeginFrame(lambda.Args, arguments);
 		Value result = lambda.Body.Eval(this);
