@@ -19,19 +19,19 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public void Import(Parser parser, Context context)
 	{   	 
-	    context.Scope.Bind("halt",
+	    context.CurrentFrame.Bind("halt",
 			 new Lambda(new string[] { "code" },
 				    new ClrLambdaBody(c =>
 					    {
 						throw new HaltException(c.Lookup("code").To<int>());
 					    })));
 
-	    context.Scope.Bind("+",
+	    context.CurrentFrame.Bind("+",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Add(c.Lookup("b")))));
 
-	    context.Scope.Bind("-",
+	    context.CurrentFrame.Bind("-",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 					    {
@@ -43,57 +43,57 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 						return c.Lookup("a").Negate();
 					    })));
 
-	    context.Scope.Bind("*",
+	    context.CurrentFrame.Bind("*",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Multiple(c.Lookup("b")))));
 
-	    context.Scope.Bind("/",
+	    context.CurrentFrame.Bind("/",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Divide(c.Lookup("b")))));
 
-	    context.Scope.Bind("=",
+	    context.CurrentFrame.Bind("=",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").EqualWithNull(c.Lookup("b")))));
 
-	    context.Scope.Bind("<",
+	    context.CurrentFrame.Bind("<",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Lesser(c.Lookup("b")))));
 
-	    context.Scope.Bind(">",
+	    context.CurrentFrame.Bind(">",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Greater(c.Lookup("b")))));
 
-	    context.Scope.Bind("and",
+	    context.CurrentFrame.Bind("and",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").And(c.Lookup("b")))));
 
-	    context.Scope.Bind("or",
+	    context.CurrentFrame.Bind("or",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Or(c.Lookup("b")))));
 
-	    context.Scope.Bind("not",
+	    context.CurrentFrame.Bind("not",
 			 new Lambda(new[] {"a"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Not())));
 
-	    context.Scope.Bind("car",
+	    context.CurrentFrame.Bind("car",
 			 new Lambda(new[] {"a"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Car())));
 
-	    context.Scope.Bind("cdr",
+	    context.CurrentFrame.Bind("cdr",
 			 new Lambda(new[] {"a"},
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Cdr())));
 
-	    context.Scope.Bind("p",
+	    context.CurrentFrame.Bind("p",
 			 new Lambda(new[] {"a"},
 				    new ClrLambdaBody(c =>
 					    {

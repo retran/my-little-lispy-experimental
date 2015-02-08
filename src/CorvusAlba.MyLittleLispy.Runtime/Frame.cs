@@ -1,4 +1,3 @@
-﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -7,43 +6,100 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Frame
     {
-	private readonly Dictionary<string, Value> _locals;
+	private readonly Stack<Scope> _scopes;
+	private readonly Frame _globalFrame;
 
-	public Frame(IEnumerable<string> args, IEnumerable<Value> values)
+	public bool IsTrampolin
 	{
-	    _locals = new Dictionary<string, Value>();
-	    foreach (var pair in args.Zip(values, (s, value) => new KeyValuePair<string, Value>(s, value)))
+	    get
 	    {
-		_locals.Add(pair.Key, pair.Value);
-	    }
+		return _globalFrame == null;
+	    }	
+	}
+	
+	public Frame()
+	{
+	    _scopes = new Stack<Scope>();
+	}
+
+	public Frame(Frame globalFrame) : this()
+	{
+	    _globalFrame = globalFrame;
 	}
 
 	public Value Lookup(string name)
 	{
-	    Value value;
-	    return _locals.TryGetValue(name, out value) ? value : null;
+	    foreach (var scope in _scopes)
+	    {
+		Value value = scope.Lookup(name);
+		if (value != null)
+		{
+		    return value;
+		}
+	    }
+
+	    if (_globalFrame != null)
+	    {
+		return _globalFrame.Lookup(name);
+	    }
+
+	    throw new SymbolNotDefinedException(name);
 	}
 
-	public bool Set(string name, Value value)
+	public void Set(string name, Value value)
 	{
-	    if (!_locals.ContainsKey(name))
+	    foreach (var scope in _scopes)
 	    {
-		return false;
+		if (scope.Set(name, value))
+		{
+		    return;
+		}
 	    }
-	    _locals[name] = value;
-	    return true;
+
+	    if (_globalFrame != null)
+	    {
+		_globalFrame.Set(name, value);
+	    }
+	    else
+	    {
+		throw new SymbolNotDefinedException(name);
+	    }
+	}
+	
+	public IEnumerable<Scope> Export()
+	{
+	    return _scopes.Reverse().ToArray();
+	}
+	
+	public void Import(IEnumerable<Scope> scopes)
+	{
+	    if (scopes != null)
+	    {
+		foreach (var scope in scopes)
+		{
+		    _scopes.Push(scope);
+		}
+	    }
 	}
 	
 	public void Bind(string name, Value value)
 	{
-	    if (_locals.ContainsKey(name))
-	    {
-		_locals[name] = value;
-	    }
-	    else
-	    {
-		_locals.Add(name, value);
-	    }
+	    _scopes.Peek().Bind(name, value);
 	}
-    }
+
+	public void BeginScope()
+	{
+	    _scopes.Push(new Scope(new string[] { }, new Value[] { }));
+	}
+
+	public void BeginScope(IEnumerable<string> args, IEnumerable<Value> values)
+	{
+	    _scopes.Push(new Scope(args, values));
+	}
+
+	public void EndScope()
+	{
+	    _scopes.Pop();			
+	}
+    }    
 }

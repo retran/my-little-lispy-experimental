@@ -4,14 +4,14 @@ using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
-    public class TailCall : Value
+    public class Continuation : Value
     {
-	private IEnumerable<Frame> _frames;
+	private IEnumerable<Scope> _frames;
 	public Node Body { get; private set; }
 
-	public TailCall(Context context, Node body)
+	public Continuation(Context context, Node body)
 	{
-	    _frames = context.Scope.Export();
+	    _frames = context.CurrentFrame.Export();
 	    Body = body;
 	}
 
@@ -22,27 +22,27 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Call(Context context)
 	{
-	    context.BeginScope();
+	    context.BeginFrame();
 	    try
 	    {
-		context.Scope.Import(_frames);
+		context.CurrentFrame.Import(_frames);
 		Value result = Body.Eval(context);
 		return result;
 	    }
 	    finally
 	    {
-		context.EndScope();
+		context.EndFrame();
 	    }
 	}
     }
     
     public class Context
     {
-	private readonly Stack<Scope> _callStack = new Stack<Scope>();
+	private readonly Stack<Frame> _callStack = new Stack<Frame>();
 	private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
-	private readonly Scope _globalScope;
+	private readonly Frame _globalFrame;
 	
-	public Scope Scope
+	public Frame CurrentFrame
 	{
 	    get
 	    {
@@ -54,30 +54,30 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
-		    {"eval", args => Trampolin(args[0].Eval(this)).ToExpression().Eval(this)},
+		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this)},
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
-		    {"list", args => new Cons(args.Select(node => Trampolin(node.Eval(this))).ToArray())},
-		    {"cons", args => new Cons(Trampolin(args[0].Eval(this)), Trampolin(args[1].Eval(this)))},
+		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
+		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this)))},
 		    {"lambda", args => new Lambda(this, args[0], args[1])},
 		    {
 			"cond", args =>
 			{
-			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampolin(c.Head.Eval(this)).To<bool>());
-			    return clause != null ? (Value) new TailCall(this, clause.Tail.Single()) : Null.Value;
+			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
+			    return clause != null ? (Value) new Continuation(this, clause.Tail.Single()) : Null.Value;
 			}
 		    },
 		    {
 			"if", args =>
 			{
-			    var condition = Trampolin(args[0].Eval(this)).To<bool>();
+			    var condition = Trampoline(args[0].Eval(this)).To<bool>();
 			    if (condition)
 			    {
-				return new TailCall(this, args[1]);
+				return new Continuation(this, args[1]);
 			    }
 			    if (args.Length > 2)
 			    {
-				return new TailCall(this, args[2]);
+				return new Continuation(this, args[2]);
 			    }
 			    return Null.Value;
 			}
@@ -86,9 +86,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"set!", args =>
 			{
-			    var name = Trampolin(args[0].Eval(this)).To<string>();
-			    var value = Trampolin(args[1].Eval(this));
-			    Scope.Set(name, value);
+			    var name = Trampoline(args[0].Eval(this)).To<string>();
+			    var value = Trampoline(args[1].Eval(this));
+			    CurrentFrame.Set(name, value);
 			    return value;
 			}
 		    },
@@ -100,24 +100,24 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 								     new Expression(new Node[] { new Symbol(new String("quote")),
 											     new Expression(args) })});
 
-			    return new TailCall(this, expression);
+			    return new Continuation(this, expression);
 			}
 		    },
 		    {
 			"while", args =>
 			{
-			    while (Trampolin(args[0].Eval(this)).To<bool>())
+			    while (Trampoline(args[0].Eval(this)).To<bool>())
 			    {
-				Trampolin(args[1].Eval(this));
+				Trampoline(args[1].Eval(this));
 			    }
 			    return Null.Value;
 			}
 		    }
 		};
 
-	    _globalScope = new Scope();
-	    _callStack.Push(_globalScope);
-	    Scope.BeginFrame();
+	    _globalFrame = new Frame();
+	    _callStack.Push(_globalFrame);
+	    CurrentFrame.BeginScope();
 	}
 
 	private Value Let(Node[] args)
@@ -128,38 +128,38 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
 	    {
 		frameArgs.Add(clause.Head.Quote(this).To<string>());
-		frameValues.Add(Trampolin(clause.Tail.Single().Eval(this)));
+		frameValues.Add(Trampoline(clause.Tail.Single().Eval(this)));
 	    }
 
-	    Scope.BeginFrame(frameArgs, frameValues);
-	    var result = new TailCall(this, args[1]);
-	    Scope.EndFrame();
+	    CurrentFrame.BeginScope(frameArgs, frameValues);
+	    var result = new Continuation(this, args[1]);
+	    CurrentFrame.EndScope();
 
 	    return result;
 	}
 
-	public void BeginScope()
+	public void BeginFrame()
 	{
-	    _callStack.Push(new Scope(_globalScope));
+	    _callStack.Push(new Frame(_globalFrame));
 	}
 
-	public void EndScope()
+	public void EndFrame()
 	{
 	    _callStack.Pop();
 	}
 	
 	public Value Lookup(string name)
 	{
-	    return Scope.Lookup(name);
+	    return CurrentFrame.Lookup(name);
 	}
 
-	public Value Trampolin(Value value)
+	public Value Trampoline(Value value)
 	{
-	    var tailCall = value as TailCall;
+	    var tailCall = value as Continuation;
 	    while (tailCall != null)
 	    {
 		value = tailCall.Call(this);
-		tailCall = value as TailCall;
+		tailCall = value as Continuation;
 	    }
 	    return value;
 	}
@@ -189,9 +189,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		if (_specialForms.ContainsKey(name))
 		{
 		    var value = _specialForms[name].Invoke(args != null ? args.ToArray() : new Node[] {});
-		    if (Scope.IsTrampolin)
+		    if (CurrentFrame.IsTrampolin)
 		    {
-			value = Trampolin(value);
+			value = Trampoline(value);
 		    }
 		    return value;
 		}
@@ -202,9 +202,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		if (lambda != null)
 		{
 		    var value = InvokeLambda(lambda, args != null ? args.ToArray() : new Node[] {});
-		    if (Scope.IsTrampolin)
+		    if (CurrentFrame.IsTrampolin)
 		    {
-			value = Trampolin(value);
+			value = Trampoline(value);
 		    }
 		    return value;
 		}
@@ -224,11 +224,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	    if (definition is Expression)
 	    {
-		Scope.Bind(name, new Lambda(args, body));
+		CurrentFrame.Bind(name, new Lambda(args, body));
 	    }
 	    else
 	    {
-		Scope.Bind(name, body.Eval(this));
+		CurrentFrame.Bind(name, body.Eval(this));
 	    }
 
 	    return Null.Value;
@@ -236,19 +236,19 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	private Value InvokeLambda(Lambda lambda, Node[] values)
 	{
-	    var arguments = values.Select(value => Trampolin(value.Eval(this))).ToArray();
-	    BeginScope();
+	    var arguments = values.Select(value => Trampoline(value.Eval(this))).ToArray();
+	    BeginFrame();
 	    try
 	    {
-		Scope.Import(lambda.Frames);
-		Scope.BeginFrame(lambda.Args, arguments);
-		Value result = new TailCall(this, lambda.Body);
-		Scope.EndFrame();
+		CurrentFrame.Import(lambda.Frames);
+		CurrentFrame.BeginScope(lambda.Args, arguments);
+		Value result = new Continuation(this, lambda.Body);
+		CurrentFrame.EndScope();
 		return result;
 	    }
 	    finally
 	    {
-	        EndScope();
+	        EndFrame();
 	    }
 	}
     }
