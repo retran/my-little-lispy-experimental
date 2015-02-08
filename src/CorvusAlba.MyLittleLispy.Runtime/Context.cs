@@ -95,11 +95,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"begin", args =>
 			{
-			    foreach (var arg in args.Take(args.Count() - 1))
-			    {
-				Trampolin(arg.Eval(this));
-			    }
-			    return new TailCall(this, args.Last());
+			    // TODO rewrite to macro
+			    var expression = new Expression(new Node[] { new Symbol(new String("eval-sequence")),
+								     new Expression(new Node[] { new Symbol(new String("quote")),
+											     new Expression(args) })});
+
+			    return new TailCall(this, expression);
 			}
 		    },
 		    {
@@ -127,7 +128,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
 	    {
 		frameArgs.Add(clause.Head.Quote(this).To<string>());
-		frameValues.Add(clause.Tail.Single().Eval(this));
+		frameValues.Add(Trampolin(clause.Tail.Single().Eval(this)));
 	    }
 
 	    Scope.BeginFrame(frameArgs, frameValues);
