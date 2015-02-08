@@ -21,11 +21,15 @@
   (/ (+ x y) 2))
 
 (define (good-enough? guess x)
-  (< (abs (- (square guess) x)) 1))
+  (< (abs (- (square guess) x)) 0.0001))
 
 (define (sqrt x)
-  (sqrt-iter 1 x))
+  (sqrt-iter 1. x))
 
 (p (sqrt 9))
 (p (sqrt 25))
 (p (sqrt 100))
+
+(p (sqrt 15))
+(p (sqrt 50))
+(p (sqrt 120))

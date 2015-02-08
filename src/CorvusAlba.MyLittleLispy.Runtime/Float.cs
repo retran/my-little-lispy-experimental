@@ -2,10 +2,10 @@ using System;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
-    public class Integer : Value<int>
+    public class Float : Value<float>
     {
 
-	public Integer(int value) : base(value)
+	public Float(float value) : base(value)
 	{
 	}
 
@@ -17,7 +17,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    else if (arg is Integer)
 	    {
-		return new Integer(ClrValue + arg.To<int>());
+		return new Float(ClrValue + arg.To<int>());
 	    }
 
 	    throw new InvalidOperationException();
@@ -31,7 +31,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    else if (arg is Integer)
 	    {
-		return new Integer(ClrValue - arg.To<int>());
+		return new Float(ClrValue - arg.To<int>());
 	    }
 
 	    throw new InvalidOperationException();
@@ -45,7 +45,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    else if (arg is Integer)
 	    {
-		return new Integer(ClrValue * arg.To<int>());
+		return new Float(ClrValue * arg.To<int>());
 	    }
 
 	    throw new InvalidOperationException();
@@ -59,17 +59,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    else if (arg is Integer)
 	    {
-		return new Integer(ClrValue/arg.To<int>());
+		return new Float(ClrValue/arg.To<int>());
 	    }
 
 	    throw new InvalidOperationException();
 	}
-	
+
 	public override Value Negate()
 	{
-	    return new Integer(-ClrValue);
+	    return new Float(-ClrValue);
 	}
-	
+
 	public override Value Equal(Value arg)
 	{
 	    if (arg is Integer)

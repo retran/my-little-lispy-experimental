@@ -46,6 +46,7 @@
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />
+    <Compile Include="Float.cs" />    
     <Compile Include="Expression.cs" />
     <Compile Include="HaltException.cs" />
     <Compile Include="IModule.cs" />

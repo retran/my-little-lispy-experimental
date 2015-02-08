@@ -64,6 +64,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		return new Constant(new Integer(value));
 	    }
 
+	    float dvalue;
+	    if (float.TryParse(rawValue, out dvalue))
+	    {
+		return new Constant(new Float(dvalue));
+	    }
+
 	    return new Symbol(new String(rawValue));
 	}
 
