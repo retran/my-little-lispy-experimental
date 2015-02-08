@@ -65,6 +65,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    return value;
 			}
 		    },
+		    {
+			"begin", args =>
+			{
+			    foreach (var arg in args.Take(args.Count() - 1))
+			    {
+				Trampoline(arg.Eval(this));
+			    }
+
+			    return new Closure(this, null, args.Last(), true);
+			}
+		    },
 		};
 
 	    _globalFrame = new Frame();
