@@ -27,7 +27,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {"eval", args =>
 		     {
 			 var clause = Trampoline(args[0].Eval(this)).ToExpression();
-			 return new Continuation(this, clause, true);
+			 return clause.Eval(this);
 		     }
 		    },
 		    {"define", args => Define(args[0], args[1])},
@@ -67,25 +67,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    return value;
 			}
 		    },
-		    {
-			"begin", args =>
-			{	
-			    var expression = new Expression(new Node[] { new Symbol(new String("eval-sequence")),
-								     new Expression(new Node[] { new Symbol(new String("quote")),
-											     new Expression(args) })});
-			    return new Continuation(this, expression, false);
-			}
-		    },
-		    {
-			"while", args =>
-			{
-			    while (Trampoline(args[0].Eval(this)).To<bool>())
-			    {
-				Trampoline(args[1].Eval(this));
-			    }
-			    return Null.Value;
-			}
-		    }
 		};
 
 	    _globalFrame = new Frame();
@@ -146,7 +127,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	public Value Invoke(Node head, IEnumerable<Node> args = null)
 	{
 	    Value call;
-//	    System.Console.WriteLine("call {0}", head.Quote(this));
 	    try
 	    {
 		call = head.Eval(this);

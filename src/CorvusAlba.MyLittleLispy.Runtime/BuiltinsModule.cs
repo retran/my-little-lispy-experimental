@@ -9,12 +9,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		"(define (<= x y) (or (< x y) (= x y)))",
 		"(define (>= x y) (or (> x y) (= x y)))",
 		"(define (xor x y) (and (or x y) (not (and x y))))",
-		@"(define (eval-sequence-impl head tail)
-                    (let ((head (car list))
-	                  (tail (cdr list)))
-                      (if (not (= tail '()))
-	                  (eval-sequence-impl (eval head) tail))))",
-		"(define (eval-sequence list) (eval-sequence-impl (car list) (cdr list)))"
 	    };
 
 	public void Import(Parser parser, Context context)
@@ -100,7 +94,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 						System.Console.WriteLine(c.Lookup("a").ToString());
 						return Null.Value;
 					    })));
-
+	    
 	    foreach (var define in _builtins)
 	    {
 		parser.Parse(define).Eval(context);
