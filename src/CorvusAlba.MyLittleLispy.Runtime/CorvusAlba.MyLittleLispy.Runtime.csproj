@@ -43,7 +43,6 @@
     <Compile Include="BuiltinsModule.cs" />
     <Compile Include="ClrLambdaBody.cs" />
     <Compile Include="Closure.cs" />
-    <Compile Include="Continuation.cs" />
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />

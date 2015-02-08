@@ -10,8 +10,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
 	private readonly Frame _globalFrame;
 
-	public bool LexicalScopeMode = true;
-	
 	public Frame CurrentFrame
 	{
 	    get
@@ -39,7 +37,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			"cond", args =>
 			{
 			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
-			    return clause != null ? (Value) new Continuation(this, clause.Tail.Single(), LexicalScopeMode) : Null.Value;
+			    return clause != null ? (Value) new Closure(this, null, clause.Tail.Single(), true) : Null.Value;
 			}
 		    },
 		    {
@@ -48,11 +46,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    var condition = Trampoline(args[0].Eval(this)).To<bool>();
 			    if (condition)
 			    {
-				return new Continuation(this, args[1], LexicalScopeMode);
+				return new Closure(this, null, args[1], true);
 			    }
 			    if (args.Length > 2)
 			    {
-				return new Continuation(this, args[2], LexicalScopeMode);
+				return new Closure(this, null, args[2], true);
 			    }
 			    return Null.Value;
 			}
@@ -86,7 +84,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 
 	    CurrentFrame.BeginScope(frameArgs, frameValues);
-	    var result = new Continuation(this, args[1], LexicalScopeMode);
+	    var result = new Closure(this, null, args[1], true);
 	    CurrentFrame.EndScope();
 
 	    return result;
@@ -94,18 +92,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public void BeginFrame()
 	{
-	    if (LexicalScopeMode)
-	    {
-		_callStack.Push(new Frame(_globalFrame));
-	    }
+	    _callStack.Push(new Frame(_globalFrame));
 	}
 
 	public void EndFrame()
 	{
-	    if (LexicalScopeMode)
-	    {
-		_callStack.Pop();
-	    }
+	    _callStack.Pop();
 	}
 	
 	public Value Lookup(string name)
@@ -115,11 +107,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Trampoline(Value value)
 	{
-	    var tailCall = value as Continuation;
+	    var tailCall = value as Closure;
 	    while (tailCall != null)
 	    {
-		value = tailCall.Call(this);
-		tailCall = value as Continuation;
+		if (tailCall.IsContinuation)
+		{
+		    value = InvokeClosure(tailCall, new Node[0]);
+		    tailCall = value as Closure;
+		}
 	    }
 	    return value;
 	}
@@ -202,7 +197,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    try
 	    {
 		CurrentFrame.BeginScope(closure.Args, arguments);
-		Value result = new Continuation(this, closure.Body, LexicalScopeMode);
+		Value result;
+		if (!closure.IsContinuation)
+		{
+		    result = new Closure(this, null, closure.Body, true);		    
+		}
+		else
+		{
+		    result = closure.Body.Eval(this);
+		}
 		CurrentFrame.EndScope();
 		return result;
 	    }
