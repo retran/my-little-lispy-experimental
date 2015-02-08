@@ -39,6 +39,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    throw new InvalidOperationException();
 	}
 
+	public Value EqualWithNull(Value arg)
+	{
+	    if (arg.RefrenceEquals(Null.Value))
+	    {
+		return new Bool(this.ReferenceEquals(Null.Value));
+	    }
+
+	    return Equal(arg);
+	}
+	
 	public virtual Value Equal(Value arg)
 	{
 	    throw new InvalidOperationException();
