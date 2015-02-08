@@ -40,7 +40,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    {
 		_locals[name] = value;
 	    }
-	    _locals.Add(name, value);
+	    else
+	    {
+		_locals.Add(name, value);
+	    }
 	}
     }
 }
