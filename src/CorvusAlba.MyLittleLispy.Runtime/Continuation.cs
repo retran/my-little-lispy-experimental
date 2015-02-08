@@ -7,15 +7,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     public class Continuation : Value
     {
 	private IEnumerable<Scope> _scopes;
-	private bool _callStackEnabled;
+	private bool _lexicalScopeMode;
 	
 	public Node Body { get; private set; }
 
-	public Continuation(Context context, Node body, bool callStackEnabled = true)
+	public Continuation(Context context, Node body, bool lexicalScopeMode = true)
 	{
 	    _scopes = context.CurrentFrame.Export();
 	    Body = body;
-	    _callStackEnabled = callStackEnabled;
+	    _lexicalScopeMode = lexicalScopeMode;
 	}
 
 	public override Node ToExpression()
@@ -25,7 +25,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Call(Context context)
 	{
-	    context.CallStackEnabled = _callStackEnabled;
+	    context.LexicalScopeMode = _lexicalScopeMode;
 	    context.BeginFrame();
 	    context.CurrentFrame.Import(_scopes);
 	    try
@@ -42,7 +42,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    }
 		}
 		context.EndFrame();
-		context.CallStackEnabled = !_callStackEnabled;
+		context.LexicalScopeMode = !_lexicalScopeMode;
 	    }
 	}
     }

@@ -6,7 +6,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Closure : Value
     {
-	public IEnumerable<Scope> Frames { get; private set; }
+	public IEnumerable<Scope> Scopes { get; private set; }
 	
 	public Closure(string[] args, Node body)
 	{
@@ -18,7 +18,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
 	    Body = body;
-	    Frames = context.CurrentFrame.Export();
+	    Scopes = context.CurrentFrame.Export();
 	}
 
 	public string[] Args { get; private set; }
