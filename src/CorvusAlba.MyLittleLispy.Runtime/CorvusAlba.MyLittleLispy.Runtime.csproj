@@ -42,6 +42,8 @@
     <Compile Include="Bool.cs" />
     <Compile Include="BuiltinsModule.cs" />
     <Compile Include="ClrLambdaBody.cs" />
+    <Compile Include="Closure.cs" />
+    <Compile Include="Continuation.cs" />
     <Compile Include="Cons.cs" />
     <Compile Include="Constant.cs" />
     <Compile Include="Context.cs" />
@@ -50,7 +52,6 @@
     <Compile Include="IModule.cs" />
     <Compile Include="Integer.cs" />
     <Compile Include="Frame.cs" />
-    <Compile Include="Lambda.cs" />
     <Compile Include="Node.cs" />
     <Compile Include="Null.cs" />
     <Compile Include="Parser.cs" />

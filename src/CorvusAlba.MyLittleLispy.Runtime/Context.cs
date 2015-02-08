@@ -3,39 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
-{
-    public class Continuation : Value
-    {
-	private IEnumerable<Scope> _frames;
-	public Node Body { get; private set; }
-
-	public Continuation(Context context, Node body)
-	{
-	    _frames = context.CurrentFrame.Export();
-	    Body = body;
-	}
-
-	public override Node ToExpression()
-	{
-	    return Body;
-	}
-
-	public Value Call(Context context)
-	{
-	    context.BeginFrame();
-	    try
-	    {
-		context.CurrentFrame.Import(_frames);
-		Value result = Body.Eval(context);
-		return result;
-	    }
-	    finally
-	    {
-		context.EndFrame();
-	    }
-	}
-    }
-    
+{  
     public class Context
     {
 	private readonly Stack<Frame> _callStack = new Stack<Frame>();
@@ -59,7 +27,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {"quote", args => args[0].Quote(this)},
 		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
 		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this)))},
-		    {"lambda", args => new Lambda(this, args[0], args[1])},
+		    {"lambda", args => new Closure(this, args[0], args[1])},
 		    {
 			"cond", args =>
 			{
@@ -198,7 +166,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    else
 	    {
-		var lambda = call as Lambda;
+		var lambda = call as Closure;
 		if (lambda != null)
 		{
 		    var value = InvokeLambda(lambda, args != null ? args.ToArray() : new Node[] {});
@@ -224,7 +192,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	    if (definition is Expression)
 	    {
-		CurrentFrame.Bind(name, new Lambda(args, body));
+		CurrentFrame.Bind(name, new Closure(args, body));
 	    }
 	    else
 	    {
@@ -234,7 +202,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return Null.Value;
 	}
 
-	private Value InvokeLambda(Lambda lambda, Node[] values)
+	private Value InvokeLambda(Closure lambda, Node[] values)
 	{
 	    var arguments = values.Select(value => Trampoline(value.Eval(this))).ToArray();
 	    BeginFrame();

@@ -4,17 +4,17 @@ using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
-    public class Lambda : Value
+    public class Closure : Value
     {
 	public IEnumerable<Scope> Frames { get; private set; }
 	
-	public Lambda(string[] args, Node body)
+	public Closure(string[] args, Node body)
 	{
 	    Args = args;
 	    Body = body;
 	}
 
-	public Lambda(Context context, Node args, Node body)
+	public Closure(Context context, Node args, Node body)
 	{
 	    Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
 	    Body = body;
