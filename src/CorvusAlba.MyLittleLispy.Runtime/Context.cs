@@ -9,6 +9,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	private readonly Stack<Frame> _callStack = new Stack<Frame>();
 	private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
 	private readonly Frame _globalFrame;
+
+	public bool CallStackEnabled = true;
 	
 	public Frame CurrentFrame
 	{
@@ -32,7 +34,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			"cond", args =>
 			{
 			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
-			    return clause != null ? (Value) new Continuation(this, clause.Tail.Single()) : Null.Value;
+			    return clause != null ? (Value) new Continuation(this, clause.Tail.Single(), CallStackEnabled) : Null.Value;
 			}
 		    },
 		    {
@@ -41,11 +43,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    var condition = Trampoline(args[0].Eval(this)).To<bool>();
 			    if (condition)
 			    {
-				return new Continuation(this, args[1]);
+				return new Continuation(this, args[1], CallStackEnabled);
 			    }
 			    if (args.Length > 2)
 			    {
-				return new Continuation(this, args[2]);
+				return new Continuation(this, args[2], CallStackEnabled);
 			    }
 			    return Null.Value;
 			}
@@ -63,12 +65,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"begin", args =>
 			{
-			    // TODO rewrite to macro
+	
 			    var expression = new Expression(new Node[] { new Symbol(new String("eval-sequence")),
 								     new Expression(new Node[] { new Symbol(new String("quote")),
 											     new Expression(args) })});
 
-			    return new Continuation(this, expression);
+			    return new Continuation(this, expression, false);
 			}
 		    },
 		    {
@@ -100,7 +102,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 
 	    CurrentFrame.BeginScope(frameArgs, frameValues);
-	    var result = new Continuation(this, args[1]);
+	    var result = new Continuation(this, args[1], CallStackEnabled);
 	    CurrentFrame.EndScope();
 
 	    return result;
@@ -108,12 +110,18 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public void BeginFrame()
 	{
-	    _callStack.Push(new Frame(_globalFrame));
+	    if (CallStackEnabled)
+	    {
+		_callStack.Push(new Frame(_globalFrame));
+	    }
 	}
 
 	public void EndFrame()
 	{
-	    _callStack.Pop();
+	    if (CallStackEnabled)
+	    {
+		_callStack.Pop();
+	    }
 	}
 	
 	public Value Lookup(string name)
@@ -206,16 +214,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    var arguments = values.Select(value => Trampoline(value.Eval(this))).ToArray();
 	    BeginFrame();
+	    CurrentFrame.Import(lambda.Frames);
 	    try
 	    {
-		CurrentFrame.Import(lambda.Frames);
 		CurrentFrame.BeginScope(lambda.Args, arguments);
-		Value result = new Continuation(this, lambda.Body);
+		Value result = new Continuation(this, lambda.Body, CallStackEnabled);
 		CurrentFrame.EndScope();
 		return result;
 	    }
 	    finally
 	    {
+		if (lambda.Frames != null)
+		{
+		    for (int i = 0; i < lambda.Frames.Count(); i++)
+		    {
+			CurrentFrame.EndScope();
+		    }
+		}
 	        EndFrame();
 	    }
 	}

@@ -6,13 +6,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Continuation : Value
     {
-	private IEnumerable<Scope> _frames;
+	private IEnumerable<Scope> _scopes;
+	private bool _callStackEnabled;
+	
 	public Node Body { get; private set; }
 
-	public Continuation(Context context, Node body)
+	public Continuation(Context context, Node body, bool callStackEnabled = true)
 	{
-	    _frames = context.CurrentFrame.Export();
+	    _scopes = context.CurrentFrame.Export();
 	    Body = body;
+	    _callStackEnabled = callStackEnabled;
 	}
 
 	public override Node ToExpression()
@@ -22,16 +25,24 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Call(Context context)
 	{
+	    context.CallStackEnabled = _callStackEnabled;
 	    context.BeginFrame();
+	    context.CurrentFrame.Import(_scopes);
 	    try
 	    {
-		context.CurrentFrame.Import(_frames);
-		Value result = Body.Eval(context);
-		return result;
+		return Body.Eval(context);		
 	    }
 	    finally
 	    {
+		if (_scopes != null)
+		{
+		    for (int i = 0; i < _scopes.Count(); i++)
+		    {
+			context.CurrentFrame.EndScope();
+		    }
+		}
 		context.EndFrame();
+		context.CallStackEnabled = !_callStackEnabled;
 	    }
 	}
     }
