@@ -29,6 +29,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public override Value Quote(Context context)
 	{
+	    if (!Nodes.Any())
+	    {
+		return Null.Value;
+	    }
+	    
 	    return new Cons(Nodes.Select(node => node.Quote(context)).ToArray());
 	}
     }

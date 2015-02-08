@@ -54,7 +54,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
-		    {"eval", args => Trampolin(Trampolin(args[0].Eval(this)).ToExpression().Eval(this))},
+		    {"eval", args => Trampolin(args[0].Eval(this)).ToExpression().Eval(this)},
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
 		    {"list", args => new Cons(args.Select(node => Trampolin(node.Eval(this))).ToArray())},
