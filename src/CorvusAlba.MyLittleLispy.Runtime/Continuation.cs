@@ -25,7 +25,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value Call(Context context)
 	{
-	    context.LexicalScopeMode = _lexicalScopeMode;
+	    if (!_lexicalScopeMode)
+	    {
+		context.LexicalScopeMode = false;
+	    }
 	    context.BeginFrame();
 	    context.CurrentFrame.Import(_scopes);
 	    try
@@ -42,7 +45,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    }
 		}
 		context.EndFrame();
-		context.LexicalScopeMode = !_lexicalScopeMode;
+		if (!_lexicalScopeMode)
+		{
+		    context.LexicalScopeMode = true;
+		}
 	    }
 	}
     }
