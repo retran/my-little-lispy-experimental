@@ -108,13 +108,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	public Value Trampoline(Value value)
 	{
 	    var tailCall = value as Closure;
-	    while (tailCall != null)
-	    {
-		if (tailCall.IsContinuation)
-		{
-		    value = InvokeClosure(tailCall, new Node[0]);
-		    tailCall = value as Closure;
-		}
+	    while (tailCall != null && tailCall.IsContinuation)
+	    {		
+		value = InvokeClosure(tailCall, new Node[0]);
+		tailCall = value as Closure;
 	    }
 	    return value;
 	}
@@ -200,7 +197,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		Value result;
 		if (!closure.IsContinuation)
 		{
-		    result = new Closure(this, null, closure.Body, true);		    
+		    result = new Closure(this, null, closure.Body, true);
 		}
 		else
 		{
