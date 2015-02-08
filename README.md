@@ -31,14 +31,20 @@ Examples
 Todo
 ----
 
-- more types (maybe static typing?)
-- more standart builtins (atom?, list?, etc)
+0.2.0:
+- strings
+- backquotes
+- standart builtins set
+
+0.3.0:
+- macro
 - .net interoperability
 
-- macro
-- backquotes
-
+0.4.0:
 - realtime compilation
-- continuations
 
-- documentation
+Future:
+- documentation ;)
+
+Never:
+- call/cc (because of perfomance and memory)
