@@ -9,12 +9,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		"(define (<= x y) (or (< x y) (= x y)))",
 		"(define (>= x y) (or (> x y) (= x y)))",
 		"(define (xor x y) (and (or x y) (not (and x y))))",
-		@"(define (eval-sequence list)
-                    (let ((value (eval (car list)))
+		@"(define (eval-sequence-impl head tail)
+                    (let ((head (car list))
 	                  (tail (cdr list)))
-                      (if (= tail '())
-	                  value
-	                  (eval-sequence tail))))"
+                      (if (not (= tail '()))
+	                  (eval-sequence-impl (eval head) tail))))",
+		"(define (eval-sequence list) (eval-sequence-impl (car list) (cdr list)))"
 	    };
 
 	public void Import(Parser parser, Context context)
