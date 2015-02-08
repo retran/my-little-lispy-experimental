@@ -30,15 +30,15 @@ Examples
 
 Todo
 ----
-- continuations
-
-- macro
-- backquotes
 
 - more types (maybe static typing?)
 - more standart builtins (atom?, list?, etc)
 - .net interoperability
 
+- macro
+- backquotes
+
 - realtime compilation
+- continuations
 
 - documentation
