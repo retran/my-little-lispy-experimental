@@ -24,7 +24,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
-		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this)},
+		    {"eval", args =>
+		     {
+			 var value = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
+			 return value;
+		     }
+		    },
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
 		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
@@ -64,12 +69,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    },
 		    {
 			"begin", args =>
-			{
-	
+			{	
 			    var expression = new Expression(new Node[] { new Symbol(new String("eval-sequence")),
 								     new Expression(new Node[] { new Symbol(new String("quote")),
 											     new Expression(args) })});
-
 			    return new Continuation(this, expression, false);
 			}
 		    },
