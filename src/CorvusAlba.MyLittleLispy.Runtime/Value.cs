@@ -41,9 +41,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public Value EqualWithNull(Value arg)
 	{
-	    if (arg.RefrenceEquals(Null.Value))
+	    if (object.ReferenceEquals(arg, Null.Value))
 	    {
-		return new Bool(this.ReferenceEquals(Null.Value));
+		return new Bool(object.ReferenceEquals(this, Null.Value));
 	    }
 
 	    return Equal(arg);

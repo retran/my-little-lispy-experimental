@@ -9,12 +9,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		"(define (<= x y) (or (< x y) (= x y)))",
 		"(define (>= x y) (or (> x y) (= x y)))",
 		"(define (xor x y) (and (or x y) (not (and x y))))",
+		@"(define (eval-sequence list)
+                    (let ((value (eval (car list)))
+	                  (tail (cdr list)))
+                      (if (= tail '())
+	                  value
+	                  (eval-sequence tail))))"
 	    };
 
 	public void Import(Parser parser, Context context)
-	{
-	    
-	    
+	{   	 
 	    context.Scope.Bind("halt",
 			 new Lambda(new string[] { "code" },
 				    new ClrLambdaBody(c =>
@@ -52,7 +56,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    context.Scope.Bind("=",
 			 new Lambda(new[] {"a", "b"},
 				    new ClrLambdaBody(c =>
-						      c.Lookup("a").Equal(c.Lookup("b")))));
+						      c.Lookup("a").EqualWithNull(c.Lookup("b")))));
 
 	    context.Scope.Bind("<",
 			 new Lambda(new[] {"a", "b"},
