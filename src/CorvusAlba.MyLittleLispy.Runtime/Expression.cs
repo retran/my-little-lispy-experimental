@@ -5,7 +5,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Expression : Node
     {
-	protected readonly IEnumerable<Node> Nodes;
+	public readonly IEnumerable<Node> Nodes;
 
 	public Expression(IEnumerable<Node> nodes)
 	{

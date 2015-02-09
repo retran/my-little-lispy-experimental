@@ -32,8 +32,6 @@ Todo
 ----
 
 0.2.0:
-- strings
-- backquotes
 - standart builtins set
 
 0.3.0:

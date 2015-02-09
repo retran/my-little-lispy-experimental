@@ -30,6 +30,46 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    },
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
+		    {
+			"quasiquote", args =>
+			{
+			    var expression = args[0] as Expression;
+			    if (expression == null)
+			    {
+				return args[0].Quote(this);
+			    }
+
+			    return new Cons(expression.Nodes.SelectMany(node =>
+				    {
+					var expressionNode = node as Expression;
+					if (expressionNode != null)
+					{
+					    var value = expressionNode.Head.Quote(this);
+					    if (value is String)
+					    {
+						var call = value.To<string>();
+						if (call == "unquote")
+						{
+						    return new[] { expressionNode.Eval(this).ToExpression() };
+						}
+						
+						if (call == "unquote-splicing")
+						{
+						    var exp = expressionNode.Eval(this).ToExpression();
+						    if (exp is Expression)
+						    {
+							return ((Expression)exp).Nodes;
+						    }
+						    return new[] { exp };
+						}
+					    }
+					}
+					return new[] { node };
+				    }).Select(node => node.Quote(this)).ToArray());
+			}
+		    },
+		    {"unquote", args => Trampoline(args[0].Eval(this)) },
+		    {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
 		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
 		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this)))},
 		    {"lambda", args => new Closure(this, args[0], args[1])},

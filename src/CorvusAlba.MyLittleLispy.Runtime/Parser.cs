@@ -11,7 +11,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	
 	private bool IsValidForIdentifier(char c)
 	{
-	    return !(c == '(' || c == ')' || c == '\'') && !_whitespaces.Contains(c);
+	    return !(c == '(' || c == ')' || c == '\'' || c == '`' || c == ',' || c == '@') && !_whitespaces.Contains(c);
 	}
 
 	private IEnumerable<string> Tokenize(string script)
@@ -80,11 +80,32 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		return Expression();
 	    }
 
-	    if (_enumerator.Current == "'")
+	    if (_enumerator.Current == "'")   
 	    {
-		return Quote();
+		_enumerator.MoveNext();
+		return Wrap("quote");
 	    }
 
+	    if (_enumerator.Current == "`")
+	    {
+		_enumerator.MoveNext();
+		return Wrap("quasiquote");
+	    }
+
+	    if (_enumerator.Current == ",")
+	    {
+		_enumerator.MoveNext();
+		if (_enumerator.Current == "@")
+		{
+		    _enumerator.MoveNext();
+		    return Wrap("unquote-splicing");
+		}
+		else
+		{
+		    return Wrap("unquote");
+		}
+	    }
+	    
 	    string rawValue = _enumerator.Current;
 	    _enumerator.MoveNext();
 
@@ -118,12 +139,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return new Symbol(new String(rawValue));
 	}
 
-	private Node Quote()
+	private Node Wrap(string function)
 	{
-	    _enumerator.MoveNext();
 	    return new Expression(new[]
 		    {
-			new Symbol(new String("quote")),
+			new Symbol(new String(function)),
 			Atom()
 		    });
 	}
