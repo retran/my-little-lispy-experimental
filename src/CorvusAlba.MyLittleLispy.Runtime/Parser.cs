@@ -7,11 +7,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     public class Parser
     {
 	private IEnumerator<string> _enumerator;
-	private readonly HashSet<char> _whitespaces = new HashSet<char>(new [] {' ', '\t', '\n'});
+	private readonly HashSet<char> _whitespaces = new HashSet<char>(new [] {' ', '\t', '\n', '\r'});
 	
 	private bool IsValidForIdentifier(char c)
 	{
-	    return !(c == '(' || c == ')') && !_whitespaces.Contains(c);
+	    return !(c == '(' || c == ')' || c == '\'') && !_whitespaces.Contains(c);
 	}
 
 	private IEnumerable<string> Tokenize(string script)
@@ -29,6 +29,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		var sb = new StringBuilder();
 		if (chars[i] == '\"')
 		{
+		    // WTF?!
+		    sb.Append(chars[i]);
+		    i++;
 		    while (chars[i] != '\"')
 		    {
 			sb.Append(chars[i]);
@@ -39,7 +42,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		}
 		else if (IsValidForIdentifier(chars[i]))
 		{
-		    while (IsValidForIdentifier(chars[i]))
+		    while (i < chars.Length && IsValidForIdentifier(chars[i]))
 		    {
 			sb.Append(chars[i]);
 			i++;
@@ -50,7 +53,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    sb.Append(chars[i]);
 		    i++;
 		}
-
 		yield return sb.ToString();		
 	    }	  
 	}
@@ -98,7 +100,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	    if (rawValue.StartsWith("\""))
 	    {
-		return new Constant(new String(rawValue.Trim('\"')));
+		return new Constant(new String(rawValue.Substring(1, rawValue.Length - 2)));
 	    }		
 
 	    int value;
