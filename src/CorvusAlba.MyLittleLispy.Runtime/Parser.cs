@@ -1,4 +1,5 @@
 using System;
+using System.Text;
 using System.Collections.Generic;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
@@ -6,15 +7,52 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     public class Parser
     {
 	private IEnumerator<string> _enumerator;
+	private readonly HashSet<char> _whitespaces = new HashSet<char>(new [] {' ', '\t', '\n'});
+	
+	private bool IsValidForIdentifier(char c)
+	{
+	    return !(c == '(' || c == ')') && !_whitespaces.Contains(c);
+	}
 
 	private IEnumerable<string> Tokenize(string script)
 	{
-	    return script
-		.Replace("(", " ( ")
-		.Replace(")", " ) ")
-		.Replace("'", " ' ")
-		.Replace("`", " ` ")
-		.Split(new[] {' ', '\t', '\n'}, StringSplitOptions.RemoveEmptyEntries);
+	    var chars = script.ToCharArray();
+	    var i = 0;
+	    while (i < chars.Length)
+	    {
+		if (_whitespaces.Contains(chars[i]))
+		{
+		    i++;
+		    continue;
+		}
+		
+		var sb = new StringBuilder();
+		if (chars[i] == '\"')
+		{
+		    while (chars[i] != '\"')
+		    {
+			sb.Append(chars[i]);
+			i++;
+		    }
+		    sb.Append(chars[i]);
+		    i++;
+		}
+		else if (IsValidForIdentifier(chars[i]))
+		{
+		    while (IsValidForIdentifier(chars[i]))
+		    {
+			sb.Append(chars[i]);
+			i++;
+		    }
+		}
+		else 
+		{
+		    sb.Append(chars[i]);
+		    i++;
+		}
+
+		yield return sb.ToString();		
+	    }	  
 	}
 
 	private Node Expression()
@@ -57,6 +95,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    {
 		return new Constant(new Bool(false));
 	    }
+
+	    if (rawValue.StartsWith("\""))
+	    {
+		return new Constant(new String(rawValue.Trim('\"')));
+	    }		
 
 	    int value;
 	    if (int.TryParse(rawValue, out value))

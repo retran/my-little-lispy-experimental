@@ -1,7 +1,7 @@
 my-little-lispy
 ===============
 
-Experimental implementation of simple scheme-like lisp dialect interpreter for using as DSL engine in .net software.
+Experimenииtal implementation of simple scheme-like lisp dialect interpreter for using as DSL engine in .net software.
 
 Features
 --------
