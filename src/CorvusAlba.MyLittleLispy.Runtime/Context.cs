@@ -9,7 +9,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	private readonly Stack<Frame> _callStack = new Stack<Frame>();
 	private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
 	private readonly Frame _globalFrame;
-
+	private Parser _parser;
+	
 	public Frame CurrentFrame
 	{
 	    get
@@ -18,8 +19,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	}
 	
-	public Context()
+	public Context(Parser parser)
 	{
+	    _parser = parser;
+	    
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
 		    {"eval", args =>
@@ -126,6 +129,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	
 	private Value Import(Node[] args)
 	{
+	    var alias = args[0].Eval(this).To<string>();
+	    var module = ModuleAttribute.Find(alias);
+	    module.Import(_parser, this);
 	    return Null.Value;
 	}
 	

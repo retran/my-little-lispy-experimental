@@ -2,6 +2,7 @@
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
+    [Module("builtins")]
     public class BuiltinsModule : IModule
     {
 	private readonly IEnumerable<string> _builtins = new[]

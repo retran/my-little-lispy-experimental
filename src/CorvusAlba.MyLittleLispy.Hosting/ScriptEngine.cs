@@ -11,8 +11,8 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 
 	public ScriptEngine()
 	{
-	    _context = new Context();
 	    _parser = new Parser();
+	    _context = new Context(_parser);
 
 	    var builtins = new BuiltinsModule();
 	    builtins.Import(_parser, _context);
