@@ -30,44 +30,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    },
 		    {"define", args => Define(args[0], args[1])},
 		    {"quote", args => args[0].Quote(this)},
-		    {
-			"quasiquote", args =>
-			{
-			    var expression = args[0] as Expression;
-			    if (expression == null)
-			    {
-				return args[0].Quote(this);
-			    }
-
-			    return new Cons(expression.Nodes.SelectMany(node =>
-				    {
-					var expressionNode = node as Expression;
-					if (expressionNode != null)
-					{
-					    var value = expressionNode.Head.Quote(this);
-					    if (value is String)
-					    {
-						var call = value.To<string>();
-						if (call == "unquote")
-						{
-						    return new[] { expressionNode.Eval(this).ToExpression() };
-						}
-						
-						if (call == "unquote-splicing")
-						{
-						    var exp = expressionNode.Eval(this).ToExpression();
-						    if (exp is Expression)
-						    {
-							return ((Expression)exp).Nodes;
-						    }
-						    return new[] { exp };
-						}
-					    }
-					}
-					return new[] { node };
-				    }).Select(node => node.Quote(this)).ToArray());
-			}
-		    },
+		    {"quasiquote", Quasiquote},
 		    {"unquote", args => Trampoline(args[0].Eval(this)) },
 		    {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
 		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
@@ -96,15 +59,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			}
 		    },
 		    {"let", Let},
-		    {
-			"set!", args =>
-			{
-			    var name = Trampoline(args[0].Eval(this)).To<string>();
-			    var value = Trampoline(args[1].Eval(this));
-			    CurrentFrame.Set(name, value);
-			    return value;
-			}
-		    },
+		    {"set!", Set},
 		    {
 			"begin", args =>
 			{
@@ -116,6 +71,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    return new Closure(this, null, args.Last(), true);
 			}
 		    },
+		    {"import", Import}
 		};
 
 	    _globalFrame = new Frame();
@@ -123,6 +79,56 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    CurrentFrame.BeginScope();
 	}
 
+	private Value Quasiquote(Node[] args)
+	{
+	    var expression = args[0] as Expression;
+	    if (expression == null)
+	    {
+		return args[0].Quote(this);
+	    }
+	    
+	    return new Cons(expression.Nodes.SelectMany(node =>
+		    {
+			var expressionNode = node as Expression;
+			if (expressionNode != null)
+			{
+			    var value = expressionNode.Head.Quote(this);
+			    if (value is String)
+			    {
+				var call = value.To<string>();
+				if (call == "unquote")
+				{
+				    return new[] { expressionNode.Eval(this).ToExpression() };
+				}
+				
+				if (call == "unquote-splicing")
+				{
+				    var exp = expressionNode.Eval(this).ToExpression();
+				    if (exp is Expression)
+				    {
+					return ((Expression)exp).Nodes;
+				    }
+				    return new[] { exp };
+				}
+			    }
+			}
+			return new[] { node };
+		    }).Select(node => node.Quote(this)).ToArray());
+	}
+
+	private Value Set(Node[] args)
+	{
+	    var name = Trampoline(args[0].Eval(this)).To<string>();
+	    var value = Trampoline(args[1].Eval(this));
+	    CurrentFrame.Set(name, value);
+	    return value;
+	}
+	
+	private Value Import(Node[] args)
+	{
+	    return Null.Value;
+	}
+	
 	private Value Let(Node[] args)
 	{
 	    var frameArgs = new List<string>();
