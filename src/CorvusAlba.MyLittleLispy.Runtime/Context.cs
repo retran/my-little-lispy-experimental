@@ -42,8 +42,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"cond", args =>
 			{
-			    var clause = args.Cast<Expression>().ToArray().FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
-			    return clause != null ? (Value) new Closure(this, null, clause.Tail.Single(), true) : Null.Value;
+			    var clauses = args.Cast<Expression>();
+			    var clause = clauses.ToArray().Take(args.Count() - 1).FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
+			    if (clause != null)
+			    {
+				return  (Value) new Closure(this, null, clause.Tail.Single(), true);
+			    }
+			    clause = clauses.Last();
+			    if (clause.Quote(this).Car().To<string>() == "else")
+			    {
+				return (Value) new Closure(this, null, clause.Tail.Single(), true);
+			    }
+			    else if (Trampoline(clause.Head.Eval(this)).To<bool>())
+			    {
+				return  (Value) new Closure(this, null, clause.Tail.Single(), true);				
+			    }
+			    
+			    return Null.Value;
 			}
 		    },
 		    {
