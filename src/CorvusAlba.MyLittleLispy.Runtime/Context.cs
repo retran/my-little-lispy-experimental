@@ -48,14 +48,18 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    {
 				return  (Value) new Closure(this, null, clause.Tail.Single(), true);
 			    }
+
 			    clause = clauses.Last();
-			    if (clause.Quote(this).Car().To<string>() == "else")
+			    
+			    var head = clause.Head.Quote(this);
+			    if (head is String && head.To<string>() == "else")
 			    {
 				return (Value) new Closure(this, null, clause.Tail.Single(), true);
 			    }
-			    else if (Trampoline(clause.Head.Eval(this)).To<bool>())
+
+			    if (Trampoline(clause.Head.Eval(this)).To<bool>())
 			    {
-				return  (Value) new Closure(this, null, clause.Tail.Single(), true);				
+				return (Value) new Closure(this, null, clause.Tail.Single(), true);				
 			    }
 			    
 			    return Null.Value;
