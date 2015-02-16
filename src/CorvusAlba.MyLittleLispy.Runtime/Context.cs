@@ -164,7 +164,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 
 	    CurrentFrame.BeginScope(frameArgs, frameValues);
-	    var result = new Closure(this, null, args[1], true);
+	    var result = new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+								Concat(args.Skip(1)).ToArray()), true);
 	    CurrentFrame.EndScope();
 
 	    return result;
