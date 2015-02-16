@@ -138,10 +138,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	private Value Set(Node[] args)
 	{
-	    var name = Trampoline(args[0].Eval(this)).To<string>();
+	    var name = args[0].Quote(this).To<string>();
 	    var value = Trampoline(args[1].Eval(this));
 	    CurrentFrame.Set(name, value);
-	    return value;
+	    return Null.Value;
 	}
 	
 	private Value Import(Node[] args)
