@@ -106,7 +106,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 							      return new Cons(list.Select(value =>
 											   c.Trampoline(c.InvokeClosure(lambda, new [] { value.ToExpression() }))).ToArray());
 							  })));
-	    
+
+	    context.CurrentFrame.Bind("apply",
+				      new Closure(new [] { "a", "b" },
+						  new ClrLambdaBody(c =>
+							  {
+							      var lambda = (Closure) c.Lookup("a");
+							      var list = c.Lookup("b").To<IEnumerable<Value>>();
+							      return c.Trampoline(
+										  c.InvokeClosure(lambda,
+												  list.Select(value => (Node)value.ToExpression()).ToArray()));
+							  })));
 	    
 	    foreach (var define in _builtins)
 	    {
