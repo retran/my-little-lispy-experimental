@@ -267,7 +267,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return Null.Value;
 	}
 
-	private Value InvokeClosure(Closure closure, Node[] values)
+	public Value InvokeClosure(Closure closure, Node[] values)
 	{
 	    var arguments = values.Select(value => Trampoline(value.Eval(this))).ToArray();
 	    BeginFrame();

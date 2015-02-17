@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Linq;
+using System.Collections.Generic;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
@@ -95,6 +96,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 						System.Console.WriteLine(c.Lookup("a").ToString());
 						return Null.Value;
 					    })));
+	    
+	    context.CurrentFrame.Bind("map",
+				      new Closure(new [] { "a", "b" },
+						  new ClrLambdaBody(c =>
+							  {
+							      var lambda = (Closure) c.Lookup("a");
+							      var list = c.Lookup("b").To<IEnumerable<Value>>();
+							      return new Cons(list.Select(value =>
+											   c.Trampoline(c.InvokeClosure(lambda, new [] { value.ToExpression() }))).ToArray());
+							  })));
+	    
 	    
 	    foreach (var define in _builtins)
 	    {
