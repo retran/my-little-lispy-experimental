@@ -7,9 +7,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     public class Closure : Value
     {
 	public IEnumerable<Scope> Scopes { get; private set; }
-	public bool IsContinuation { get; set; }
+	public bool IsTailCall { get; set; }
 	
-	public Closure(string[] args, Node body, bool isContinuation = false)
+	public Closure(string[] args, Node body, bool isTailCall = false)
 	{
 	    if (args != null)
 	    {
@@ -20,10 +20,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		Args = new string[0];
 	    }
 	    Body = body;
-	    IsContinuation = isContinuation;
+	    IsTailCall = isTailCall;
 	}
 
-	public Closure(Context context, Node args, Node body, bool isContinuation = false)
+	public Closure(Context context, Node args, Node body, bool isTailCall = false)
 	{
 	    if (args != null)
 	    {
@@ -35,7 +35,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    }
 	    Body = body;
 	    Scopes = context.CurrentFrame.Export();
-	    IsContinuation = isContinuation;
+	    IsTailCall = isTailCall;
 	}
 
 	public string[] Args { get; private set; }

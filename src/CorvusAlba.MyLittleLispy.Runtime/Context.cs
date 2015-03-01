@@ -232,7 +232,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	public Value Trampoline(Value value)
 	{
 	    var tailCall = value as Closure;
-	    while (tailCall != null && tailCall.IsContinuation)
+	    while (tailCall != null && tailCall.IsTailCall)
 	    {		
 		value = InvokeClosure(tailCall, new Node[0]);
 		tailCall = value as Closure;
@@ -320,7 +320,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    {
 		CurrentFrame.BeginScope(closure.Args, arguments);
 		Value result;
-		if (!closure.IsContinuation)
+		if (!closure.IsTailCall)
 		{
 		    result = new Closure(this, null, closure.Body, true);
 		}
