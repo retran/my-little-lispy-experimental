@@ -10,7 +10,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    {
 		return (Value<T>) (object) new Bool(true);
 	    }
-	    
+
 	    return (Value<T>) this;
 	}
 
@@ -77,9 +77,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	}
 
 	public virtual Value Or(Value arg)
-	{
-	    return this.To<bool>() || arg.To<bool>()
-		? arg
+	{	    
+	    var argBool = arg.To<bool>();
+	    return this.To<bool>() || argBool
+		? (argBool ? arg : this)
 		: new Bool(false);
 	}
 

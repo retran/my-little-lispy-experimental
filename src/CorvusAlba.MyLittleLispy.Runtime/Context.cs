@@ -175,7 +175,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    Value value = new Bool(false);
 	    foreach (var arg in args)
-		value = value.Or(arg.Eval(this));
+		value = value.Or(Trampoline(arg.Eval(this)));
 	    return value;
 	}
 
@@ -183,7 +183,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    Value value = new Bool(true);
 	    foreach (var arg in args)
-		value = value.And(arg.Eval(this));
+		value = value.And(Trampoline(arg.Eval(this)));
 	    return value;
 	}
 	
@@ -269,6 +269,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			value = Trampoline(value);
 		    }
+
 		    return value;
 		}
 	    }
@@ -286,7 +287,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		}
 	    }
 
-	    throw new SymbolNotDefinedException("");
+	    throw new SymbolNotDefinedException(call.ToString());
 	}
 
 	public Value Define(Node definition, Node body)
