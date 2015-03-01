@@ -64,16 +64,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Greater(c.Lookup("b")))));
 
-	    context.CurrentFrame.Bind("and",
-			 new Closure(new[] {"a", "b"},
-				    new ClrLambdaBody(c =>
-						      c.Lookup("a").And(c.Lookup("b")))));
-
-	    context.CurrentFrame.Bind("or",
-			 new Closure(new[] {"a", "b"},
-				    new ClrLambdaBody(c =>
-						      c.Lookup("a").Or(c.Lookup("b")))));
-
 	    context.CurrentFrame.Bind("not",
 			 new Closure(new[] {"a"},
 				    new ClrLambdaBody(c =>

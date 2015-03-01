@@ -6,6 +6,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     {
 	public virtual Value<T> Cast<T>()
 	{
+	    if (typeof(T) == typeof(bool) && !(this is Bool))
+	    {
+		return (Value<T>) (object) new Bool(true);
+	    }
+	    
 	    return (Value<T>) this;
 	}
 
@@ -66,17 +71,21 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public virtual Value And(Value arg)
 	{
-	    throw new InvalidOperationException();
+	    return this.To<bool>() && arg.To<bool>()
+		? arg
+		: new Bool(false);
 	}
 
 	public virtual Value Or(Value arg)
 	{
-	    throw new InvalidOperationException();
+	    return this.To<bool>() || arg.To<bool>()
+		? arg
+		: new Bool(false);
 	}
 
 	public virtual Value Not()
 	{
-	    throw new InvalidOperationException();
+	    return new Bool(!this.To<bool>());
 	}
 
 	public virtual Value Car()

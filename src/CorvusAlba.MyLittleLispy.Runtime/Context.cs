@@ -18,11 +18,28 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		return _callStack.Peek();
 	    }
 	}
+
+	private Value InvokeCondClause(Expression clause, Value condition = null)
+	{
+	    var tail = clause.Tail;
+	    var first = tail.First().Quote(this);
+	    if (first is String && first.To<string>() == "=>")
+	    {
+		if (condition != null)
+		{
+		    return new Closure(this, null, new Expression(tail.Skip(1).
+							      Concat(new [] { condition.ToExpression() })), true);
+		}
+
+		throw new SyntaxErrorException();
+	    }
+	    return new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+							  Concat(tail).ToArray()), true);			     
+	}
 	
 	public Context(Parser parser)
 	{
 	    _parser = parser;
-	    
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
 		    {"eval", args =>
@@ -46,21 +63,29 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			"cond", args =>
 			{
 			    var clauses = args.Cast<Expression>();
-			    var clause = clauses.ToArray().Take(args.Count() - 1).FirstOrDefault(c => Trampoline(c.Head.Eval(this)).To<bool>());
-			    if (clause != null)
+
+			    foreach (var clause in clauses.ToArray().Take(args.Count() - 1))
 			    {
-				return  (Value) new Closure(this, null, clause.Tail.Single(), true);
+				var condition = Trampoline(clause.Head.Eval(this));
+				if (condition.To<bool>())
+				{
+				    return InvokeCondClause(clause, condition);
+				}
 			    }
-			    clause = clauses.Last();
-			    var head = clause.Head.Quote(this);
+
+			    var lastClause = clauses.Last();
+			    var head = lastClause.Head.Quote(this);
 			    if (head is String && head.To<string>() == "else")
 			    {
-				return (Value) new Closure(this, null, clause.Tail.Single(), true);
+				return InvokeCondClause(lastClause);
 			    }
-			    if (Trampoline(clause.Head.Eval(this)).To<bool>())
+
+			    var lastCondition = Trampoline(lastClause.Head.Eval(this));
+			    if (lastCondition.To<bool>())
 			    {
-				return (Value) new Closure(this, null, clause.Tail.Single(), true);				
+				return InvokeCondClause(lastClause, lastCondition);
 			    }
+				
 			    return Null.Value;
 			}
 		    },
@@ -91,7 +116,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    return new Closure(this, null, args.Last(), true);
 			}
 		    },
-		    {"import", Import}
+		    {"import", Import},
+		    {"and", And},
+		    {"or", Or}
 		};
 
 	    _globalFrame = new Frame();
@@ -142,6 +169,22 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    var value = Trampoline(args[1].Eval(this));
 	    CurrentFrame.Set(name, value);
 	    return Null.Value;
+	}
+
+	private Value Or(Node[] args)
+	{
+	    Value value = new Bool(false);
+	    foreach (var arg in args)
+		value = value.Or(arg.Eval(this));
+	    return value;
+	}
+
+	private Value And(Node[] args)
+	{
+	    Value value = new Bool(true);
+	    foreach (var arg in args)
+		value = value.And(arg.Eval(this));
+	    return value;
 	}
 	
 	private Value Import(Node[] args)
