@@ -33,7 +33,20 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public override string ToString()
 	{
-	    return string.Format("[{0} . {1}]", Car(), Cdr());
+	    var left = Car();
+	    var right = Cdr();
+	   
+ 	    if (right == Null.Value)
+	    {
+		return string.Format("({0})", left);
+	    }
+
+	    if (right is Cons)
+	    {
+		return string.Format("({0})", string.Join(" ", this.Flatten()));
+	    }
+	    
+	    return string.Format("({0} . {1})", Car(), Cdr());
 	}
 
 	public override T To<T>()

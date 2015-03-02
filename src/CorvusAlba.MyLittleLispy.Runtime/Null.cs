@@ -6,7 +6,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	public override string ToString()
 	{
-	    return "nil";
+	    return "()";
 	}
 
 	public override Node ToExpression()
