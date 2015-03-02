@@ -69,21 +69,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    throw new InvalidOperationException();
 	}
 
-	public virtual Value And(Value arg)
-	{
-	    return this.To<bool>() && arg.To<bool>()
-		? arg
-		: new Bool(false);
-	}
-
-	public virtual Value Or(Value arg)
-	{	    
-	    var argBool = arg.To<bool>();
-	    return this.To<bool>() || argBool
-		? (argBool ? arg : this)
-		: new Bool(false);
-	}
-
 	public virtual Value Not()
 	{
 	    return new Bool(!this.To<bool>());

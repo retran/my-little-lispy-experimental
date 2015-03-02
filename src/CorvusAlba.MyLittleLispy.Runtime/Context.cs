@@ -173,17 +173,28 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	private Value Or(Node[] args)
 	{
-	    Value value = new Bool(false);
 	    foreach (var arg in args)
-		value = value.Or(Trampoline(arg.Eval(this)));
-	    return value;
+	    {
+		var value = Trampoline(arg.Eval(this));
+		if (value.To<bool>())
+		{
+		    return value;
+		}
+	    }
+	    return new Bool(false);
 	}
 
 	private Value And(Node[] args)
 	{
-	    Value value = new Bool(true);
+	    Value value = null;
 	    foreach (var arg in args)
-		value = value.And(Trampoline(arg.Eval(this)));
+	    {
+		value = Trampoline(arg.Eval(this));
+		if (!value.To<bool>())
+		{
+		    return new Bool(false);
+		}
+	    }
 	    return value;
 	}
 	
