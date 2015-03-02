@@ -26,10 +26,10 @@
 (define (sqrt x)
   (sqrt-iter 1. x))
 
-(p (sqrt 9))
-(p (sqrt 25))
-(p (sqrt 100))
+(display (sqrt 9))
+(display (sqrt 25))
+(display (sqrt 100))
 
-(p (sqrt 15))
-(p (sqrt 50))
-(p (sqrt 120))
+(display (sqrt 15))
+(display (sqrt 50))
+(display (sqrt 120))

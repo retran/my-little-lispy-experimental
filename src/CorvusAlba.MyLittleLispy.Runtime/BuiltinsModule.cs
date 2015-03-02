@@ -79,7 +79,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 				    new ClrLambdaBody(c =>
 						      c.Lookup("a").Cdr())));
 
-	    context.CurrentFrame.Bind("p",
+	    context.CurrentFrame.Bind("display",
 			 new Closure(new[] {"a"},
 				    new ClrLambdaBody(c =>
 					    {

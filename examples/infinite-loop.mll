@@ -1,7 +1,7 @@
 (define (loop-impl a)
   (let ((b (+ a 1)))
     (begin
-      (p b)
+      (display b)
       (loop-impl b))))
 
 (define (start-loop)
