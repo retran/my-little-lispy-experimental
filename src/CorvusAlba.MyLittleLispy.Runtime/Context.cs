@@ -129,6 +129,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			}
 		    },
 		    {"let", Let},
+		    {"let*", LetSequential},
 		    {"set!", Set},
 		    {
 			"begin", args =>
@@ -249,6 +250,22 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return result;
 	}
 
+	private Value LetSequential(Node[] args)
+	{
+	    CurrentFrame.BeginScope();
+	    foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
+	    {
+		CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Single().Eval(this)));
+	    }
+
+	    var result = new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+								Concat(args.Skip(1)).ToArray()), true);
+	    CurrentFrame.EndScope();
+
+	    return result;
+	}
+
+	
 	public void BeginFrame()
 	{
 	    _callStack.Push(new Frame(_globalFrame));
