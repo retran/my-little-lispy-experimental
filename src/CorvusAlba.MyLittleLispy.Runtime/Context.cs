@@ -143,7 +143,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    },
 		    {"import", Import},
 		    {"and", And},
-		    {"or", Or}
+		    {"or", Or},
+
+		    // TODO for jit-compiler letrec and letrec* will have different implementations
+		    {"letrec", Let},
+		    {"letrec*", LetSequential},
 		};
 
 	    _globalFrame = new Frame();
