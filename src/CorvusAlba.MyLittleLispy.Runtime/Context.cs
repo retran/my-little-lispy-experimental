@@ -42,47 +42,26 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    _parser = parser;
 	    _specialForms = new Dictionary<string, Func<Node[], Value>>
 		{
-		    {"eval", args =>
-		     {
-			 var clause = Trampoline(args[0].Eval(this)).ToExpression();
-			 return clause.Eval(this);
-		     }
-		    },
+		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
 		    {"define", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
 								      Concat(args.Skip(1)).ToArray())) },
-		    {"quote", args => args[0].Quote(this)},
-		    {"quasiquote", Quasiquote},
+		    {"quote", args => args[0].Quote(this) },
+		    {"quasiquote", Quasiquote },
 		    {"unquote", args => Trampoline(args[0].Eval(this)) },
 		    {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
-		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray())},
-		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this)))},
+		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray()) },
+		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this))) },
 		    {"lambda", args => new Closure(this, args[0],
 						   new Expression(new [] { new Symbol(new String("begin")) }.
 								  Concat(args.Skip(1)).ToArray())) },
-		    {"when", args =>
-		     {
-			 var condition = Trampoline(args[0].Eval(this)).To<bool>();
-			 if (condition)
-			 {
-			     return new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
-									   Concat(args.Skip(1)).ToArray()), true);			     
-			 }
-
-			 return Null.Value;
-		     }
-		    },
-		    {"unless", args =>
-		     {
-			 var condition = Trampoline(args[0].Eval(this)).To<bool>();
-			 if (!condition)
-			 {
-			     return new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
-									   Concat(args.Skip(1)).ToArray()), true);			     
-			 }
-			 
-			 return Null.Value;
-		     }
-		    },
+		    {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
+		         ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+								  Concat(args.Skip(1)).ToArray()), true)
+		         : (Value) Null.Value },
+		    {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
+		         ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+								  Concat(args.Skip(1)).ToArray()), true)
+		         : (Value) Null.Value },
 		    {
 			"cond", args =>
 			{
@@ -215,7 +194,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
 	private Value And(Node[] args)
 	{
-	    Value value = null;
+	    Value value = new Bool(true);
 	    foreach (var arg in args)
 	    {
 		value = Trampoline(arg.Eval(this));
