@@ -59,6 +59,30 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {"lambda", args => new Closure(this, args[0],
 						   new Expression(new [] { new Symbol(new String("begin")) }.
 								  Concat(args.Skip(1)).ToArray())) },
+		    {"when", args =>
+		     {
+			 var condition = Trampoline(args[0].Eval(this)).To<bool>();
+			 if (condition)
+			 {
+			     return new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+									   Concat(args.Skip(1)).ToArray()), true);			     
+			 }
+
+			 return Null.Value;
+		     }
+		    },
+		    {"unless", args =>
+		     {
+			 var condition = Trampoline(args[0].Eval(this)).To<bool>();
+			 if (!condition)
+			 {
+			     return new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
+									   Concat(args.Skip(1)).ToArray()), true);			     
+			 }
+			 
+			 return Null.Value;
+		     }
+		    },
 		    {
 			"cond", args =>
 			{
