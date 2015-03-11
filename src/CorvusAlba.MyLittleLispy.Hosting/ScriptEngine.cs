@@ -39,6 +39,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 	    if (!useGlobalFrame)
 	    {
 		_context.BeginFrame();
+		_context.CurrentFrame.BeginScope();
 	    }
 	    
 	    var sb = new StringBuilder();
@@ -55,7 +56,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 		    count--;
 		    if (count == 0)
 		    {
-			result = _parser.Parse(sb.ToString()).Eval(_context);
+			result = _context.Trampoline(_parser.Parse(sb.ToString()).Eval(_context));
 			sb = new StringBuilder(); // TODO как-то можно очистить?
 		    }
 		}
@@ -63,6 +64,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 	    
 	    if (!useGlobalFrame)
 	    {
+		_context.CurrentFrame.EndScope();
 		_context.EndFrame();
 	    }
 	    
