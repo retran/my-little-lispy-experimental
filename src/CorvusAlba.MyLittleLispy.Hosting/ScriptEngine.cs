@@ -23,20 +23,20 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 	    return _parser.Parse(line).Eval(_context);
 	}
 
-	public Value Execute(Stream stream, bool useGlobalScope = false)
+	public Value Execute(Stream stream, bool useGlobalFrame = false)
 	{
 	    using(var sr = new StreamReader(stream))
 	    {
-		return Execute(sr.ReadToEnd(), useGlobalScope);
+		return Execute(sr.ReadToEnd(), useGlobalFrame);
 	    }
 	}
 	
-	public Value Execute(string script, bool useGlobalScope = false)
+	public Value Execute(string script, bool useGlobalFrame = false)
 	{	    
 	    Value result = Null.Value;	    
 	    var count = 0;
 
-	    if (!useGlobalScope)
+	    if (!useGlobalFrame)
 	    {
 		_context.BeginFrame();
 	    }
@@ -61,7 +61,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 		}
 	    }
 	    
-	    if (!useGlobalScope)
+	    if (!useGlobalFrame)
 	    {
 		_context.EndFrame();
 	    }
