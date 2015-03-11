@@ -111,4 +111,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	    return new Constant(this);
 	}
     }
+
+    public class ObjectValue: Value<object>
+    {
+	public ObjectValue(object value) : base(value) { }
+    }
 }
