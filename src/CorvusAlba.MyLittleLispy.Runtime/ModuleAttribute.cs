@@ -21,6 +21,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 	{
 	    if (_modules == null)
 	    {
+		_modules = new Dictionary<string, IModule>();
 		var assemblies = AppDomain.CurrentDomain.GetAssemblies();
 		foreach (var type in assemblies.SelectMany(a => a.GetTypes()))
 		{
