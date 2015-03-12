@@ -11,6 +11,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private readonly Dictionary<string, Func<Node[], Value>> _specialForms;
         private readonly Frame _globalFrame;
         private Parser _parser;
+        private bool _evalMacro = true;
+
 
         public Frame CurrentFrame
         {
@@ -46,6 +48,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
 		    {"define", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
 								      Concat(args.Skip(1)).ToArray())) },
+		    {"defmacro", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
+								      Concat(args.Skip(1)).ToArray()), true) },
+		    {
+		        "macroexpand", args =>
+		        {
+		            _evalMacro = false;
+		            var result = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
+		            _evalMacro = true;
+		            return result;
+		        }
+		    },
 		    {"quote", args => args[0].Quote(this) },
 		    {"quasiquote", Quasiquote },
 		    {"unquote", args => Trampoline(args[0].Eval(this)) },
@@ -323,21 +336,25 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             throw new SymbolNotDefinedException(call.ToString());
         }
 
-        public Value Define(Node definition, Node body)
+        public Value Define(Node definition, Node body, bool isMacro = false)
         {
             string[] def = definition is Expression
-            ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>()).ToArray()
-            : new[] { definition.Quote(this).To<string>() };
+                ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>()).ToArray()
+                : new[] { definition.Quote(this).To<string>() };
 
             string name = def.First();
             string[] args = def.Skip(1).ToArray();
 
             if (definition is Expression)
             {
-                CurrentFrame.Bind(name, new Closure(args, body));
+                CurrentFrame.Bind(name, new Closure(args, body, false, isMacro));
             }
             else
             {
+                if (isMacro)
+                {
+                    throw new SyntaxErrorException();
+                }
                 CurrentFrame.Bind(name, body.Eval(this));
             }
 
@@ -347,22 +364,33 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public Value InvokeClosure(Closure closure, Node[] values)
         {
             var calculatedValues = values.Select(value => Trampoline(value.Eval(this))).ToArray();
-            var arguments = closure.HasRestArg 
+            var arguments = closure.HasRestArg
                 ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
                 : calculatedValues;
 
             BeginFrame();
-            CurrentFrame.Import(closure.Scopes);
-            try
+            if (!closure.IsMacro)
             {
-                CurrentFrame.BeginScope(closure.Args, arguments);
-                var result = !closure.IsTailCall 
-                    ? new Closure(this, null, closure.Body, true) 
-                    : closure.Body.Eval(this);
-                CurrentFrame.EndScope();
-                return result;
+                CurrentFrame.Import(closure.Scopes);
             }
-            finally
+            
+            CurrentFrame.BeginScope(closure.Args, arguments);
+            Value result = null;
+
+            if (!closure.IsMacro)
+            {
+                result = !closure.IsTailCall
+                    ? new Closure(this, null, closure.Body, true)
+                    : closure.Body.Eval(this);
+            }
+            else
+            {
+                result = Trampoline(closure.Body.Eval(this));
+            }
+
+            CurrentFrame.EndScope();
+
+            if (!closure.IsMacro)
             {
                 if (closure.Scopes != null)
                 {
@@ -371,8 +399,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                         CurrentFrame.EndScope();
                     }
                 }
-                EndFrame();
             }
+            EndFrame();
+            
+            return !(closure.IsMacro && _evalMacro) ? result : result.ToExpression().Eval(this);
         }
     }
 }

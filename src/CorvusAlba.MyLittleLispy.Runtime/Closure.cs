@@ -9,13 +9,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     {
         public IEnumerable<Scope> Scopes { get; private set; }
         public bool IsTailCall { get; set; }
+        public bool IsMacro { get; private set; }
         public bool HasRestArg { get; private set; }
 
-        public Closure(string[] args, Node body, bool isTailCall = false)
+        public Closure(string[] args, Node body, bool isTailCall = false, bool isMacro = false)
         {
             Args = args;
             Body = body;
             IsTailCall = isTailCall;
+            IsMacro = isMacro;
             if (Args != null)
             {
                 // TODO optimisation
@@ -31,11 +33,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
         }
 
-        public Closure(Context context, Node args, Node body, bool isTailCall = false)
+        public Closure(Context context, Node args, Node body, bool isTailCall = false, bool isMacro = false)
         {
             Body = body;
             Scopes = context.CurrentFrame.Export();
             IsTailCall = isTailCall;
+            IsMacro = isMacro;
             if (args != null)
             {
                 var argsExpression = args as Expression;
