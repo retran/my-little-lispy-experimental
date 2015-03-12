@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
@@ -345,7 +346,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Value InvokeClosure(Closure closure, Node[] values)
         {
-            var arguments = values.Select(value => Trampoline(value.Eval(this))).ToArray();
+            var calculatedValues = values.Select(value => Trampoline(value.Eval(this))).ToArray();
+            var arguments = closure.HasRestArg 
+                ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
+                : calculatedValues;
+
             BeginFrame();
             CurrentFrame.Import(closure.Scopes);
             try
