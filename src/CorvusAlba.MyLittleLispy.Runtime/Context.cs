@@ -48,8 +48,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
 		    {"define", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
 								      Concat(args.Skip(1)).ToArray())) },
-		    {"defmacro", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
-								      Concat(args.Skip(1)).ToArray()), true) },
+		    {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new String("begin")) }.
+								      Concat(args.Skip(2)).ToArray())) },
 		    {
 		        "macroexpand", args =>
 		        {
@@ -336,7 +336,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             throw new SymbolNotDefinedException(call.ToString());
         }
 
-        public Value Define(Node definition, Node body, bool isMacro = false)
+        public Value Define(Node definition, Node body)
         {
             string[] def = definition is Expression
                 ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>()).ToArray()
@@ -347,23 +347,27 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             if (definition is Expression)
             {
-                CurrentFrame.Bind(name, new Closure(args, body, false, isMacro));
+                CurrentFrame.Bind(name, new Closure(args, body, false, false));
             }
             else
             {
-                if (isMacro)
-                {
-                    throw new SyntaxErrorException();
-                }
                 CurrentFrame.Bind(name, body.Eval(this));
             }
 
             return Null.Value;
         }
 
+        public Value DefineMacro(string name, Node args, Node body)
+        {
+            CurrentFrame.Bind(name, new Closure(this, args, body, false, true));
+            return Null.Value;
+        }
+        
         public Value InvokeClosure(Closure closure, Node[] values)
         {
-            var calculatedValues = values.Select(value => Trampoline(value.Eval(this))).ToArray();
+            var calculatedValues = closure.IsMacro
+                ? values.Select(value => value.Quote(this)).ToArray()
+                : values.Select(value => Trampoline(value.Eval(this))).ToArray();
             var arguments = closure.HasRestArg
                 ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
                 : calculatedValues;
