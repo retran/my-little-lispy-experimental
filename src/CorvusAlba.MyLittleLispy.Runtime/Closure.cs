@@ -14,21 +14,20 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public Closure(string[] args, Node body, bool isTailCall = false)
         {
             Args = args;
-
             Body = body;
             IsTailCall = isTailCall;
-
-            if (Args == null)
+            if (Args != null)
             {
-                Args = new string[] { };
-                return;
+                // TODO optimisation
+                if (Args.Any(a => a == "."))
+                {
+                    HasRestArg = true;
+                    Args = Args.Where(a => a != ".").ToArray();
+                }
             }
-
-            // TODO optimisation
-            if (Args.Any(a => a == "."))
+            else
             {
-                HasRestArg = true;
-                Args = Args.Where(a => a != ".").ToArray();
+                Args = new string[] {};
             }
         }
 
@@ -37,28 +36,28 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             Body = body;
             Scopes = context.CurrentFrame.Export();
             IsTailCall = isTailCall;
-
-            if (args == null)
+            if (args != null)
             {
-                Args = new string[] { };
-                return;
+                var argsExpression = args as Expression;
+                if (argsExpression != null)
+                {
+                    Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
+                    // TODO optimisation
+                    if (Args.Any(a => a == "."))
+                    {
+                        HasRestArg = true;
+                        Args = Args.Where(a => a != ".").ToArray();
+                    }
+                }
+                else
+                {
+                    HasRestArg = true;
+                    Args = new[] {args.Quote(context).To<string>()};
+                }
             }
-
-            var argsExpression = args as Expression;
-            if (argsExpression == null)
+            else
             {
-                HasRestArg = true;
-                Args = new[] { args.Quote(context).To<string>() };
-                return;
-            }
-
-            Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
-            
-            // TODO optimisation
-            if (Args.Any(a => a == "."))
-            {
-                HasRestArg = true;
-                Args = Args.Where(a => a != ".").ToArray();
+                Args = new string[] {};
             }
         }
 
