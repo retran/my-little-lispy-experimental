@@ -13,9 +13,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Closure(string[] args, Node body, bool isTailCall = false)
         {
-            Args = args ?? new string[0];
+            Args = args;
+
             Body = body;
             IsTailCall = isTailCall;
+
+            if (Args == null)
+            {
+                Args = new string[] { };
+                return;
+            }
+
+            // TODO optimisation
+            if (Args.Any(a => a == "."))
+            {
+                HasRestArg = true;
+                Args = Args.Where(a => a != ".").ToArray();
+            }
         }
 
         public Closure(Context context, Node args, Node body, bool isTailCall = false)
@@ -24,11 +38,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             Scopes = context.CurrentFrame.Export();
             IsTailCall = isTailCall;
 
-            DetermineArgs(context, args);
-        }
-
-        private void DetermineArgs(Context context, Node args)
-        {
             if (args == null)
             {
                 Args = new string[] { };
