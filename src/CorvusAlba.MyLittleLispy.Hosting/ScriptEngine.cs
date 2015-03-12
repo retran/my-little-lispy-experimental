@@ -43,15 +43,15 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             }
 
             var sb = new StringBuilder();
-            for (var i = 0; i < script.Length; i++)
+            foreach (var t in script)
             {
-                sb.Append(script[i]);
-                if (script[i] == '(')
+                sb.Append(t);
+                if (t == '(')
                 {
                     count++;
                 }
 
-                if (script[i] == ')')
+                if (t == ')')
                 {
                     count--;
                     if (count == 0)

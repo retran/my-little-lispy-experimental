@@ -75,11 +75,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             if (arg is Integer)
             {
-                return new Bool(ClrValue == arg.To<int>());
+                return new Bool(Math.Abs(ClrValue - arg.To<int>()) < float.Epsilon);
             }
             else if (arg is Float)
             {
-                return new Bool(ClrValue == arg.To<float>());
+                return new Bool(Math.Abs(ClrValue - arg.To<float>()) < float.Epsilon);
             }
 
             throw new InvalidOperationException();

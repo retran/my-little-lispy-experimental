@@ -46,9 +46,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Value EqualWithNull(Value arg)
         {
-            if (object.ReferenceEquals(arg, Null.Value))
+            if (ReferenceEquals(arg, Null.Value))
             {
-                return new Bool(object.ReferenceEquals(this, Null.Value));
+                return new Bool(ReferenceEquals(this, Null.Value));
             }
 
             return Equal(arg);
@@ -71,7 +71,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public virtual Value Not()
         {
-            return new Bool(!this.To<bool>());
+            return new Bool(!To<bool>());
         }
 
         public virtual Value Car()
@@ -110,10 +110,5 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             return new Constant(this);
         }
-    }
-
-    public class ObjectValue : Value<object>
-    {
-        public ObjectValue(object value) : base(value) { }
     }
 }

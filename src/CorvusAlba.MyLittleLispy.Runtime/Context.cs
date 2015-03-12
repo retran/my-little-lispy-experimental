@@ -21,7 +21,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         private Value InvokeCondClause(Expression clause, Value condition = null)
         {
-            var tail = clause.Tail;
+            var tail = clause.Tail.ToArray();
             var first = tail.First().Quote(this);
             if (first is String && first.To<string>() == "=>")
             {
@@ -65,9 +65,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    {
 			"cond", args =>
 			{
-			    var clauses = args.Cast<Expression>();
+			    var clauses = args.Cast<Expression>().ToArray();
 
-			    foreach (var clause in clauses.ToArray().Take(args.Count() - 1))
+			    foreach (var clause in clauses.Take(args.Count() - 1))
 			    {
 				var condition = Trampoline(clause.Head.Eval(this));
 				if (condition.To<bool>())
@@ -158,12 +158,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
                             if (call == "unquote-splicing")
                             {
-                                var exp = expressionNode.Eval(this).ToExpression();
-                                if (exp is Expression)
-                                {
-                                    return ((Expression)exp).Nodes;
-                                }
-                                return new[] { exp };
+                                var innerNode = expressionNode.Eval(this).ToExpression();
+                                var innerExpressionNode = innerNode as Expression;
+                                return innerExpressionNode != null ? innerExpressionNode.Nodes : new[] { innerNode };
                             }
                         }
                     }
@@ -354,15 +351,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             try
             {
                 CurrentFrame.BeginScope(closure.Args, arguments);
-                Value result;
-                if (!closure.IsTailCall)
-                {
-                    result = new Closure(this, null, closure.Body, true);
-                }
-                else
-                {
-                    result = closure.Body.Eval(this);
-                }
+                var result = !closure.IsTailCall 
+                    ? new Closure(this, null, closure.Body, true) 
+                    : closure.Body.Eval(this);
                 CurrentFrame.EndScope();
                 return result;
             }
@@ -370,7 +361,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             {
                 if (closure.Scopes != null)
                 {
-                    for (int i = 0; i < closure.Scopes.Count(); i++)
+                    for (var i = 0; i < closure.Scopes.Count(); i++)
                     {
                         CurrentFrame.EndScope();
                     }

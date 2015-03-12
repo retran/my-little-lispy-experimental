@@ -11,28 +11,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Closure(string[] args, Node body, bool isTailCall = false)
         {
-            if (args != null)
-            {
-                Args = args;
-            }
-            else
-            {
-                Args = new string[0];
-            }
+            Args = args ?? new string[0];
             Body = body;
             IsTailCall = isTailCall;
         }
 
         public Closure(Context context, Node args, Node body, bool isTailCall = false)
         {
-            if (args != null)
-            {
-                Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
-            }
-            else
-            {
-                Args = new string[0];
-            }
+            Args = args != null 
+                ? args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray() 
+                : new string[0];
             Body = body;
             Scopes = context.CurrentFrame.Export();
             IsTailCall = isTailCall;

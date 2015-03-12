@@ -1,6 +1,5 @@
 using System.Collections.Generic;
 using System.Linq;
-using System.Runtime.InteropServices;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
@@ -49,12 +48,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public void Set(string name, Value value)
         {
-            foreach (var scope in _scopes)
+            if (_scopes.Any(scope => scope.Set(name, value)))
             {
-                if (scope.Set(name, value))
-                {
-                    return;
-                }
+                return;
             }
 
             if (_globalFrame != null)

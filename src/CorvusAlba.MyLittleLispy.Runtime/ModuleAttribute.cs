@@ -1,11 +1,10 @@
 using System;
-using System.Reflection;
 using System.Collections.Generic;
 using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
-    [AttributeUsage(AttributeTargets.Class, Inherited = false, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Class, Inherited = false)]
     public class ModuleAttribute : Attribute
     {
         public string Alias { get; private set; }
@@ -15,7 +14,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             Alias = alias;
         }
 
-        private static Dictionary<string, IModule> _modules = null;
+        private static Dictionary<string, IModule> _modules;
 
         public static IModule Find(string alias)
         {

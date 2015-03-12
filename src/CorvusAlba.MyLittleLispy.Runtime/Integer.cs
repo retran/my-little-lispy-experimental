@@ -79,7 +79,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             else if (arg is Float)
             {
-                return new Bool(ClrValue == arg.To<float>());
+                return new Bool(Math.Abs(ClrValue - arg.To<float>()) < float.Epsilon);
             }
 
             throw new InvalidOperationException();

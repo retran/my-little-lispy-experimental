@@ -4,7 +4,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class SymbolNotDefinedException : Exception
     {
-        private string _symbol;
+        private readonly string _symbol;
 
         public SymbolNotDefinedException(string symbol)
         {

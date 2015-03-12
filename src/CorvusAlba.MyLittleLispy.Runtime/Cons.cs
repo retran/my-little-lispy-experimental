@@ -45,7 +45,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             if (right is Cons)
             {
-                return string.Format("({0})", string.Join(" ", this.Flatten()));
+                return string.Format("({0})", string.Join(" ", Flatten()));
             }
 
             return string.Format("({0} . {1})", Car(), Cdr());

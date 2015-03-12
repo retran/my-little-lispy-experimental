@@ -16,7 +16,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public void Import(Parser parser, Context context)
         {
             context.CurrentFrame.Bind("halt",
-                 new Closure(new string[] { "code" },
+                 new Closure(new[] { "code" },
                         new ClrLambdaBody(c =>
                             {
                                 throw new HaltException(c.Lookup("code").To<int>());
@@ -105,7 +105,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       var list = c.Lookup("b").To<IEnumerable<Value>>();
                                       return c.Trampoline(
                                               c.InvokeClosure(lambda,
-                                                      list.Select(value => (Node)value.ToExpression()).ToArray()));
+                                                      list.Select(value => value.ToExpression()).ToArray()));
                                   })));
 
             foreach (var define in _builtins)
