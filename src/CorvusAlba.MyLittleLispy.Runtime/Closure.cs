@@ -6,45 +6,45 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Closure : Value
     {
-	public IEnumerable<Scope> Scopes { get; private set; }
-	public bool IsTailCall { get; set; }
-	
-	public Closure(string[] args, Node body, bool isTailCall = false)
-	{
-	    if (args != null)
-	    {
-		Args = args;
-	    }
-	    else
-	    {
-		Args = new string[0];
-	    }
-	    Body = body;
-	    IsTailCall = isTailCall;
-	}
+        public IEnumerable<Scope> Scopes { get; private set; }
+        public bool IsTailCall { get; set; }
 
-	public Closure(Context context, Node args, Node body, bool isTailCall = false)
-	{
-	    if (args != null)
-	    {
-		Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
-	    }
-	    else
-	    {
-		Args = new string[0];
-	    }
-	    Body = body;
-	    Scopes = context.CurrentFrame.Export();
-	    IsTailCall = isTailCall;
-	}
+        public Closure(string[] args, Node body, bool isTailCall = false)
+        {
+            if (args != null)
+            {
+                Args = args;
+            }
+            else
+            {
+                Args = new string[0];
+            }
+            Body = body;
+            IsTailCall = isTailCall;
+        }
 
-	public string[] Args { get; private set; }
+        public Closure(Context context, Node args, Node body, bool isTailCall = false)
+        {
+            if (args != null)
+            {
+                Args = args.Quote(context).To<IEnumerable<Value>>().Select(v => v.To<string>()).ToArray();
+            }
+            else
+            {
+                Args = new string[0];
+            }
+            Body = body;
+            Scopes = context.CurrentFrame.Export();
+            IsTailCall = isTailCall;
+        }
 
-	public Node Body { get; private set; }
+        public string[] Args { get; private set; }
 
-	public override Node ToExpression()
-	{
-	    throw new NotImplementedException();
-	}
+        public Node Body { get; private set; }
+
+        public override Node ToExpression()
+        {
+            throw new NotImplementedException();
+        }
     }
 }

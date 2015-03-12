@@ -5,111 +5,112 @@ namespace CorvusAlba.MyLittleLispy.Runtime
     public class Float : Value<float>
     {
 
-	public Float(float value) : base(value)
-	{
-	}
+        public Float(float value)
+            : base(value)
+        {
+        }
 
-	public override Value Add(Value arg)
-	{
-	    if (arg is Float)
-	    {
-		return new Float(ClrValue + arg.To<float>());
-	    }
-	    else if (arg is Integer)
-	    {
-		return new Float(ClrValue + arg.To<int>());
-	    }
+        public override Value Add(Value arg)
+        {
+            if (arg is Float)
+            {
+                return new Float(ClrValue + arg.To<float>());
+            }
+            else if (arg is Integer)
+            {
+                return new Float(ClrValue + arg.To<int>());
+            }
 
-	    throw new InvalidOperationException();
-	}
+            throw new InvalidOperationException();
+        }
 
-	public override Value Substract(Value arg)
-	{
-	    if (arg is Float)
-	    {
-		return new Float(ClrValue - arg.To<float>());
-	    }
-	    else if (arg is Integer)
-	    {
-		return new Float(ClrValue - arg.To<int>());
-	    }
+        public override Value Substract(Value arg)
+        {
+            if (arg is Float)
+            {
+                return new Float(ClrValue - arg.To<float>());
+            }
+            else if (arg is Integer)
+            {
+                return new Float(ClrValue - arg.To<int>());
+            }
 
-	    throw new InvalidOperationException();
-	}
-	
-	public override Value Multiple(Value arg)
-	{
-	    if (arg is Float)
-	    {
-		return new Float(ClrValue * arg.To<float>());
-	    }
-	    else if (arg is Integer)
-	    {
-		return new Float(ClrValue * arg.To<int>());
-	    }
+            throw new InvalidOperationException();
+        }
 
-	    throw new InvalidOperationException();
-	}
+        public override Value Multiple(Value arg)
+        {
+            if (arg is Float)
+            {
+                return new Float(ClrValue * arg.To<float>());
+            }
+            else if (arg is Integer)
+            {
+                return new Float(ClrValue * arg.To<int>());
+            }
 
-	public override Value Divide(Value arg)
-	{
-	    if (arg is Float)
-	    {
-		return new Float(ClrValue/arg.To<float>());
-	    }
-	    else if (arg is Integer)
-	    {
-		return new Float(ClrValue/arg.To<int>());
-	    }
+            throw new InvalidOperationException();
+        }
 
-	    throw new InvalidOperationException();
-	}
+        public override Value Divide(Value arg)
+        {
+            if (arg is Float)
+            {
+                return new Float(ClrValue / arg.To<float>());
+            }
+            else if (arg is Integer)
+            {
+                return new Float(ClrValue / arg.To<int>());
+            }
 
-	public override Value Negate()
-	{
-	    return new Float(-ClrValue);
-	}
+            throw new InvalidOperationException();
+        }
 
-	public override Value Equal(Value arg)
-	{
-	    if (arg is Integer)
-	    {
-		return new Bool(ClrValue == arg.To<int>());
-	    }
-	    else if (arg is Float)
-	    {
-		return new Bool(ClrValue == arg.To<float>());
-	    }
+        public override Value Negate()
+        {
+            return new Float(-ClrValue);
+        }
 
-	    throw new InvalidOperationException();
-	}
+        public override Value Equal(Value arg)
+        {
+            if (arg is Integer)
+            {
+                return new Bool(ClrValue == arg.To<int>());
+            }
+            else if (arg is Float)
+            {
+                return new Bool(ClrValue == arg.To<float>());
+            }
 
-	public override Value Greater(Value arg)
-	{
-	    if (arg is Integer)
-	    {
-		return new Bool(ClrValue > arg.To<int>());
-	    }
-	    else if (arg is Float)
-	    {
-		return new Bool(ClrValue > arg.To<float>());
-	    }
+            throw new InvalidOperationException();
+        }
 
-	    throw new InvalidOperationException();
-	}
+        public override Value Greater(Value arg)
+        {
+            if (arg is Integer)
+            {
+                return new Bool(ClrValue > arg.To<int>());
+            }
+            else if (arg is Float)
+            {
+                return new Bool(ClrValue > arg.To<float>());
+            }
 
-	public override Value Lesser(Value arg)
-	{
-	    if (arg is Integer)
-	    {
-		return new Bool(ClrValue < arg.To<int>());
-	    }
-	    else if (arg is Float)
-	    {
-		return new Bool(ClrValue < arg.To<float>());
-	    }
+            throw new InvalidOperationException();
+        }
 
-	    throw new InvalidOperationException();
-	}
+        public override Value Lesser(Value arg)
+        {
+            if (arg is Integer)
+            {
+                return new Bool(ClrValue < arg.To<int>());
+            }
+            else if (arg is Float)
+            {
+                return new Bool(ClrValue < arg.To<float>());
+            }
+
+            throw new InvalidOperationException();
+        }
     }
 }

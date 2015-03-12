@@ -2,6 +2,6 @@
 {
     public interface IModule
     {
-	void Import(Parser parser, Context context);
+        void Import(Parser parser, Context context);
     }
 }
