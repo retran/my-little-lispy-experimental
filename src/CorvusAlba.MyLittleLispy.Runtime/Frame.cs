@@ -8,7 +8,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private readonly Stack<Scope> _scopes;
         private readonly Frame _globalFrame;
 
-        public bool IsTrampolin
+        public bool IsGlobal
         {
             get
             {
