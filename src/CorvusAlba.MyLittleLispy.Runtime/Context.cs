@@ -13,7 +13,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private Parser _parser;
         private bool _evalMacro = true;
 
-
         public Frame CurrentFrame
         {
             get
@@ -26,7 +25,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             var tail = clause.Tail.ToArray();
             var first = tail.First().Quote(this);
-            if (first is String && first.To<string>() == "=>")
+            if (first is SymbolValue && first.To<string>() == "=>")
             {
                 if (condition != null)
                 {
@@ -36,7 +35,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
                 throw new SyntaxErrorException();
             }
-            return new Closure(this, null, new Expression(new[] { new Symbol(new String("begin")) }.
+            return new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                   Concat(tail).ToArray()), true);
         }
 
@@ -44,104 +43,104 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             _parser = parser;
             _specialForms = new Dictionary<string, Func<Node[], Value>>
-		{
-		    {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
-		    {"define", args => Define(args[0], new Expression(new [] { new Symbol(new String("begin")) }.
-								      Concat(args.Skip(1)).ToArray())) },
-		    {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new String("begin")) }.
-								      Concat(args.Skip(2)).ToArray())) },
 		    {
-		        "macroexpand", args =>
+		        {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
+		        {"define", args => Define(args[0], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+								          Concat(args.Skip(1)).ToArray())) },
+		        {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+								          Concat(args.Skip(2)).ToArray())) },
 		        {
-		            _evalMacro = false;
-		            var result = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
-		            _evalMacro = true;
-		            return result;
-		        }
-		    },
-		    {"quote", args => args[0].Quote(this) },
-		    {"quasiquote", Quasiquote },
-		    {"unquote", args => Trampoline(args[0].Eval(this)) },
-		    {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
-		    {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray()) },
-		    {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this))) },
-		    {"lambda", args => new Closure(this, args[0],
-						   new Expression(new [] { new Symbol(new String("begin")) }.
-								  Concat(args.Skip(1)).ToArray())) },
-		    {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
-		         ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
-								  Concat(args.Skip(1)).ToArray()), true)
-		         : (Value) Null.Value },
-		    {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
-		         ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new String("begin")) }.
-								  Concat(args.Skip(1)).ToArray()), true)
-		         : (Value) Null.Value },
-		    {
-			"cond", args =>
-			{
-			    var clauses = args.Cast<Expression>().ToArray();
-
-			    foreach (var clause in clauses.Take(args.Count() - 1))
+		            "macroexpand", args =>
+		            {
+		                _evalMacro = false;
+		                var result = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
+		                _evalMacro = true;
+		                return result;
+		            }
+		        },
+		        {"quote", args => args[0].Quote(this) },
+		        {"quasiquote", Quasiquote },
+		        {"unquote", args => Trampoline(args[0].Eval(this)) },
+		        {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
+		        {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray()) },
+		        {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this))) },
+		        {"lambda", args => new Closure(this, args[0],
+						       new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+								      Concat(args.Skip(1)).ToArray())) },
+		        {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
+		             ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+								      Concat(args.Skip(1)).ToArray()), true)
+		             : (Value) Null.Value },
+		        {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
+		             ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+								      Concat(args.Skip(1)).ToArray()), true)
+		             : (Value) Null.Value },
+		        {
+			    "cond", args =>
 			    {
-				var condition = Trampoline(clause.Head.Eval(this));
-				if (condition.To<bool>())
-				{
-				    return InvokeCondClause(clause, condition);
-				}
-			    }
+			        var clauses = args.Cast<Expression>().ToArray();
 
-			    var lastClause = clauses.Last();
-			    var head = lastClause.Head.Quote(this);
-			    if (head is String && head.To<string>() == "else")
-			    {
-				return InvokeCondClause(lastClause);
-			    }
+			        foreach (var clause in clauses.Take(args.Count() - 1))
+			        {
+				        var condition = Trampoline(clause.Head.Eval(this));
+				        if (condition.To<bool>())
+				        {
+				            return InvokeCondClause(clause, condition);
+				        }
+			        }
 
-			    var lastCondition = Trampoline(lastClause.Head.Eval(this));
-			    if (lastCondition.To<bool>())
-			    {
-				return InvokeCondClause(lastClause, lastCondition);
-			    }
+			        var lastClause = clauses.Last();
+			        var head = lastClause.Head.Quote(this);
+			        if (head is SymbolValue && head.To<string>() == "else")
+			        {
+				        return InvokeCondClause(lastClause);
+			        }
+
+			        var lastCondition = Trampoline(lastClause.Head.Eval(this));
+			        if (lastCondition.To<bool>())
+			        {
+				        return InvokeCondClause(lastClause, lastCondition);
+			        }
 				
-			    return Null.Value;
-			}
-		    },
-		    {
-			"if", args =>
-			{
-			    var condition = Trampoline(args[0].Eval(this)).To<bool>();
-			    if (condition)
-			    {
-				return new Closure(this, null, args[1], true);
+			        return Null.Value;
 			    }
-			    if (args.Length > 2)
+		        },
+		        {
+			    "if", args =>
 			    {
-				return new Closure(this, null, args[2], true);
+			        var condition = Trampoline(args[0].Eval(this)).To<bool>();
+			        if (condition)
+			        {
+				        return new Closure(this, null, args[1], true);
+			        }
+			        if (args.Length > 2)
+			        {
+				        return new Closure(this, null, args[2], true);
+			        }
+			        return Null.Value;
 			    }
-			    return Null.Value;
-			}
-		    },
-		    {"let", Let},
-		    {"let*", LetSequential},
-		    {"set!", Set},
-		    {
-			"begin", args =>
-			{
-			    foreach (var arg in args.Take(args.Count() - 1))
+		        },
+		        {"let", Let},
+		        {"let*", LetSequential},
+		        {"set!", Set},
+		        {
+			    "begin", args =>
 			    {
-				Trampoline(arg.Eval(this));
+			        foreach (var arg in args.Take(args.Count() - 1))
+			        {
+				        Trampoline(arg.Eval(this));
+			        }
+			        return new Closure(this, null, args.Last(), true);
 			    }
-			    return new Closure(this, null, args.Last(), true);
-			}
-		    },
-		    {"import", Import},
-		    {"and", And},
-		    {"or", Or},
+		        },
+		        {"import", Import},
+		        {"and", And},
+		        {"or", Or},
 
-		    // TODO for jit-compiler letrec and letrec* will have different implementations
-		    {"letrec", Let},
-		    {"letrec*", LetSequential},
-		};
+		        // TODO for jit-compiler letrec and letrec* will have different implementations
+		        {"letrec", Let},
+		        {"letrec*", LetSequential},
+		    };
 
             _globalFrame = new Frame();
             _callStack.Push(_globalFrame);
@@ -162,7 +161,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     if (expressionNode != null)
                     {
                         var value = expressionNode.Head.Quote(this);
-                        if (value is String)
+                        if (value is SymbolValue)
                         {
                             var call = value.To<string>();
                             if (call == "unquote")
@@ -237,7 +236,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             CurrentFrame.BeginScope(frameArgs, frameValues);
-            var result = new Closure(this, null, new Expression(new[] { new Symbol(new String("begin")) }.
+            var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                     Concat(args.Skip(1)).ToArray()), true);
             CurrentFrame.EndScope();
 
@@ -252,7 +251,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Single().Eval(this)));
             }
 
-            var result = new Closure(this, null, new Expression(new[] { new Symbol(new String("begin")) }.
+            var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                     Concat(args.Skip(1)).ToArray()), true);
             CurrentFrame.EndScope();
 
@@ -305,7 +304,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 }
             }
 
-            if (call is String)
+            if (call is SymbolValue)
             {
                 var name = call.To<string>();
                 if (_specialForms.ContainsKey(name))
@@ -347,7 +346,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             if (definition is Expression)
             {
-                CurrentFrame.Bind(name, new Closure(args, body, false, false));
+                CurrentFrame.Bind(name, new Closure(args, body));
             }
             else
             {
@@ -362,7 +361,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             CurrentFrame.Bind(name, new Closure(this, args, body, false, true));
             return Null.Value;
         }
-        
+
         public Value InvokeClosure(Closure closure, Node[] values)
         {
             var calculatedValues = closure.IsMacro
@@ -377,10 +376,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             {
                 CurrentFrame.Import(closure.Scopes);
             }
-            
-            CurrentFrame.BeginScope(closure.Args, arguments);
-            Value result = null;
 
+            CurrentFrame.BeginScope(closure.Args, arguments);
+
+            Value result;
             if (!closure.IsMacro)
             {
                 result = !closure.IsTailCall
@@ -405,7 +404,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 }
             }
             EndFrame();
-            
+
             return !(closure.IsMacro && _evalMacro) ? result : result.ToExpression().Eval(this);
         }
     }

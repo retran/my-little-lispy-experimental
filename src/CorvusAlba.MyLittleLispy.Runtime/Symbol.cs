@@ -2,7 +2,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Symbol : Node
     {
-        public Symbol(String value)
+        public Symbol(SymbolValue value)
         {
             Value = value;
         }

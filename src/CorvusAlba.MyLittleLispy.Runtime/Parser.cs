@@ -99,10 +99,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     _enumerator.MoveNext();
                     return Wrap("unquote-splicing");
                 }
-                else
-                {
-                    return Wrap("unquote");
-                }
+                return Wrap("unquote");
             }
 
             string rawValue = _enumerator.Current;
@@ -135,15 +132,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 return new Constant(new Float(dvalue));
             }
 
-            return new Symbol(new String(rawValue));
+            return new Symbol(new SymbolValue(rawValue));
         }
 
         private Node Wrap(string function)
         {
             return new Expression(new[]
 		    {
-			new Symbol(new String(function)),
-			Atom()
+    			new Symbol(new SymbolValue(function)),
+			    Atom()
 		    });
         }
 

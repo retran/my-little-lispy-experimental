@@ -62,6 +62,7 @@
     <Compile Include="Scope.cs" />
     <Compile Include="Symbol.cs" />
     <Compile Include="SymbolNotDefinedException.cs" />
+    <Compile Include="SymbolValue.cs" />
     <Compile Include="Syntax.cs" />
     <Compile Include="SyntaxErrorException.cs" />
     <Compile Include="Value.cs" />

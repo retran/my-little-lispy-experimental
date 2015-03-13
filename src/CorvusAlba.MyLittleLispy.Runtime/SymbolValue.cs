@@ -1,15 +1,15 @@
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
-    public class String : Value<string>
+    public class SymbolValue : Value<string>
     {
-        public String(string value)
+        public SymbolValue(string value)
             : base(value)
         {
         }
 
         public override Node ToExpression()
         {
-            return new Constant(this);
+            return new Symbol(this);
         }
     }
 }
