@@ -311,7 +311,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 if (_specialForms.ContainsKey(name))
                 {
                     var value = _specialForms[name].Invoke(args != null ? args.ToArray() : new Node[] { });
-                    if (CurrentFrame.IsTrampolin)
+                    if (CurrentFrame.IsGlobal)
                     {
                         value = Trampoline(value);
                     }
@@ -325,7 +325,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 if (lambda != null)
                 {
                     var value = InvokeClosure(lambda, args != null ? args.ToArray() : new Node[] { });
-                    if (CurrentFrame.IsTrampolin)
+                    if (CurrentFrame.IsGlobal)
                     {
                         value = Trampoline(value);
                     }
