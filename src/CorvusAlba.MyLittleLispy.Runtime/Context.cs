@@ -228,14 +228,30 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             var frameArgs = new List<string>();
             var frameValues = new List<Value>();
+            var argNodes = new List<Node>();
+            var name = string.Empty;
 
+            if (args[0] is Symbol)
+            {
+                name = args[0].Quote(this).To<string>();
+                args = args.Skip(1).ToArray();
+            }
+            
             foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
             {
                 frameArgs.Add(clause.Head.Quote(this).To<string>());
                 frameValues.Add(Trampoline(clause.Tail.Single().Eval(this)));
+                argNodes.Add(clause.Head);
             }
 
             CurrentFrame.BeginScope(frameArgs, frameValues);
+            if (!string.IsNullOrEmpty(name))
+            {
+                CurrentFrame.Bind(name, new Closure(this,
+                                                    new Expression(argNodes),
+                                                    new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                   Concat(args.Skip(1)).ToArray()), true));
+            }
             var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                     Concat(args.Skip(1)).ToArray()), true);
             CurrentFrame.EndScope();
@@ -245,10 +261,28 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         private Value LetSequential(Node[] args)
         {
+            var name = string.Empty;
+            var argNodes = new List<Node>();
+            
+            if (args[0] is Symbol)
+            {
+                name = args[0].Quote(this).To<string>();
+                args = args.Skip(1).ToArray();
+            }
+
             CurrentFrame.BeginScope();
             foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
             {
+                argNodes.Add(clause.Head);
                 CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Single().Eval(this)));
+            }
+
+            if (!string.IsNullOrEmpty(name))
+            {
+                CurrentFrame.Bind(name, new Closure(this,
+                                                    new Expression(argNodes),
+                                                    new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                   Concat(args.Skip(1)).ToArray()), true));
             }
 
             var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
@@ -292,7 +326,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             {
                 call = head.Eval(this);
             }
-            catch (SymbolNotDefinedException)
+            catch (SymbolNotDefinedException e)
             {
                 if (head is Symbol)
                 {
@@ -300,7 +334,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 }
                 else
                 {
-                    throw;
+                    throw e;
                 }
             }
 
@@ -371,41 +405,44 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
                 : calculatedValues;
 
-            BeginFrame();
-            if (!closure.IsMacro)
+            try
             {
-                CurrentFrame.Import(closure.Scopes);
-            }
-
-            CurrentFrame.BeginScope(closure.Args, arguments);
-
-            Value result;
-            if (!closure.IsMacro)
-            {
-                result = !closure.IsTailCall
-                    ? new Closure(this, null, closure.Body, true)
-                    : closure.Body.Eval(this);
-            }
-            else
-            {
-                result = Trampoline(closure.Body.Eval(this));
-            }
-
-            CurrentFrame.EndScope();
-
-            if (!closure.IsMacro)
-            {
-                if (closure.Scopes != null)
+                BeginFrame();
+                if (!closure.IsMacro)
                 {
-                    for (var i = 0; i < closure.Scopes.Count(); i++)
+                    CurrentFrame.Import(closure.Scopes);
+                }
+                
+                CurrentFrame.BeginScope(closure.Args, arguments);
+                
+                Value result;
+                if (!closure.IsMacro)
+                {
+                    result = !closure.IsTailCall
+                        ? new Closure(this, null, closure.Body, true)
+                        : closure.Body.Eval(this);
+                }
+                else
+                {
+                    result = Trampoline(closure.Body.Eval(this));
+                }
+                return !(closure.IsMacro && _evalMacro) ? result : result.ToExpression().Eval(this);
+            }
+            finally
+            {
+                CurrentFrame.EndScope();                
+                if (!closure.IsMacro)
+                {
+                    if (closure.Scopes != null)
                     {
-                        CurrentFrame.EndScope();
+                        for (var i = 0; i < closure.Scopes.Count(); i++)
+                        {
+                            CurrentFrame.EndScope();
+                        }
                     }
                 }
+                EndFrame();
             }
-            EndFrame();
-
-            return !(closure.IsMacro && _evalMacro) ? result : result.ToExpression().Eval(this);
         }
     }
 }

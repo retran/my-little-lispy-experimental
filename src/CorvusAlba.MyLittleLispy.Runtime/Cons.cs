@@ -76,13 +76,13 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return new Bool(false);
         }
 
-        public Value EqualRecursive(Cons a)
+        public Value EqualRecursive(Cons value)
         {
             var leftA = this.Car();
-            var leftB = a.Car();
+            var leftB = value.Car();
 
             var rightA = this.Cdr();
-            var rightB = a.Cdr();
+            var rightB = value.Cdr();
 
             var left = leftA is Cons && leftB is Cons
                 ? ((Cons)leftA).EqualRecursive((Cons)leftB)
