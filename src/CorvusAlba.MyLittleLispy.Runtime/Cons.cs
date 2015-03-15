@@ -60,6 +60,41 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return ((Value)this).To<T>();
         }
 
+        public override Value Equal(Value arg)
+        {
+            if (arg is Null && this.IsNull())
+            {
+                return new Bool(true);
+            }
+
+            var cons = arg as Cons;
+            if (cons != null)
+            {
+                return new Bool(object.ReferenceEquals(this, cons));
+            }
+
+            return new Bool(false);
+        }
+
+        public Value EqualRecursive(Cons a)
+        {
+            var leftA = this.Car();
+            var leftB = a.Car();
+
+            var rightA = this.Cdr();
+            var rightB = a.Cdr();
+
+            var left = leftA is Cons && leftB is Cons
+                ? ((Cons)leftA).EqualRecursive((Cons)leftB)
+                : leftA.EqualWithNull(leftB);
+
+            var right = rightA is Cons && rightB is Cons
+                ? ((Cons)rightA).EqualRecursive((Cons)rightB)
+                : rightA.EqualWithNull(rightB);
+
+            return new Bool(left.To<bool>() && right.To<bool>());
+        }
+
         private IEnumerable<Value> Flatten()
         {
             var list = new List<Value>();
@@ -74,6 +109,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 list.Add(current);
             }
             return list;
+        }
+
+        public bool IsNull()
+        {
+            return Car().Equal(Null.Value).To<bool>()
+                && Cdr().Equal(Null.Value).To<bool>();             
         }
 
         public override Node ToExpression()

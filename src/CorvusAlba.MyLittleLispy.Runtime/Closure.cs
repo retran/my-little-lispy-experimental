@@ -68,6 +68,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Node Body { get; private set; }
 
+        public override Value Equal(Value arg)
+        {
+            var closure = arg as Closure;
+            if (closure != null)
+            {
+                return new Bool(object.ReferenceEquals(this, closure));
+            }
+            
+            return new Bool(false);
+        }
+        
         public override Node ToExpression()
         {
             throw new NotImplementedException();

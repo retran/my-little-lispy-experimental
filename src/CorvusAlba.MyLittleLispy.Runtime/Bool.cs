@@ -14,7 +14,13 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public override Value Equal(Value arg)
         {
-            return new Bool(ClrValue == arg.To<bool>());
+            var boolValue = arg as Bool;
+            if (boolValue != null)
+            {
+                return new Bool(ClrValue == boolValue.GetClrValue());
+            }
+
+            return new Bool(false);
         }
     }
 }

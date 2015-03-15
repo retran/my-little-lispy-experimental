@@ -82,7 +82,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 return new Bool(Math.Abs(ClrValue - arg.To<float>()) < float.Epsilon);
             }
 
-            throw new InvalidOperationException();
+            return new Bool(false);
         }
 
         public override Value Greater(Value arg)

@@ -11,6 +11,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		    "(define (<= x y) (or (< x y) (= x y)))",
 		    "(define (>= x y) (or (> x y) (= x y)))",
 		    "(define (xor x y) (and (or x y) (not (and x y))))",
+
+                    // TODO revise for special cases
+                    "(define (= x y) (eqv? x y))",
+                    "(define (eq? x y) (eqv? x y))"
 	    };
 
         public void Import(Parser parser, Context context)
@@ -49,11 +53,34 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                         new ClrLambdaBody(c =>
                                   c.Lookup("a").Divide(c.Lookup("b")))));
 
-            context.CurrentFrame.Bind("=",
+            context.CurrentFrame.Bind("eqv?",
                  new Closure(new[] { "a", "b" },
                         new ClrLambdaBody(c =>
                                   c.Lookup("a").EqualWithNull(c.Lookup("b")))));
 
+            context.CurrentFrame.Bind("equal?",
+                 new Closure(new[] { "a", "b" },
+                        new ClrLambdaBody(c =>
+                                {
+                                    var a = c.Lookup("a");
+                                    var b = c.Lookup("b");
+
+                                    var eqvResult = a.EqualWithNull(b);
+                                    if (eqvResult.To<bool>())
+                                    {
+                                        return eqvResult;
+                                    }
+
+                                    var aCons = a as Cons;
+                                    var bCons = b as Cons;
+                                    if (aCons != null && bCons != null)
+                                    {
+                                        return aCons.EqualRecursive(bCons);
+                                    }
+
+                                    return eqvResult;
+                                })));
+            
             context.CurrentFrame.Bind("<",
                  new Closure(new[] { "a", "b" },
                         new ClrLambdaBody(c =>
