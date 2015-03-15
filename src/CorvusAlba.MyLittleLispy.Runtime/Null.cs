@@ -1,3 +1,5 @@
+using System.Collections.Generic;
+
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Null : Value
@@ -9,6 +11,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return "()";
         }
 
+        public override T To<T>()
+        {
+            if (typeof(T) == typeof(IEnumerable<Value>))
+            {
+                return (T) (object) (new Value[] { });
+            }
+
+            return base.To<T>();
+        }
+        
         public override Value Equal(Value arg)
         {
             if (object.ReferenceEquals(this, arg))

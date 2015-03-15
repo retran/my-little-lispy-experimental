@@ -133,6 +133,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			        return new Closure(this, null, args.Last(), true);
 			    }
 		        },
+                        {"do", Do},
 		        {"import", Import},
 		        {"and", And},
 		        {"or", Or},
@@ -224,6 +225,41 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return Null.Value;
         }
 
+        private Value Do(Node[] args)
+        {
+            var variableClauses = args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>();
+            var testClause = args[1] as Expression;
+            var body = new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                      Concat(args.Skip(2)).ToArray());
+
+            CurrentFrame.BeginScope();
+            try
+            {
+                foreach (var clause in variableClauses)
+                {
+                    CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.First().Eval(this)));
+                }            
+
+                while(!Trampoline(testClause.Head.Eval(this)).To<bool>())
+                {
+                    body.Eval(this);
+                    foreach (var clause in variableClauses)
+                    {
+                        if (clause.Tail.Count() > 1)
+                        {
+                            CurrentFrame.Set(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Skip(1).First().Eval(this)));
+                        }
+                    }                
+                }
+                return new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                              Concat(testClause.Tail).ToArray()), true);
+            }
+            finally
+            {
+                CurrentFrame.EndScope();
+            }
+        }
+        
         private Value Let(Node[] args)
         {
             var frameArgs = new List<string>();
@@ -245,18 +281,23 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             CurrentFrame.BeginScope(frameArgs, frameValues);
-            if (!string.IsNullOrEmpty(name))
+            try
             {
-                CurrentFrame.Bind(name, new Closure(this,
-                                                    new Expression(argNodes),
-                                                    new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                                                   Concat(args.Skip(1)).ToArray()), true));
+                if (!string.IsNullOrEmpty(name))
+                {
+                    CurrentFrame.Bind(name, new Closure(this,
+                                                        new Expression(argNodes),
+                                                        new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                       Concat(args.Skip(1)).ToArray()), true));
+                }
+                var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                    Concat(args.Skip(1)).ToArray()), true);
+                return result;
             }
-            var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                    Concat(args.Skip(1)).ToArray()), true);
-            CurrentFrame.EndScope();
-
-            return result;
+            finally
+            {
+                CurrentFrame.EndScope();
+            }
         }
 
         private Value LetSequential(Node[] args)
@@ -271,25 +312,30 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             CurrentFrame.BeginScope();
-            foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
+            try
             {
-                argNodes.Add(clause.Head);
-                CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Single().Eval(this)));
-            }
+                foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
+                {
+                    argNodes.Add(clause.Head);
+                    CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Single().Eval(this)));
+                }
 
-            if (!string.IsNullOrEmpty(name))
+                if (!string.IsNullOrEmpty(name))
+                {
+                    CurrentFrame.Bind(name, new Closure(this,
+                                                        new Expression(argNodes),
+                                                        new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                       Concat(args.Skip(1)).ToArray()), true));
+                }
+                
+                var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
+                                                                    Concat(args.Skip(1)).ToArray()), true);
+                return result;
+            }
+            finally
             {
-                CurrentFrame.Bind(name, new Closure(this,
-                                                    new Expression(argNodes),
-                                                    new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                                                   Concat(args.Skip(1)).ToArray()), true));
+                CurrentFrame.EndScope();
             }
-
-            var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                    Concat(args.Skip(1)).ToArray()), true);
-            CurrentFrame.EndScope();
-
-            return result;
         }
 
 
@@ -405,16 +451,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
                 : calculatedValues;
 
+            BeginFrame();
+            if (!closure.IsMacro)
+            {
+                CurrentFrame.Import(closure.Scopes);
+            }
+            CurrentFrame.BeginScope(closure.Args, arguments);                
             try
             {
-                BeginFrame();
-                if (!closure.IsMacro)
-                {
-                    CurrentFrame.Import(closure.Scopes);
-                }
-                
-                CurrentFrame.BeginScope(closure.Args, arguments);
-                
                 Value result;
                 if (!closure.IsMacro)
                 {
