@@ -448,9 +448,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
                 : calculatedValues;
 
-            BeginFrame();
             if (!closure.IsMacro)
             {
+                BeginFrame();
                 CurrentFrame.Import(closure.Scopes);
             }
             CurrentFrame.BeginScope(closure.Args, arguments);                
@@ -481,8 +481,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                             CurrentFrame.EndScope();
                         }
                     }
+                    EndFrame();
                 }
-                EndFrame();
             }
         }
     }
