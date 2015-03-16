@@ -242,14 +242,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
                 while(!Trampoline(testClause.Head.Eval(this)).To<bool>())
                 {
-                    body.Eval(this);
+                    Trampoline(body.Eval(this));
                     foreach (var clause in variableClauses)
                     {
                         if (clause.Tail.Count() > 1)
                         {
                             CurrentFrame.Set(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Skip(1).First().Eval(this)));
                         }
-                    }                
+                    }       
                 }
                 return new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                                               Concat(testClause.Tail).ToArray()), true);
@@ -368,19 +368,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public Value Invoke(Node head, IEnumerable<Node> args = null)
         {
             Value call;
-            try
-            {
-                call = head.Eval(this);
-            }
-            catch (SymbolNotDefinedException e)
-            {
+            call = head.Eval(this);
+            if (call is Undefined)
+            {            
                 if (head is Symbol)
                 {
                     call = head.Quote(this);
                 }
                 else
                 {
-                    throw e;
+                    return Undefined.Value;
                 }
             }
 
@@ -412,7 +409,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 }
             }
 
-            throw new SymbolNotDefinedException(call.ToString());
+            return Undefined.Value;
         }
 
         public Value Define(Node definition, Node body)

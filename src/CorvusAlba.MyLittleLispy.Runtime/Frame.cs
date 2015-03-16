@@ -43,7 +43,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 return _globalFrame.Lookup(name);
             }
 
-            throw new SymbolNotDefinedException(name);
+            return Undefined.Value;
         }
 
         public void Set(string name, Value value)

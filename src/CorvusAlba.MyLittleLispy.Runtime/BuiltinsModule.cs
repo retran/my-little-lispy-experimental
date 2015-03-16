@@ -1,5 +1,8 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using System.Reflection;
+using System.IO;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
@@ -17,6 +20,38 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     "(define (eq? x y) (eqv? x y))"
 	    };
 
+        public enum Platform
+        {
+            Windows,
+            Linux,
+            Mac
+        }
+
+        public static Platform GetRunningPlatform()
+        {
+            switch (Environment.OSVersion.Platform)
+            {
+                case PlatformID.Unix:
+                    if (Directory.Exists("/Applications")
+                        & Directory.Exists("/System")
+                        & Directory.Exists("/Users")
+                        & Directory.Exists("/Volumes"))
+                    {
+                        return Platform.Mac;
+                    }
+                    else
+                    {
+                        return Platform.Linux;
+                    }
+
+                case PlatformID.MacOSX:
+                    return Platform.Mac;
+
+                default:
+                    return Platform.Windows;
+            }
+        }
+        
         public void Import(Parser parser, Context context)
         {
             context.CurrentFrame.Bind("halt",
@@ -135,6 +170,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                       list.Select(value => value.ToExpression()).ToArray()));
                                   })));
 
+            context.CurrentFrame.Bind("system-is-windows?", new Bool(GetRunningPlatform() == Platform.Windows));
+            context.CurrentFrame.Bind("system-is-linux?", new Bool(GetRunningPlatform() == Platform.Linux));
+            context.CurrentFrame.Bind("system-is-macos?", new Bool(GetRunningPlatform() == Platform.Mac));
+            context.CurrentFrame.Bind("my-little-lispy-runtime-version", new String(Assembly.GetEntryAssembly().GetName().Version.ToString()));
+            
             foreach (var define in _builtins)
             {
                 parser.Parse(define).Eval(context);
