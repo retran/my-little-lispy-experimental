@@ -1,7 +1,7 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("CorvusAlba.MyLittleLispy.CLI")]
+[assembly: AssemblyTitle("CorvusAlba.MyLittleLispy.Client")]
 [assembly: AssemblyDescription("command line interface for My Little Lispy")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Corvus Alba")]

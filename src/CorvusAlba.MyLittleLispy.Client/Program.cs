@@ -3,7 +3,7 @@ using System.Linq;
 using CorvusAlba.MyLittleLispy.Runtime;
 using CorvusAlba.MyLittleLispy.Hosting;
 
-namespace CorvusAlba.MyLittleLispy.CLI
+namespace CorvusAlba.MyLittleLispy.Client
 {
     internal class Program
     {

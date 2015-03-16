@@ -4,7 +4,7 @@ using System.Linq;
 using CorvusAlba.MyLittleLispy.Hosting;
 using CorvusAlba.MyLittleLispy.Runtime;
 
-namespace CorvusAlba.MyLittleLispy.CLI
+namespace CorvusAlba.MyLittleLispy.Client
 {
     internal class Repl
     {

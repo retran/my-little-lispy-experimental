@@ -7,7 +7,7 @@
     <ProjectGuid>{FE6A0755-D76C-4130-B963-0065C915FFFA}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>CorvusAlba.MyLittleLispy.CLI</RootNamespace>
+    <RootNamespace>CorvusAlba.MyLittleLispy.Client</RootNamespace>
     <AssemblyName>mll</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
@@ -56,7 +56,6 @@
       <Name>CorvusAlba.MyLittleLispy.Runtime</Name>
       <private>True</private>
     </ProjectReference>
-
     <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Debugger\CorvusAlba.MyLittleLispy.Debugger.csproj">
       <Project>{7C3D4407-7409-49B4-89ED-538882ADDDDE}</Project>
       <Name>CorvusAlba.MyLittleLispy.Debugger</Name>
