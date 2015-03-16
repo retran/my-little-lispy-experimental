@@ -173,7 +173,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             context.CurrentFrame.Bind("system-is-windows?", new Bool(GetRunningPlatform() == Platform.Windows));
             context.CurrentFrame.Bind("system-is-linux?", new Bool(GetRunningPlatform() == Platform.Linux));
             context.CurrentFrame.Bind("system-is-macos?", new Bool(GetRunningPlatform() == Platform.Mac));
-            context.CurrentFrame.Bind("my-little-lispy-runtime-version", new String(Assembly.GetEntryAssembly().GetName().Version.ToString()));
+            context.CurrentFrame.Bind("my-little-lispy-runtime-version", new String(Assembly.GetAssembly().GetName().Version.ToString()));
             
             foreach (var define in _builtins)
             {
