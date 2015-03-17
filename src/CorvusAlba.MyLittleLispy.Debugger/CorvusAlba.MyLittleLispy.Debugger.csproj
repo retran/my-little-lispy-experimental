@@ -40,6 +40,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compule Include="Server.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Runtime\CorvusAlba.MyLittleLispy.Runtime.csproj">
