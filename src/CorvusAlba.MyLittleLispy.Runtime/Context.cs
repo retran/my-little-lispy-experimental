@@ -177,6 +177,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                 return innerExpressionNode != null ? innerExpressionNode.Nodes : new[] { innerNode };
                             }
                         }
+                        return new [] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
                     }
                     return new[] { node };
                 }).Select(node => node.Quote(this)).ToArray());
@@ -445,7 +446,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 ? values.Select(value => value.Quote(this)).ToArray()
                 : values.Select(value => Trampoline(value.Eval(this))).ToArray();
             var arguments = closure.HasRestArg
-                ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[] { new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray()) }).ToArray()
+                ? calculatedValues.Take(closure.Args.Count() - 1).Concat(new[]
+                        {
+                            new Cons(calculatedValues.Skip(closure.Args.Count() - 1).ToArray())
+                        }).ToArray()
                 : calculatedValues;
 
             if (!closure.IsMacro)

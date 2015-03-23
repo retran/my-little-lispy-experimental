@@ -4,11 +4,13 @@ using CorvusAlba.MyLittleLispy.Runtime;
 
 namespace CorvusAlba.MyLittleLispy.Debugger
 {
-    public sealed class Server
+    public sealed class Server : IDisposable
     {
         private ScriptEngine _scriptEngine;
         private bool _synchronized;
         private int _port;
+        private TcpListener _listener;
+
         
         public Server(ScriptEngine scriptEngine, int port = 12345, bool synchronized = false)
         {
@@ -31,5 +33,20 @@ namespace CorvusAlba.MyLittleLispy.Debugger
         {
 
         }            
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                
+            }
+        }
+
     }
 }
