@@ -369,7 +369,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public Value Invoke(Node head, IEnumerable<Node> args = null)
         {
             Value call;
-            call = head.Eval(this);
+            call = Trampoline(head.Eval(this));
             if (call is Undefined)
             {            
                 if (head is Symbol)
