@@ -76,7 +76,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 								      Concat(args.Skip(1)).ToArray()), true)
 		             : (Value) Null.Value },
 		        {
-			    "cond", args =>
+			    "cond", args =>  
 			    {
 			        var clauses = args.Cast<Expression>().ToArray();
 
@@ -228,8 +228,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         private Value Do(Node[] args)
         {
-            var variableClauses = args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>();
-            var testClause = args[1] as Expression;
+            var variableClauses = args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>().ToArray();
+            var testClause = (Expression) args[1];
             var body = new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                       Concat(args.Skip(2)).ToArray());
 
@@ -415,19 +415,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Value Define(Node definition, Node body)
         {
-            string[] def = definition is Expression
-                ? definition.Quote(this).To<IEnumerable<Value>>().Select(value => value.To<string>()).ToArray()
-                : new[] { definition.Quote(this).To<string>() };
-
-            string name = def.First();
-            string[] args = def.Skip(1).ToArray();
 
             if (definition is Expression)
             {
-                CurrentFrame.Bind(name, new Closure(args, body));
+                var values = definition.Quote(this).To<IEnumerable<Value>>().ToArray();
+                var name = values.First().To<string>();
+                var args = new Expression(values.Skip(1).Select(v => v.ToExpression()));
+                CurrentFrame.Bind(name, new Closure(this, args, body));
             }
             else
             {
+                var name = definition.Quote(this).To<string>();
                 CurrentFrame.Bind(name, body.Eval(this));
             }
 

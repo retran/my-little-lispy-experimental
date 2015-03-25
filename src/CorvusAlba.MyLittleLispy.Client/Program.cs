@@ -13,19 +13,17 @@ namespace CorvusAlba.MyLittleLispy.Client
             {
                 return new Repl(new ScriptEngine()).Loop();
             }
-            else
+            
+            using (var stream = new FileStream(args[0], FileMode.Open))
             {
-                using (var stream = new FileStream(args[0], FileMode.Open))
+                try
                 {
-                    try
-                    {
-                        (new ScriptEngine()).Execute(stream, true);
-                        return 0;
-                    }
-                    catch (HaltException e)
-                    {
-                        return e.Code;
-                    }
+                    (new ScriptEngine()).Execute(stream, true);
+                    return 0;
+                }
+                catch (HaltException e)
+                {
+                    return e.Code;
                 }
             }
         }
