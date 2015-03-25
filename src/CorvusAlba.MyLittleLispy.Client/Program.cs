@@ -19,7 +19,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                 {
                     try
                     {
-                        (new ScriptEngine()).Execute(stream);
+                        (new ScriptEngine()).Execute(stream, true);
                         return 0;
                     }
                     catch (HaltException e)
