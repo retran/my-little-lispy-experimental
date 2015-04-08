@@ -158,6 +158,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             return new Cons(expression.Nodes.SelectMany(node =>
                 {
+                    bool isNested = false;
+                    
                     var expressionNode = node as Expression;
                     if (expressionNode != null)
                     {
@@ -176,6 +178,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                 var innerExpressionNode = innerNode as Expression;
                                 return innerExpressionNode != null ? innerExpressionNode.Nodes : new[] { innerNode };
                             }
+
+                            if (call == "quasiquote")
+                            {
+                                isNested = true;
+                            }
+                        }
+                        if (isNested)
+                        {
+                            return new [] { expressionNode.Quote(this).ToExpression() };
                         }
                         return new [] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
                     }
