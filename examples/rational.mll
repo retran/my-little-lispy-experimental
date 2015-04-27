@@ -37,14 +37,15 @@
   (newline)
   (display (numer x))
   (display "/")
-  (display (denom x))
-  (display " "))
+  (display (denom x)))
 
 (define one-half (make-rat 1 2))
 (define one-third (make-rat 1 3))
 
 (print-rat one-half)
+(display " ")
 (print-rat (add-rat one-half one-third))
+(display " ")
 (print-rat (mul-rat one-half one-third))
+(display " ")
 (print-rat (add-rat one-third one-third))
-
