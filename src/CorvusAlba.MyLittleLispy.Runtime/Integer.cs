@@ -66,6 +66,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             throw new InvalidOperationException();
         }
 
+        public override Value Remainder(Value arg)
+        {
+            if (arg is Integer)
+            {
+                return new Integer(ClrValue % arg.To<int>());
+            }
+
+            throw new InvalidOperationException();
+        }
+        
         public override Value Negate()
         {
             return new Integer(-ClrValue);

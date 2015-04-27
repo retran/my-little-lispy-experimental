@@ -88,6 +88,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                   new ClrLambdaBody(c =>
                                                                     c.Lookup("a").Divide(c.Lookup("b")))));
             
+            context.CurrentFrame.Bind("%",
+                                      new Closure(new[] { "a", "b" },
+                                                  new ClrLambdaBody(c =>
+                                                                    c.Lookup("a").Remainder(c.Lookup("b")))));
+            
             context.CurrentFrame.Bind("eqv?",
                                       new Closure(new[] { "a", "b" },
                                                   new ClrLambdaBody(c =>
@@ -145,7 +150,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       new Closure(new[] { "a" },
                                                   new ClrLambdaBody(c =>
                                                           {
-                                                              System.Console.WriteLine(c.Lookup("a").ToString());
+                                                              System.Console.Write(c.Lookup("a").ToString());
                                                               return Null.Value;
                                                           })));
             
