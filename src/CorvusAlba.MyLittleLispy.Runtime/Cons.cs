@@ -84,6 +84,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return new Integer(To<IEnumerable<Value>>().Count());
         }
 
+        public override Value ListRef(Value arg)
+        {
+            var index = arg as Integer;
+            if (index == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return To<IEnumerable<Value>>().ElementAt(index.To<int>());
+        }
+
         public override Value Append(Value arg)
         {
             if (arg is Null)
@@ -92,9 +103,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             var cons = arg as Cons;
-            if (cons == null)            
+            if (cons == null)
+            {
                 throw new InvalidOperationException();
-
+            }
+            
             return new Cons(To<IEnumerable<Value>>().Concat(cons.To<IEnumerable<Value>>()).ToArray());
         }
 

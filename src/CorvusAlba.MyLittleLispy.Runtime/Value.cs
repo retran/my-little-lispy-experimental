@@ -99,6 +99,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             throw new InvalidOperationException();
         }
 
+        public virtual Value ListRef(Value arg)
+        {
+            throw new InvalidOperationException();
+        }
+        
         public abstract Node ToExpression();
     }
 

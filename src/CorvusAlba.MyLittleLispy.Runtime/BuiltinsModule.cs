@@ -191,9 +191,13 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                           })));
 
             context.CurrentFrame.Bind("length",
-                          new Closure(new[] { "a"},
+                          new Closure(new[] { "a" },
                                       new ClrLambdaBody(c => c.Lookup("a").Length())));
 
+            context.CurrentFrame.Bind("list-ref",
+                                      new Closure(new[] { "a", "b" },
+                                                  new ClrLambdaBody(c => c.Lookup("a").ListRef(c.Lookup("b")))));
+            
             context.CurrentFrame.Bind("append",
                           new Closure(new[] { "a", "b" },
                                       new ClrLambdaBody(c =>
