@@ -1,4 +1,6 @@
+using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
 {
@@ -40,6 +42,22 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             return new Bool(false);
+        }
+
+        public override Value Length()
+        {
+            return new Integer(0);
+        }
+
+        public override Value Append(Value arg)
+        {
+            var cons = arg as Cons;
+            if (cons == null)
+            {
+                throw new InvalidOperationException();
+            }
+
+            return new Cons(cons.To<IEnumerable<Value>>().ToArray());
         }
         
         public override Node ToExpression()

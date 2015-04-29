@@ -159,6 +159,21 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                                                           c.Trampoline(c.InvokeClosure(lambda, new[] { value.ToExpression() }))).ToArray());
                                                           })));
 
+            context.CurrentFrame.Bind("filter",
+                          new Closure(new[] { "a", "b" },
+                                      new ClrLambdaBody(c =>
+                                      {
+                                          var lambda = (Closure)c.Lookup("a");
+                                          var list = c.Lookup("b").To<IEnumerable<Value>>();
+                                          var result = list.Where(value => c.Trampoline(c.InvokeClosure(lambda, new[] { value.ToExpression() })).To<bool>()).ToArray();
+                                          if (result.Any())
+                                          {
+                                              return new Cons(result);
+                                          }
+
+                                          return Null.Value;
+                                      })));
+
             context.CurrentFrame.Bind("apply",
                                       new Closure(new[] { "a", "b" },
                                                   new ClrLambdaBody(c =>
@@ -169,7 +184,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                                                   c.InvokeClosure(lambda,
                                                                                                   list.Select(value => value.ToExpression()).ToArray()));
                                                           })));
-            
+
+            context.CurrentFrame.Bind("length",
+                          new Closure(new[] { "a"},
+                                      new ClrLambdaBody(c => c.Lookup("a").Length())));
+
+            context.CurrentFrame.Bind("append",
+                          new Closure(new[] { "a", "b" },
+                                      new ClrLambdaBody(c =>
+                                                        c.Lookup("a").Append(c.Lookup("b")))));
+
             context.CurrentFrame.Bind("system-is-windows?",
                                       new Bool(GetRunningPlatform() == Platform.Windows));
             context.CurrentFrame.Bind("system-is-linux?",

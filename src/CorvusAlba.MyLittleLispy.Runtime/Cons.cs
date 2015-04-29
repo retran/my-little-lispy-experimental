@@ -17,9 +17,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         }
 
         public Cons(Value[] values)
-            : base(values.Skip(1).Any()
-               ? new Tuple<Value, Value>(values.First(), new Cons(values.Skip(1).ToArray()))
-               : new Tuple<Value, Value>(values.First(), Null.Value))
+            : base(
+                values.Any() 
+                    ? values.Skip(1).Any()
+                       ? new Tuple<Value, Value>(values.First(), new Cons(values.Skip(1).ToArray()))
+                       : new Tuple<Value, Value>(values.First(), Null.Value)
+                    : new Tuple<Value, Value>(Null.Value, Null.Value))
         {
         }
 
@@ -76,6 +79,25 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return new Bool(false);
         }
 
+        public override Value Length()
+        {
+            return new Integer(To<IEnumerable<Value>>().Count());
+        }
+
+        public override Value Append(Value arg)
+        {
+            if (arg is Null)
+            {
+                return new Cons(To<IEnumerable<Value>>().ToArray());
+            }
+
+            var cons = arg as Cons;
+            if (cons == null)            
+                throw new InvalidOperationException();
+
+            return new Cons(To<IEnumerable<Value>>().Concat(cons.To<IEnumerable<Value>>()).ToArray());
+        }
+
         public Value EqualRecursive(Cons value)
         {
             var leftA = this.Car();
@@ -98,15 +120,18 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private IEnumerable<Value> Flatten()
         {
             var list = new List<Value>();
-            Value current = this;
-            do
+            if (!IsNull())
             {
-                list.Add(current.Car());
-                current = current.Cdr();
-            } while (current is Cons);
-            if (current != Null.Value)
-            {
-                list.Add(current);
+                Value current = this;
+                do
+                {
+                    list.Add(current.Car());
+                    current = current.Cdr();
+                } while (current is Cons);
+                if (current != Null.Value)
+                {
+                    list.Add(current);
+                }
             }
             return list;
         }

@@ -84,6 +84,16 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             throw new InvalidOperationException();
         }
 
+        public virtual Value Length()
+        {
+            throw new InvalidOperationException();
+        }
+
+        public virtual Value Append(Value arg)
+        {
+            throw new InvalidOperationException();
+        }
+
         public abstract Node ToExpression();
     }
 
