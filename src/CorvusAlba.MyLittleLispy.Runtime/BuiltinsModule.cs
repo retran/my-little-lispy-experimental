@@ -62,9 +62,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                           })));
 
             context.CurrentFrame.Bind("+",
-                                      new Closure(new[] { "a", "b" },
+                                      new Closure(new[] { ".", "args" },
                                                   new ClrLambdaBody(c =>
-                                                                    c.Lookup("a").Add(c.Lookup("b")))));
+                                                          {
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>();
+                                                              var result = args.First();
+                                                              foreach (var value in args.Skip(1))
+                                                              {
+                                                                  result = result.Add(value);
+                                                              }
+                                                              return result;
+                                                          })));
 
             context.CurrentFrame.Bind("-",
                                       new Closure(new[] { "a", "b" },
@@ -79,10 +87,18 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                           })));
             
             context.CurrentFrame.Bind("*",
-                                      new Closure(new[] { "a", "b" },
+                                      new Closure(new[] { ".", "args" },
                                                   new ClrLambdaBody(c =>
-                                                                    c.Lookup("a").Multiple(c.Lookup("b")))));
-            
+                                                          {
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>();
+                                                              var result = args.First();
+                                                              foreach (var value in args.Skip(1))
+                                                              {
+                                                                  result = result.Multiple(value);
+                                                              }
+                                                              return result;
+                                                          })));
+                                      
             context.CurrentFrame.Bind("/",
                                       new Closure(new[] { "a", "b" },
                                                   new ClrLambdaBody(c =>
