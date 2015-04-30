@@ -223,9 +223,21 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                   new ClrLambdaBody(c => c.Lookup("a").ListRef(c.Lookup("b")))));
             
             context.CurrentFrame.Bind("append",
-                          new Closure(new[] { "a", "b" },
-                                      new ClrLambdaBody(c =>
-                                                        c.Lookup("a").Append(c.Lookup("b")))));
+                                      new Closure(new[] { ".", "args" },
+                                                  new ClrLambdaBody(c =>
+                                                          {
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>().ToArray();
+                                                              if (args.Length == 0)
+                                                              {
+                                                                  return Null.Value;
+                                                              }
+                                                              var result = args.First();
+                                                              foreach (var value in args.Skip(1))
+                                                              {
+                                                                  result = result.Append(value);
+                                                              }
+                                                              return result;
+                                                          })));
 
             context.CurrentFrame.Bind("system-is-windows?",
                                       new Bool(GetRunningPlatform() == Platform.Windows));
