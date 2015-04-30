@@ -65,7 +65,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       new Closure(new[] { ".", "args" },
                                                   new ClrLambdaBody(c =>
                                                           {
-                                                              var args = c.Lookup("args").To<IEnumerable<Value>>();
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>().ToArray();
+                                                              if (args.Length == 0)
+                                                              {
+                                                                  return new Integer(0);
+                                                              }
                                                               var result = args.First();
                                                               foreach (var value in args.Skip(1))
                                                               {
@@ -90,7 +94,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       new Closure(new[] { ".", "args" },
                                                   new ClrLambdaBody(c =>
                                                           {
-                                                              var args = c.Lookup("args").To<IEnumerable<Value>>();
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>().ToArray();
+                                                              if (args.Length == 0)
+                                                              {
+                                                                  return new Integer(0);
+                                                              }
                                                               var result = args.First();
                                                               foreach (var value in args.Skip(1))
                                                               {
@@ -177,7 +185,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                               var lambda = (Closure)c.Lookup("a");
                                                               var list = c.Lookup("b").To<IEnumerable<Value>>();
                                                               return new Cons(list.Select(value =>
-                                                                                          c.Trampoline(c.InvokeClosure(lambda, new[] { value.ToExpression() }))).ToArray());
+                                                                                          c.Trampoline(c.InvokeClosure(lambda, new[] { new Constant(value) }))).ToArray());
                                                           })));
 
             context.CurrentFrame.Bind("filter",
@@ -186,7 +194,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       {
                                           var lambda = (Closure)c.Lookup("a");
                                           var list = c.Lookup("b").To<IEnumerable<Value>>();
-                                          var result = list.Where(value => c.Trampoline(c.InvokeClosure(lambda, new[] { value.ToExpression() })).To<bool>()).ToArray();
+                                          var result = list.Where(value => c.Trampoline(c.InvokeClosure(lambda, new[] { new Constant(value) })).To<bool>()).ToArray();
                                           if (result.Any())
                                           {
                                               return new Cons(result);
