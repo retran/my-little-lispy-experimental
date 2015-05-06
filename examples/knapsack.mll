@@ -44,11 +44,10 @@
 
 (define (solve-impl sack index len)
   (if (and (>= (sack-size sack) 0) (< index len))
-      (let ((sack-with-item (sack-with-nth-item sack index)))
-        (best (solve-impl sack-with-item (+ index 1) len)
-              (solve-impl sack (+ index 1) len)
-              sack-cost))
-      sack))
+      (best (solve-impl (sack-with-nth-item sack index) (+ index 1) len)
+            (solve-impl sack (+ index 1) len)
+            sack-cost)
+  sack))
 
 (define (solve sack)
   (solve-impl sack 0 (length (items sack))))
