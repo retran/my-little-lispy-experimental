@@ -50,7 +50,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             var scriptEngine = new ScriptEngine();
             if (!string.IsNullOrEmpty(arguments.Script))
             {
-                using (var stream = new FileStream(args[0], FileMode.Open))
+                using (var stream = new FileStream(arguments.Script, FileMode.Open))
                 {
                     try
                     {
