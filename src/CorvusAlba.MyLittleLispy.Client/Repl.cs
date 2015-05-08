@@ -24,6 +24,11 @@ namespace CorvusAlba.MyLittleLispy.Client
                 {
                     var line = Console.ReadLine();
 
+                    if (line == null)
+                    {
+                        line = "(halt 0)";
+                    }
+                    
                     while (true)
                     {
                         var count = line.Count(c => c == '(') - line.Count(c => c == ')');
@@ -35,6 +40,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                         Console.Write(" ... ");
                         line = line + Console.ReadLine();
                     }
+
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
                     var value = _engine.Evaluate(line);
