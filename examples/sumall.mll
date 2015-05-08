@@ -4,6 +4,6 @@
       ((> x value) acc)
     (set! acc (+ acc x))))
 
-(display (sum-all 10))
-(display (sum-all 100))
-(display (sum-all 1000))
+(display-line (sum-all 10))
+(display-line (sum-all 100))
+(display-line (sum-all 1000))

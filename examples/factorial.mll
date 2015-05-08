@@ -3,6 +3,6 @@
 	    1
 	    (* value (factorial (- value 1)))))
 
-(display (factorial 5))
-(display (factorial 8))
-(display (factorial 10))
+(display-line (factorial 5))
+(display-line (factorial 8))
+(display-line (factorial 10))

@@ -1,6 +1,6 @@
 (cond
- (system-is-windows? (display "windows"))
- (system-is-linux? (display "linux"))
- (system-is-macos? (display "macos")))
+ (system-is-windows? (display-line "windows"))
+ (system-is-linux? (display-line "linux"))
+ (system-is-macos? (display-line "macos")))
 
-(display my-little-lispy-runtime-version)
+(display-line my-little-lispy-runtime-version)

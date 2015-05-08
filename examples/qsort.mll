@@ -7,5 +7,5 @@
         (append (qsort left) (list pivot) (qsort right)))
       lst))
 
-(display (qsort '(1 3 6 5 7 10 8 2)))
-(display (qsort '(1 3 3 5 2 1 8 2 1 1 5)))
+(display-line (qsort '(1 3 6 5 7 10 8 2)))
+(display-line (qsort '(1 3 3 5 2 1 8 2 1 1 5)))

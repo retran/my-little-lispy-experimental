@@ -5,5 +5,5 @@
            ,@body
            (loop (+ i 1))))))
 
-(for-loop 1 10 ((display "Hello") (display i)))
+(for-loop 1 10 ((display "Hello ") (display-line i)))
 

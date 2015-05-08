@@ -1,6 +1,6 @@
 (defmacro main commands
   `(let ((c 1))
-     (defmacro p (value) `(display ,value))
+     (defmacro p (value) `(display-line ,value))
      ,@commands
      c))
 

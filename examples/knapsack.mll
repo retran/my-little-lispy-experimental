@@ -60,4 +60,4 @@
   (item 3 4)
   (item 1 10)))
 
-(display (solve test))
+(display-line (solve test))

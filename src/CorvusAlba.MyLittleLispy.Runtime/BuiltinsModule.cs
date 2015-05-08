@@ -177,6 +177,14 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                               System.Console.Write(c.Lookup("a").ToString());
                                                               return Null.Value;
                                                           })));
+
+            context.CurrentFrame.Bind("display-line",
+                                      new Closure(new[] { "a" },
+                                                  new ClrLambdaBody(c =>
+                                                          {
+                                                              System.Console.WriteLine(c.Lookup("a").ToString());
+                                                              return Null.Value;
+                                                          })));
             
             context.CurrentFrame.Bind("map",
                                       new Closure(new[] { "a", "b" },
