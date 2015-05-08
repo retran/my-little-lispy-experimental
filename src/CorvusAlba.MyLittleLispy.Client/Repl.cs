@@ -43,7 +43,7 @@ namespace CorvusAlba.MyLittleLispy.Client
 
                     Stopwatch sw = new Stopwatch();
                     sw.Start();
-                    var value = _engine.Evaluate(line);
+                    var value = string.IsNullOrWhiteSpace(line) ? Null.Value : _engine.Evaluate(line);
                     sw.Stop();
 
                     TimeSpan ts = sw.Elapsed;
