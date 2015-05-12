@@ -300,7 +300,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     CurrentFrame.Bind(name, new Closure(this,
                                                         new Expression(argNodes),
                                                         new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                                                       Concat(args.Skip(1)).ToArray()), true));
+                                                                       Concat(args.Skip(1)).ToArray()), false));
                 }
                 var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                                                     Concat(args.Skip(1)).ToArray()), true);
@@ -337,7 +337,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     CurrentFrame.Bind(name, new Closure(this,
                                                         new Expression(argNodes),
                                                         new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
-                                                                       Concat(args.Skip(1)).ToArray()), true));
+                                                                       Concat(args.Skip(1)).ToArray()), false));
                 }
                 
                 var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
