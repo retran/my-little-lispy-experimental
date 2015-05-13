@@ -1,8 +1,3 @@
-(define (build-list n proc)
-  (do ((i 0 (+ i 1)) (lst '()))
-      ((= i n) lst)
-    (set! lst (append lst (list (proc i))))))
-
 (define (best a b est)
   (if (> (est a) (est b)) a b))
 

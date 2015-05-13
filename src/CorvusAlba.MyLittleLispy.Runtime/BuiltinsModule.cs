@@ -211,6 +211,20 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                           return Null.Value;
                                       })));
 
+            context.CurrentFrame.Bind("build-list",
+                                      new Closure(new[] { "n", "proc" },
+                                                  new ClrLambdaBody(c =>
+                                                          {
+                                                              var n = c.Lookup("n").To<int>();
+                                                              var list = new Value[n];
+                                                              var lambda = (Closure)c.Lookup("proc");
+                                                              for (int i = 0; i < n; i++)
+                                                              {
+                                                                  list[i] = c.Trampoline(c.InvokeClosure(lambda, new Node[] { (new Integer(i)).ToExpression() }));
+                                                              }
+                                                              return new Cons(list);
+                                                          })));
+
             context.CurrentFrame.Bind("apply",
                                       new Closure(new[] { "a", "b" },
                                                   new ClrLambdaBody(c =>
