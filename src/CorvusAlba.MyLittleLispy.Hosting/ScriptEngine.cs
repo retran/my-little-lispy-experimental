@@ -38,8 +38,8 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 
             if (!useGlobalFrame)
             {
-                _context.BeginFrame();
-                _context.CurrentFrame.BeginScope();
+                _context.Push();
+                _context.CurrentFrame.Push();
             }
 
             var sb = new StringBuilder();
@@ -64,8 +64,8 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 
             if (!useGlobalFrame)
             {
-                _context.CurrentFrame.EndScope();
-                _context.EndFrame();
+                _context.CurrentFrame.Pop();
+                _context.Pop();
             }
 
             return result;

@@ -142,7 +142,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             _globalFrame = new Frame();
             _callStack.Push(_globalFrame);
-            CurrentFrame.BeginScope();
+            CurrentFrame.Push();
         }
 
         private Value Quasiquote(Node[] args)
@@ -241,7 +241,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             var body = new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                       Concat(args.Skip(2)).ToArray());
 
-            CurrentFrame.BeginScope();
+            CurrentFrame.Push();
             try
             {
                 foreach (var clause in variableClauses)
@@ -265,7 +265,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             finally
             {
-                CurrentFrame.EndScope();
+                CurrentFrame.Pop();
             }
         }
         
@@ -289,7 +289,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 argNodes.Add(clause.Head);
             }
 
-            CurrentFrame.BeginScope(frameArgs, frameValues);
+            CurrentFrame.Push(frameArgs, frameValues);
             try
             {
                 if (!string.IsNullOrEmpty(name))
@@ -305,7 +305,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             finally
             {
-                CurrentFrame.EndScope();
+                CurrentFrame.Pop();
             }
         }
 
@@ -320,7 +320,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 args = args.Skip(1).ToArray();
             }
 
-            CurrentFrame.BeginScope();
+            CurrentFrame.Push();
             try
             {
                 foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
@@ -343,17 +343,21 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             finally
             {
-                CurrentFrame.EndScope();
+                CurrentFrame.Pop();
             }
         }
 
+        public void Push(Frame frame)
+        {
+            _callStack.Push(frame);
+        }
 
-        public void BeginFrame()
+        public void Push()
         {
             _callStack.Push(new Frame(_globalFrame));
         }
 
-        public void EndFrame()
+        public void Pop()
         {
             _callStack.Pop();
         }
@@ -460,10 +464,10 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             if (!closure.IsMacro)
             {
-                BeginFrame();
+                Push();
                 CurrentFrame.Import(closure.Scopes);
             }
-            CurrentFrame.BeginScope(closure.Args, arguments);                
+            CurrentFrame.Push(closure.Args, arguments);                
             try
             {
                 Value result;
@@ -481,17 +485,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             finally
             {
-                CurrentFrame.EndScope();                
+                CurrentFrame.Pop();                
                 if (!closure.IsMacro)
                 {
                     if (closure.Scopes != null)
                     {
                         for (var i = 0; i < closure.Scopes.Count(); i++)
                         {
-                            CurrentFrame.EndScope();
+                            CurrentFrame.Pop();
                         }
                     }
-                    EndFrame();
+                    Pop();
                 }
             }
         }

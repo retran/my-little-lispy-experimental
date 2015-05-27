@@ -58,7 +58,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                       new Closure(new[] { "expression" },
                                                   new ClrLambdaBody(c =>
                                                           {
-                                                              return c.Lookup("expression").ToExpression().Eval(context);
+                                                              var expression = c.Lookup("expression").ToExpression();
+                                                              var frame = context.CurrentFrame;
+                                                              context.Pop();
+                                                              var result = expression.Eval(context);
+                                                              context.Push(frame);
+                                                              return result;
                                                           })));
             
             context.CurrentFrame.Bind("halt",

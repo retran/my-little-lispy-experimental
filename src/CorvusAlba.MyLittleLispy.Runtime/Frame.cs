@@ -84,17 +84,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             _scopes.Peek().Bind(name, value);
         }
 
-        public void BeginScope()
+        public void Push()
         {
             _scopes.Push(new Scope(new string[] { }, new Value[] { }));
         }
 
-        public void BeginScope(IEnumerable<string> args, IEnumerable<Value> values)
+        public void Push(IEnumerable<string> args, IEnumerable<Value> values)
         {
             _scopes.Push(new Scope(args, values));
         }
 
-        public void EndScope()
+        public void Pop()
         {
             _scopes.Pop();
         }
