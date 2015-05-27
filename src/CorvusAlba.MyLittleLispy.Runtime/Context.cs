@@ -44,7 +44,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             _parser = parser;
             _specialForms = new Dictionary<string, Func<Node[], Value>>
 		    {
-		        {"eval", args => Trampoline(args[0].Eval(this)).ToExpression().Eval(this) },
 		        {"define", args => Define(args[0], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
 								          Concat(args.Skip(1)).ToArray())) },
 		        {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
@@ -62,8 +61,6 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 		        {"quasiquote", Quasiquote },
 		        {"unquote", args => Trampoline(args[0].Eval(this)) },
 		        {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
-		        {"list", args => new Cons(args.Select(node => Trampoline(node.Eval(this))).ToArray()) },
-		        {"cons", args => new Cons(Trampoline(args[0].Eval(this)), Trampoline(args[1].Eval(this))) },
 		        {"lambda", args => new Closure(this, args[0],
 						       new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
 								      Concat(args.Skip(1)).ToArray())) },

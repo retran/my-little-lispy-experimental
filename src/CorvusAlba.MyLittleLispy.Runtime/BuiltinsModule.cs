@@ -54,6 +54,13 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         
         public void Import(Parser parser, Context context)
         {
+            context.CurrentFrame.Bind("eval",
+                                      new Closure(new[] { "expression" },
+                                                  new ClrLambdaBody(c =>
+                                                          {
+                                                              return c.Lookup("expression").ToExpression().Eval(context);
+                                                          })));
+            
             context.CurrentFrame.Bind("halt",
                                       new Closure(new[] { "code" },
                                                   new ClrLambdaBody(c =>
@@ -61,6 +68,19 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                               throw new HaltException(c.Lookup("code").To<int>());
                                                           })));
 
+            context.CurrentFrame.Bind("cons",
+                                      new Closure(new[] { "a", "b" },
+                                                  new ClrLambdaBody(c =>
+                                                                    new Cons(c.Lookup("a"), c.Lookup("b")))));
+                            
+            context.CurrentFrame.Bind("list",
+                                      new Closure(new[] { ".", "args" },
+                                                  new ClrLambdaBody(c =>
+                                                          {
+                                                              var args = c.Lookup("args").To<IEnumerable<Value>>().ToArray();
+                                                              return new Cons(args);
+                                                          })));
+                            
             context.CurrentFrame.Bind("+",
                                       new Closure(new[] { ".", "args" },
                                                   new ClrLambdaBody(c =>
