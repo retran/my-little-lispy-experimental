@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Project ToolsVersion="12.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
@@ -52,13 +52,8 @@
       <private>True</private>
     </ProjectReference>
     <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Runtime\CorvusAlba.MyLittleLispy.Runtime.csproj">
-      <Project>{c7bad0db-2baf-45d0-be12-bbb29f4e7631}</Project>
+      <Project>{C7BAD0DB-2BAF-45D0-BE12-BBB29F4E7631}</Project>
       <Name>CorvusAlba.MyLittleLispy.Runtime</Name>
-      <private>True</private>
-    </ProjectReference>
-    <ProjectReference Include="..\CorvusAlba.MyLittleLispy.Debugger\CorvusAlba.MyLittleLispy.Debugger.csproj">
-      <Project>{7C3D4407-7409-49B4-89ED-538882ADDDDE}</Project>
-      <Name>CorvusAlba.MyLittleLispy.Debugger</Name>
       <private>True</private>
     </ProjectReference>
   </ItemGroup>
