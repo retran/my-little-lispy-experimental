@@ -1,13 +1,11 @@
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading;
 using CorvusAlba.MyLittleLispy.Hosting;
 using CorvusAlba.MyLittleLispy.Runtime;
-using System.Net;
-using System.Net.Sockets;
-using System.IO;
-using System.Text;
-using System.Threading;
 
 namespace CorvusAlba.MyLittleLispy.Client
 {
@@ -17,7 +15,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             private ScriptEngine _scriptEngine;
             private bool _synchronized;
             private Thread _debuggerThread;
-            private bool _running = false;
+            private bool _running;
             private int _port;
             
             public Server(ScriptEngine scriptEngine, int port, bool synchronized = false)
@@ -42,7 +40,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                     tcpListener.Start(); 
                     Socket client = tcpListener.AcceptSocket();
                     
-                    NetworkStream ns = new NetworkStream(client);
+                    var ns = new NetworkStream(client);
                     
                     using (var writer = new StreamWriter(ns))
                         using (var reader = new StreamReader(ns))
@@ -51,7 +49,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                             {
                                 var line = reader.ReadLine();
                                 var result = _scriptEngine.Evaluate(line);
-                                writer.WriteLine(result.ToString());
+                                writer.WriteLine(result);
                                 writer.Flush();
                             }
                         }
@@ -77,12 +75,12 @@ namespace CorvusAlba.MyLittleLispy.Client
             {
                 if (disposing)
                 {
-                    this.Stop();                
+                    Stop();                
                 }
             }
 	}
 
-    internal class Repl
+    class Repl
     {
         private readonly ScriptEngine _engine;
         private readonly Server _server;
@@ -118,13 +116,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                         Console.Write(" > ");
                         try
                         {
-                            var line = Console.ReadLine();
-                            
-                            if (line == null)
-                            {
-                                line = "(halt 0)";
-                            }
-                            
+                            var line = Console.ReadLine() ?? "(halt 0)";
                             while (true)
                             {
                                 var count = line.Count(c => c == '(') - line.Count(c => c == ')');
@@ -137,7 +129,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                                 line = line + Console.ReadLine();
                             }
                             
-                            Stopwatch sw = new Stopwatch();
+                            var sw = new Stopwatch();
                             
                             sw.Start();
                             writer.WriteLine(line);

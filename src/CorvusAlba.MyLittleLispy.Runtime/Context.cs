@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
@@ -24,7 +23,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private Value InvokeCondClause(Expression clause, Value condition = null)
         {
             var tail = clause.Tail.ToArray();
-            var first = tail.First().Quote(this);
+            var first = tail[0].Quote(this);
             if (first is SymbolValue && first.To<string>() == "=>")
             {
                 if (condition != null)
@@ -125,7 +124,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 			    {
 			        foreach (var arg in args.Take(args.Count() - 1))
 			        {
-				        Trampoline(arg.Eval(this));
+                                    Trampoline(arg.Eval(this));
 			        }
 			        return new Closure(this, null, args.Last(), true);
 			    }
@@ -154,41 +153,41 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
 
             return new Cons(expression.Nodes.SelectMany(node =>
-                {
-                    bool isNested = false;
-                    
-                    var expressionNode = node as Expression;
-                    if (expressionNode != null)
                     {
-                        var value = expressionNode.Head.Quote(this);
-                        if (value is SymbolValue)
+                        bool isNested = false;
+                    
+                        var expressionNode = node as Expression;
+                        if (expressionNode != null)
                         {
-                            var call = value.To<string>();
-                            if (call == "unquote")
+                            var value = expressionNode.Head.Quote(this);
+                            if (value is SymbolValue)
                             {
-                                return new[] { expressionNode.Eval(this).ToExpression() };
-                            }
+                                var call = value.To<string>();
+                                if (call == "unquote")
+                                {
+                                    return new[] { expressionNode.Eval(this).ToExpression() };
+                                }
 
-                            if (call == "unquote-splicing")
-                            {
-                                var innerNode = expressionNode.Eval(this).ToExpression();
-                                var innerExpressionNode = innerNode as Expression;
-                                return innerExpressionNode != null ? innerExpressionNode.Nodes : new[] { innerNode };
-                            }
+                                if (call == "unquote-splicing")
+                                {
+                                    var innerNode = expressionNode.Eval(this).ToExpression();
+                                    var innerExpressionNode = innerNode as Expression;
+                                    return innerExpressionNode != null ? innerExpressionNode.Nodes : new[] { innerNode };
+                                }
 
-                            if (call == "quasiquote")
-                            {
-                                isNested = true;
+                                if (call == "quasiquote")
+                                {
+                                    isNested = true;
+                                }
                             }
+                            if (isNested)
+                            {
+                                return new [] { expressionNode.Quote(this).ToExpression() };
+                            }
+                            return new [] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
                         }
-                        if (isNested)
-                        {
-                            return new [] { expressionNode.Quote(this).ToExpression() };
-                        }
-                        return new [] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
-                    }
-                    return new[] { node };
-                }).Select(node => node.Quote(this)).ToArray());
+                        return new[] { node };
+                    }).Select(node => node.Quote(this)).ToArray());
         }
 
         private Value Set(Node[] args)
