@@ -13,29 +13,32 @@ namespace CorvusAlba.MyLittleLispy.Client
 {
 	public sealed class Server : IDisposable
 	{
-		public static readonly string DefaultPipeName = "mylittlelispy";
+            public static readonly int DefaultPort = 55555;
+            private ScriptEngine _scriptEngine;
+            private bool _synchronized;
+            private Thread _debuggerThread;
+            private bool _running = false;
+            private int _port;
+            
+            public Server(ScriptEngine scriptEngine, int port, bool synchronized = false)
+            {
+                _scriptEngine = scriptEngine;
+                _synchronized = synchronized;
+                _debuggerThread = new Thread(new ThreadStart(Process));
+                _port = port;
+            }
 
-		private ScriptEngine _scriptEngine;
-		private bool _synchronized;
-		private Thread _debuggerThread;
-		private bool _running = false;
+            public void Start()
+            {
+                _running = true;
+                _debuggerThread.Start();
+            }
 
-		public Server(ScriptEngine scriptEngine, string name = "mylittlelispy", bool synchronized = false)
-		{
-                    _scriptEngine = scriptEngine;
-                    _synchronized = synchronized;
-                    _debuggerThread = new Thread(new ThreadStart(Process));
-		}
-
-		public void Start()
-		{
-                    _running = true;
-                    _debuggerThread.Start();
-		}
-
-		private void Process()
-		{
-                    var tcpListener = new TcpListener(55555);
+            private void Process()
+            {
+                while (_running)
+                {
+                    var tcpListener = new TcpListener(_port);
                     tcpListener.Start(); 
                     Socket client = tcpListener.AcceptSocket();
                     
@@ -52,33 +55,34 @@ namespace CorvusAlba.MyLittleLispy.Client
                                 writer.Flush();
                             }
                         }
-		}
+                }
+            }
 
-		public void Stop()
-		{
-			if (_running)
-			{
-				_running = false;
-				_debuggerThread.Abort(); // TODO use eventhandlers
-			}
-		}            
+            public void Stop()
+            {
+                if (_running)
+                {
+                    _running = false;
+                    _debuggerThread.Abort(); // TODO use eventhandlers
+                }
+            }            
 
-		public void Dispose()
-		{
-			Dispose(true);
-			GC.SuppressFinalize(this);
-		}
+            public void Dispose()
+            {
+                Dispose(true);
+                GC.SuppressFinalize(this);
+            }
 
-		private void Dispose(bool disposing)
-		{
-			if (disposing)
-			{
-				this.Stop();                
-			}
-		}
+            private void Dispose(bool disposing)
+            {
+                if (disposing)
+                {
+                    this.Stop();                
+                }
+            }
 	}
 
-	internal class Repl
+    internal class Repl
     {
         private readonly ScriptEngine _engine;
         private readonly Server _server;
@@ -86,7 +90,7 @@ namespace CorvusAlba.MyLittleLispy.Client
         public Repl(ScriptEngine engine)
         {
             _engine = engine;
-            _server = new Server(_engine);
+            _server = new Server(_engine, Server.DefaultPort);
         }
 
         public int Loop()
@@ -159,7 +163,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                             Console.WriteLine(e.Message);
                         }
                     }
-            }
+                }
         }
     }
 }
