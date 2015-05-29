@@ -1,21 +1,37 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Text;
 using CorvusAlba.MyLittleLispy.Runtime;
 
 namespace CorvusAlba.MyLittleLispy.Hosting
 {
-    public class ScriptEngine
+    public class ScriptEngine : IDisposable
     {
         private readonly Context _context;
         private readonly Parser _parser;
+        private readonly RemoteAgent _agent;
+        
+        public bool RemoteEnabled
+        {
+            get
+            {
+                return _agent != null;
+            }
+        }
 
         public ScriptEngine()
         {
             _parser = new Parser();
             _context = new Context(_parser);
-
             var builtins = new BuiltinsModule();
             builtins.Import(_parser, _context);
+        }
+
+        public ScriptEngine(int port, bool synchronized)
+            : this()
+        {
+            _agent = new RemoteAgent(this, port, synchronized);
+            _agent.Start();                
         }
 
         public Value Evaluate(string line)
@@ -69,6 +85,23 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             }
 
             return result;
+        }
+
+        public void Dispose()
+        {
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+        
+        private void Dispose(bool disposing)
+        {
+            if (disposing)
+            {
+                if (_agent != null)
+                {
+                    _agent.Stop();
+                }
+            }
         }
     }
 }

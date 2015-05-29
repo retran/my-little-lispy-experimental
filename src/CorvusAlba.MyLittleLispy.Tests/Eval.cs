@@ -11,7 +11,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
             _engine = new ScriptEngine();
         }
 
-        private ScriptEngine _engine;
+        private readonly ScriptEngine _engine;
 
         [Fact]
         public void EvalShouldEvaluteQuotedExpression()

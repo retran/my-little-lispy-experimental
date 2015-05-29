@@ -47,7 +47,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             var arguments = new CommandLineArgs();
             arguments.Parse(args);
 
-            var scriptEngine = new ScriptEngine();
+            var scriptEngine = new ScriptEngine(55555, false);
             if (!string.IsNullOrEmpty(arguments.Script))
             {
                 using (var stream = new FileStream(arguments.Script, FileMode.Open))
@@ -72,7 +72,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             
             if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
             {
-                return new Repl(scriptEngine).Loop();
+                return new Repl("localhost", 55555).Loop();
             }
 
             throw new InvalidOperationException();

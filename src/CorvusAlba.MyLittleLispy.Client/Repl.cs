@@ -2,6 +2,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using CorvusAlba.MyLittleLispy.Hosting;
@@ -9,104 +10,21 @@ using CorvusAlba.MyLittleLispy.Runtime;
 
 namespace CorvusAlba.MyLittleLispy.Client
 {
-	public sealed class Server : IDisposable
-	{
-            public static readonly int DefaultPort = 55555;
-            private ScriptEngine _scriptEngine;
-            private bool _synchronized;
-            private Thread _debuggerThread;
-            private bool _running;
-            private int _port;
-            
-            public Server(ScriptEngine scriptEngine, int port, bool synchronized = false)
-            {
-                _scriptEngine = scriptEngine;
-                _synchronized = synchronized;
-                _debuggerThread = new Thread(Process);
-                _port = port;
-            }
-
-            public void Start()
-            {
-                _running = true;
-                _debuggerThread.Start();
-            }
-
-            private void Process()
-            {
-                while (_running)
-                {
-                    var tcpListener = new TcpListener(_port);
-                    tcpListener.Start(); 
-                    Socket client = tcpListener.AcceptSocket();
-                    
-                    var ns = new NetworkStream(client);
-                    
-                    using (var writer = new StreamWriter(ns))
-                        using (var reader = new StreamReader(ns))
-                        {
-                            while (true)
-                            {
-                                var line = reader.ReadLine();
-                                var result = _scriptEngine.Evaluate(line);
-                                writer.WriteLine(result);
-                                writer.Flush();
-                            }
-                        }
-                }
-            }
-
-            public void Stop()
-            {
-                if (_running)
-                {
-                    _running = false;
-                    _debuggerThread.Abort(); // TODO use eventhandlers
-                }
-            }            
-
-            public void Dispose()
-            {
-                Dispose(true);
-                GC.SuppressFinalize(this);
-            }
-
-            private void Dispose(bool disposing)
-            {
-                if (disposing)
-                {
-                    Stop();                
-                }
-            }
-	}
-
     class Repl
     {
-        private readonly ScriptEngine _engine;
-        private readonly Server _server;
-
-        public Repl(ScriptEngine engine)
+        private readonly string _host;
+        private readonly int _port;
+        
+        public Repl(string host, int port)
         {
-            _engine = engine;
-            _server = new Server(_engine, Server.DefaultPort);
+            _host = host;
+            _port = port;
         }
 
         public int Loop()
         {
-            _server.Start();
-            Thread.Sleep(1000);
-
-            TcpClient socketForServer = null;
-            try
-            {
-                socketForServer = new TcpClient("localHost", 55555);
-            }
-            catch
-            {
-                Console.WriteLine("Failed to connect to server at {0}:999", "localhost");
-            }
-
-            NetworkStream ns = socketForServer.GetStream();
+            var socketForServer = new TcpClient(_host, _port);
+            var ns = socketForServer.GetStream();
             
             using (var writer = new StreamWriter(ns))
                 using (var reader = new StreamReader(ns))
@@ -126,7 +44,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                                 }
                                 
                                 Console.Write(" ... ");
-                                line = line + Console.ReadLine();
+                                line = line.TrimEnd('\n', '\r') + " " + Console.ReadLine();
                             }
                             
                             var sw = new Stopwatch();

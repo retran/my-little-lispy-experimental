@@ -106,7 +106,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         }
 
         [Fact]
-        public void DivideOperationThrowsOnIntegerDivideByZero()
+        public void DivideOperationShouldThrowExceptionOnNumberDivideByZero()
         {
             Assert.Throws<DivideByZeroException>(() => 
                 _engine.Evaluate("(/ 10 0)").To<int>());
@@ -116,7 +116,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(+ (+ (* 10 3) 2) (- 10 (- 20 15)))", 37)]
         [InlineData("(* (/ 10.0  5.0) (* 5.0 5.0))", 50f)]
         [InlineData("(* (/ 10.0  5) (* 5 5.0))", 50f)]
-        public void ComplexExpressionWithIntegersShouldEvaluateProperly<T>(string expression, T expected)
+        public void ComplexExpressionWithNumbersShouldEvaluateProperly<T>(string expression, T expected)
         {
             Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
         }
