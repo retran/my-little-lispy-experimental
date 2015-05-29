@@ -1,57 +1,55 @@
 ﻿using CorvusAlba.MyLittleLispy.Hosting;
 using CorvusAlba.MyLittleLispy.Runtime;
-using NUnit.Framework;
+using Xunit;
 
 namespace CorvusAlba.MyLittleLispy.Tests
 {
-    [TestFixture]
     public class Builtins
     {
-        [SetUp]
-        public void SetUp()
+        public Builtins()
         {
-            _engine = new ScriptEngine();
+            _engine = new ScriptEngine();           
         }
 
         private ScriptEngine _engine;
 
-        [Test]
+        [Fact]
         public void GreaterEqualShouldEvaluateProperly()
         {
-            Assert.AreEqual(true, _engine.Evaluate("(>= 10 10)").To<bool>());
-            Assert.AreEqual(true, _engine.Evaluate("(>= 10 5)").To<bool>());
-            Assert.AreEqual(false, _engine.Evaluate("(>= 5 10)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(>= 10 10)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(>= 10 5)").To<bool>());
+            Assert.Equal(false, _engine.Evaluate("(>= 5 10)").To<bool>());
         }
 
-        [Test]
+        [Fact]
         public void IfWithFalseExpressionReturnsElseClause()
         {
-            Assert.AreEqual(Null.Value, _engine.Evaluate("(if #f 'then)"));
-            Assert.AreEqual("else", _engine.Evaluate("(if #f 'then 'else)").To<string>());
+            Assert.Equal(Null.Value, _engine.Evaluate("(if #f 'then)"));
+            Assert.Equal("else", _engine.Evaluate("(if #f 'then 'else)").To<string>());
         }
 
-        [Test]
+        [Fact]
         public void IfWithTrueExpressionReturnsThenClause()
         {
-            Assert.AreEqual("then", _engine.Evaluate("(if #t 'then)").To<string>());
-            Assert.AreEqual("then", _engine.Evaluate("(if #t 'then 'else)").To<string>());
+            Assert.Equal("then", _engine.Evaluate("(if #t 'then)").To<string>());
+            Assert.Equal("then", _engine.Evaluate("(if #t 'then 'else)").To<string>());
         }
 
-        [Test]
+        [Fact]
         public void LessEqualShouldEvaluateProperly()
         {
-            Assert.AreEqual(true, _engine.Evaluate("(<= 10 10)").To<bool>());
-            Assert.AreEqual(true, _engine.Evaluate("(<= 5 10)").To<bool>());
-            Assert.AreEqual(false, _engine.Evaluate("(<= 10 5)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(<= 10 10)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(<= 5 10)").To<bool>());
+            Assert.Equal(false, _engine.Evaluate("(<= 10 5)").To<bool>());
         }
 
-        [Test]
+        [Fact]
         public void XorShouldEvaluateProperly()
         {
-            Assert.AreEqual(false, _engine.Evaluate("(xor #t #t)").To<bool>());
-            Assert.AreEqual(true, _engine.Evaluate("(xor #f #t)").To<bool>());
-            Assert.AreEqual(true, _engine.Evaluate("(xor #t #f)").To<bool>());
-            Assert.AreEqual(false, _engine.Evaluate("(xor #f #f)").To<bool>());
+            Assert.Equal(false, _engine.Evaluate("(xor #t #t)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(xor #f #t)").To<bool>());
+            Assert.Equal(true, _engine.Evaluate("(xor #t #f)").To<bool>());
+            Assert.Equal(false, _engine.Evaluate("(xor #f #f)").To<bool>());
         }
     }
 }

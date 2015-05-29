@@ -1,30 +1,28 @@
 using CorvusAlba.MyLittleLispy.Hosting;
 using CorvusAlba.MyLittleLispy.Runtime;
-using NUnit.Framework;
+using Xunit;
 
 namespace CorvusAlba.MyLittleLispy.Tests
 {
-    [TestFixture]
     public class Eval
     {
-        [SetUp]
-        public void SetUp()
+        public Eval()
         {
             _engine = new ScriptEngine();
         }
 
         private ScriptEngine _engine;
 
-        [Test]
+        [Fact]
         public void EvalShouldEvaluteQuotedExpression()
         {
-            Assert.AreEqual(12, _engine.Evaluate("(eval '(+ 2 (* 5 2)))").To<int>());
-            Assert.AreEqual("true", _engine.Evaluate("(eval '(cond ((< 5 10) 'true) (#t 'false)))").To<string>());
-            Assert.AreEqual(4, _engine.Evaluate("(eval (cons '+ (cons 2 2)))").To<int>());
-            Assert.AreEqual(4, _engine.Evaluate("(eval (list '+ 2 2))").To<int>());
+            Assert.Equal(12, _engine.Evaluate("(eval '(+ 2 (* 5 2)))").To<int>());
+            Assert.Equal("true", _engine.Evaluate("(eval '(cond ((< 5 10) 'true) (#t 'false)))").To<string>());
+            Assert.Equal(4, _engine.Evaluate("(eval (cons '+ (cons 2 2)))").To<int>());
+            Assert.Equal(4, _engine.Evaluate("(eval (list '+ 2 2))").To<int>());
 
-            Assert.AreEqual(Null.Value, _engine.Evaluate("(eval '(define x 10))"));
-            Assert.AreEqual(10, _engine.Evaluate("(eval 'x)").To<int>());
+            Assert.Equal(Null.Value, _engine.Evaluate("(eval '(define x 10))"));
+            Assert.Equal(10, _engine.Evaluate("(eval 'x)").To<int>());
         }
     }
 }

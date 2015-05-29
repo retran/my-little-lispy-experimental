@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 using System.Runtime.InteropServices;
 
-[assembly: AssemblyTitle("CorvusAlba.MyLittleLispy.Tests")]
-[assembly: AssemblyDescription("Tests for My Little Lispy")]
+[assembly: AssemblyTitle("CorvusAlba.MyLittleLispy.Facts")]
+[assembly: AssemblyDescription("Facts for My Little Lispy")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Corvus Alba")]
 [assembly: AssemblyProduct("My Little Lispy")]
