@@ -22,7 +22,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             {
                 _scriptEngine = scriptEngine;
                 _synchronized = synchronized;
-                _debuggerThread = new Thread(new ThreadStart(Process));
+                _debuggerThread = new Thread(Process);
                 _port = port;
             }
 
