@@ -23,6 +23,7 @@ namespace CorvusAlba.MyLittleLispy.Client
 
         public int Loop()
         {
+            Thread.Sleep(1000);
             var socketForServer = new TcpClient(_host, _port);
             var ns = socketForServer.GetStream();
             
@@ -34,7 +35,11 @@ namespace CorvusAlba.MyLittleLispy.Client
                         Console.Write(" > ");
                         try
                         {
-                            var line = Console.ReadLine() ?? "(halt 0)";
+                            var line = Console.ReadLine();
+                            if (line == null)
+                            {
+                                break;
+                            }
                             while (true)
                             {
                                 var count = line.Count(c => c == '(') - line.Count(c => c == ')');
@@ -44,25 +49,31 @@ namespace CorvusAlba.MyLittleLispy.Client
                                 }
                                 
                                 Console.Write(" ... ");
-                                line = line.TrimEnd('\n', '\r') + " " + Console.ReadLine();
+                                var newpart = Console.ReadLine();
+                                if (newpart != null)
+                                {
+                                    line = line.TrimEnd('\n', '\r') + " " + newpart;
+                                }
                             }
+
+                            if (!string.IsNullOrEmpty(line))
+                            {
+                                var sw = new Stopwatch();
                             
-                            var sw = new Stopwatch();
+                                sw.Start();
+                                writer.WriteLine(line);
+                                writer.Flush();
+                                var value = reader.ReadLine();
+                                sw.Stop();
                             
-                            sw.Start();
-                            writer.WriteLine(line);
-                            writer.Flush();
-                            var value = reader.ReadLine();
-                            sw.Stop();
-                            
-                            TimeSpan ts = sw.Elapsed;
-                            string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}:{3:000}",
-                                                               ts.Hours, ts.Minutes, ts.Seconds,
-                                                               ts.Milliseconds);
+                                TimeSpan ts = sw.Elapsed;
+                                string elapsedTime = string.Format("{0:00}:{1:00}:{2:00}:{3:000}",
+                                                                   ts.Hours, ts.Minutes, ts.Seconds,
+                                                                   ts.Milliseconds);
                     
-                            Console.WriteLine(" => {0}", value);
-                            Console.WriteLine("(elapsed {0})", elapsedTime);
-                        
+                                Console.WriteLine(" => {0}", value);
+                                Console.WriteLine("(elapsed {0})", elapsedTime);
+                            }
                         }
                         catch (HaltException e)
                         {
@@ -74,6 +85,8 @@ namespace CorvusAlba.MyLittleLispy.Client
                         }
                     }
                 }
+            socketForServer.Close();
+            return 0;
         }
     }
 }

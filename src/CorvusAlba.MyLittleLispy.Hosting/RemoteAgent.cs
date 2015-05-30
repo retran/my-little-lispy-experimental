@@ -3,6 +3,10 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
+using CorvusAlba.MyLittleLispy.Runtime;
+
+using String = CorvusAlba.MyLittleLispy.Runtime.String;
 
 namespace CorvusAlba.MyLittleLispy.Hosting
 {
@@ -10,22 +14,21 @@ namespace CorvusAlba.MyLittleLispy.Hosting
     {
         private ScriptEngine _scriptEngine;
         private bool _synchronized;
-        private Thread _thread;
         private bool _running;
         private int _port;
+        private Task _task;
         
         public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronized = false)
         {
             _scriptEngine = scriptEngine;
             _synchronized = synchronized;
-            _thread = new Thread(Process);
             _port = port;
         }
         
         public void Start()
         {
             _running = true;
-            _thread.Start();
+            _task = Task.Run(Process);
         }
         
         private void Process()
@@ -41,8 +44,16 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                     {
                         while (client.Connected && _running)
                         {
+                            Value result = Null.Value;
                             var line = reader.ReadLine();
-                            var result = _scriptEngine.Evaluate(line);
+                            try
+                            {
+                                result = _scriptEngine.Evaluate(line);
+                            }
+                            catch (HaltException e)
+                            {
+                                result = new String("HALT " + e.Code);
+                            }
                             writer.WriteLine(result);
                             writer.Flush();
                         }
@@ -56,8 +67,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             if (_running)
             {
                 _running = false;
-                _thread.Join();
-            }
+                _task.Wait();            }
         }            
         
         public void Dispose()
