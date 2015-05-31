@@ -28,7 +28,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         public void Start()
         {
             _running = true;
-            _task = Task.Run(Process);
+            _task = Task.Run(new Action(Process));
         }
         
         private void Process()
