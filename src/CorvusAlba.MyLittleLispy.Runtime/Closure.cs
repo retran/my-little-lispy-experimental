@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Contracts;
 using System.Linq;
 
 namespace CorvusAlba.MyLittleLispy.Runtime
@@ -29,7 +28,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             else
             {
-                Args = new string[] {};
+                Args = new string[] { };
             }
         }
 
@@ -55,12 +54,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 else
                 {
                     HasRestArg = true;
-                    Args = new[] {args.Quote(context).To<string>()};
+                    Args = new[] { args.Quote(context).To<string>() };
                 }
             }
             else
             {
-                Args = new string[] {};
+                Args = new string[] { };
             }
         }
 
