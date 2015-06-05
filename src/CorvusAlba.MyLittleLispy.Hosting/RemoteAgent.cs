@@ -17,24 +17,24 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         private bool _running;
         private int _port;
         private Task _task;
-        
+
         public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronized = false)
         {
             _scriptEngine = scriptEngine;
             _synchronized = synchronized;
             _port = port;
         }
-        
+
         public void Start()
         {
             _running = true;
             _task = Task.Run(new Action(Process));
         }
-        
+
         private void Process()
         {
             var tcpListener = new TcpListener(IPAddress.Any, _port);
-            tcpListener.Start(); 
+            tcpListener.Start();
             while (_running)
             {
                 var client = tcpListener.AcceptSocket();
@@ -54,6 +54,10 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                             {
                                 result = new String("HALT " + e.Code);
                             }
+                            catch (Exception e)
+                            {
+                                result = new String("EXCEPTION " + e.Message);
+                            }
                             writer.WriteLine(result);
                             writer.Flush();
                         }
@@ -61,26 +65,26 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             }
             tcpListener.Stop();
         }
-        
+
         public void Stop()
         {
             if (_running)
             {
                 _running = false;
                 _task.Wait();            }
-        }            
-        
+        }
+
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         private void Dispose(bool disposing)
         {
             if (disposing)
             {
-                Stop();                
+                Stop();
             }
         }
     }

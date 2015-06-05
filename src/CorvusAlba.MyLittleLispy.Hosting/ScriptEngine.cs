@@ -10,7 +10,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         private readonly Context _context;
         private readonly Parser _parser;
         private readonly RemoteAgent _agent;
-        
+
         public bool RemoteEnabled
         {
             get
@@ -31,7 +31,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             : this()
         {
             _agent = new RemoteAgent(this, port, synchronized);
-            _agent.Start();                
+            _agent.Start();
         }
 
         public Value Evaluate(string line)
@@ -92,7 +92,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             Dispose(true);
             GC.SuppressFinalize(this);
         }
-        
+
         private void Dispose(bool disposing)
         {
             if (disposing)

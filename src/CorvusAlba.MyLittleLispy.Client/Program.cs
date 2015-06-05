@@ -13,7 +13,7 @@ namespace CorvusAlba.MyLittleLispy.Client
         public bool Inspect = false;
 
         private IEnumerator _enumerator = null;
-        
+
         public void Parse(string[] args)
         {
             _enumerator = args.GetEnumerator();
@@ -39,7 +39,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             }
         }
     }
-    
+
     internal class Program
     {
         private static int Main(string[] args)
@@ -47,12 +47,11 @@ namespace CorvusAlba.MyLittleLispy.Client
             var arguments = new CommandLineArgs();
             arguments.Parse(args);
 
-            var scriptEngine = new ScriptEngine(55555, false);
-            if (!string.IsNullOrEmpty(arguments.Script))
+            using (var scriptEngine = new ScriptEngine(55555, false))
             {
-                using (var stream = new FileStream(arguments.Script, FileMode.Open))
+                if (!string.IsNullOrEmpty(arguments.Script))
                 {
-                    try
+                    using (var stream = new FileStream(arguments.Script, FileMode.Open))
                     {
                         scriptEngine.Execute(stream, true);
                         if (!arguments.Inspect)
@@ -60,21 +59,13 @@ namespace CorvusAlba.MyLittleLispy.Client
                             return 0;
                         }
                     }
-                    catch (HaltException e)
-                    {
-                        if (!arguments.Inspect)
-                        {                       
-                            return e.Code;
-                        }
-                    }
+                }
+
+                if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
+                {
+                    return new Repl("localhost", 55555).Loop();
                 }
             }
-            
-            if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
-            {
-                return new Repl("localhost", 55555).Loop();
-            }
-
             throw new InvalidOperationException();
         }
     }
