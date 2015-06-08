@@ -67,7 +67,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             arguments.Parse(args);
             if (!arguments.Remote)
             {
-                using (var scriptEngine = new ScriptEngine(arguments.Port, false))
+                using (var scriptEngine = new ScriptEngine(arguments.Port, true))
                 {
                     if (!string.IsNullOrEmpty(arguments.Script))
                     {
