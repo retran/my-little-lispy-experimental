@@ -12,6 +12,9 @@ namespace CorvusAlba.MyLittleLispy.Client
         {
             public string Script = string.Empty;
             public bool Inspect = false;
+            public string Host = "localhost";
+            public int Port = 55555;
+            public bool Remote = false;
 
             private IEnumerator _enumerator = null;
 
@@ -29,9 +32,26 @@ namespace CorvusAlba.MyLittleLispy.Client
                 if (arg.StartsWith("-"))
                 {
                     if (arg.Equals("-i", StringComparison.OrdinalIgnoreCase)
-                    || arg.Equals("--inspect", StringComparison.OrdinalIgnoreCase))
+                        || arg.Equals("--inspect", StringComparison.OrdinalIgnoreCase))
                     {
                         Inspect = true;
+                    }
+                    else if (arg.Equals("-r", StringComparison.OrdinalIgnoreCase)
+                             || arg.Equals("--remote", StringComparison.OrdinalIgnoreCase))
+                    {
+                        Remote = true;
+                    }
+                    else if (arg.Equals("-h", StringComparison.OrdinalIgnoreCase)
+                             || arg.Equals("--host", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _enumerator.MoveNext();
+                        Host = _enumerator.Current.ToString();
+                    }
+                    else if (arg.Equals("-p", StringComparison.OrdinalIgnoreCase)
+                             || arg.Equals("--port", StringComparison.OrdinalIgnoreCase))
+                    {
+                        _enumerator.MoveNext();
+                        Port = int.Parse(_enumerator.Current.ToString());
                     }
                 }
                 else
@@ -45,25 +65,34 @@ namespace CorvusAlba.MyLittleLispy.Client
         {
             var arguments = new CommandLineArgs();
             arguments.Parse(args);
-            using (var scriptEngine = new ScriptEngine(55555, false))
+            if (!arguments.Remote)
             {
-                if (!string.IsNullOrEmpty(arguments.Script))
+                using (var scriptEngine = new ScriptEngine(arguments.Port, false))
                 {
-                    using (var stream = new FileStream(arguments.Script, FileMode.Open))
+                    if (!string.IsNullOrEmpty(arguments.Script))
                     {
-                        scriptEngine.Execute(stream, true);
-                        if (!arguments.Inspect)
+                        using (var stream = new FileStream(arguments.Script, FileMode.Open))
                         {
-                            return 0;
+                            scriptEngine.Execute(stream, true);
+                            if (!arguments.Inspect)
+                            {
+                                return 0;
+                            }
                         }
                     }
+                    if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
+                    {
+                        var task = new Repl("localhost", arguments.Port).Loop();
+                        Task.WaitAll(task);
+                        return task.Result;
+                    }
                 }
-                if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
-                {
-                    var task = new Repl("localhost", 55555).Loop();
-                    Task.WaitAll(task);
-                    return task.Result;
-                }
+            }
+            else
+            {
+                var task = new Repl(arguments.Host, arguments.Port).Loop();
+                Task.WaitAll(task);
+                return task.Result;
             }
             throw new InvalidOperationException();
         }

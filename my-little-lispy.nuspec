@@ -13,7 +13,10 @@
     </dependencies>
   </metadata>
   <files>
-    <file src="src\CorvusAlba.MyLittleLispy.Hosting\bin\Release\CorvusAlba.MyLittleLispy.Hosting.dll" target="lib\CorvusAlba.MyLittleLispy.Hosting.dll" />
-    <file src="src\CorvusAlba.MyLittleLispy.Runtime\bin\Release\CorvusAlba.MyLittleLispy.Runtime.dll" target="lib\CorvusAlba.MyLittleLispy.Runtime.dll" />
+    <file src="bin\CorvusAlba.MyLittleLispy.Hosting.dll" target="lib\CorvusAlba.MyLittleLispy.Hosting.dll" />
+    <file src="bin\CorvusAlba.MyLittleLispy.Runtime.dll" target="lib\CorvusAlba.MyLittleLispy.Runtime.dll" />
+    <file src="bin\CorvusAlba.MyLittleLispy.Hosting.dll" target="tools\CorvusAlba.MyLittleLispy.Hosting.dll" />
+    <file src="bin\CorvusAlba.MyLittleLispy.Runtime.dll" target="tools\CorvusAlba.MyLittleLispy.Runtime.dll" />
+    <file src="bin\mll.exe" target="tools\mll.exe" />
   </files>
 </package>
