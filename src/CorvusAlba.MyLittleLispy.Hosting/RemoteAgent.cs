@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
@@ -17,8 +18,10 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         private bool _running;
         private int _port;
         private Task _task;
+        private ConcurrentQueue<string> _inputLines;
+        private ConcurrentQueue<string> _outputLines;
 
-        public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronized = false)
+        public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronized = true)
         {
             _scriptEngine = scriptEngine;
             _synchronized = synchronized;
@@ -28,10 +31,12 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         public void Start()
         {
             _running = true;
-            _task = Task.Run(new Action(Process));
+            _task = _synchronized
+                ? Task.Run(new Action(ProcessSync))
+                : Task.Run(new Action(ProcessAsync));
         }
 
-        private void Process()
+        private async void ProcessSync()
         {
             var tcpListener = new TcpListener(IPAddress.Any, _port);
             tcpListener.Start();
@@ -40,28 +45,48 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                 var client = tcpListener.AcceptSocket();
                 var ns = new NetworkStream(client);
                 using (var writer = new StreamWriter(ns))
-                    using (var reader = new StreamReader(ns))
+                using (var reader = new StreamReader(ns))
+                {
+                    while (client.Connected && _running)
                     {
-                        while (client.Connected && _running)
+                        Value result = Null.Value;
+                        var line = await reader.ReadLineAsync();
+                        try
                         {
-                            Value result = Null.Value;
-                            var line = reader.ReadLine();
-                            try
-                            {
-                                result = _scriptEngine.Evaluate(line);
-                            }
-                            catch (HaltException e)
-                            {
-                                result = new String("HALT " + e.Code);
-                            }
-                            catch (Exception e)
-                            {
-                                result = new String("EXCEPTION " + e.Message);
-                            }
-                            writer.WriteLine(result);
-                            writer.Flush();
+                            result = _scriptEngine.Evaluate(line);
                         }
+                        catch (HaltException e)
+                        {
+                            result = new String("HALT " + e.Code);
+                        }
+                        catch (Exception e)
+                        {
+                            result = new String("EXCEPTION " + e.Message);
+                        }
+                        await writer.WriteLineAsync(result.ToString());
+                        await writer.FlushAsync();
                     }
+                }
+            }
+            tcpListener.Stop();
+        }
+
+        private async void ProcessAsync()
+        {
+            var tcpListener = new TcpListener(IPAddress.Any, _port);
+            tcpListener.Start();
+            while (_running)
+            {
+                var client = tcpListener.AcceptSocket();
+                var ns = new NetworkStream(client);
+                using (var writer = new StreamWriter(ns))
+                using (var reader = new StreamReader(ns))
+                {
+                    while (client.Connected && _running)
+                    {
+                        // TODO
+                    }
+                }
             }
             tcpListener.Stop();
         }
@@ -71,7 +96,8 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             if (_running)
             {
                 _running = false;
-                _task.Wait();            }
+                _task.Wait();
+            }
         }
 
         public void Dispose()

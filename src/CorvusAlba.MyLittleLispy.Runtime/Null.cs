@@ -17,17 +17,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             if (typeof(T) == typeof(IEnumerable<Value>))
             {
-                return (T) (object) (new Value[] { });
+                return (T)(object)(new Value[] { });
             }
 
             if (typeof(T) == (typeof(bool)))
             {
-                return (T) (object) false;
+                return (T)(object)false;
             }
 
             return base.To<T>();
         }
-        
+
         public override Value Equal(Value arg)
         {
             if (object.ReferenceEquals(this, arg))
@@ -59,7 +59,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             return new Cons(cons.To<IEnumerable<Value>>().ToArray());
         }
-        
+
         public override Node ToExpression()
         {
             return new Constant(this);
@@ -79,12 +79,12 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             if (typeof(T) == (typeof(bool)))
             {
-                return (T) (object) false;
+                return (T)(object)false;
             }
 
             return base.To<T>();
         }
-        
+
         public override Value Equal(Value arg)
         {
             if (object.ReferenceEquals(this, arg))
@@ -94,7 +94,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
             return new Bool(false);
         }
-        
+
         public override Node ToExpression()
         {
             return new Constant(this);
