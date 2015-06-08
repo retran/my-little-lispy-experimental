@@ -45,7 +45,7 @@ namespace CorvusAlba.MyLittleLispy.Client
         {
             var arguments = new CommandLineArgs();
             arguments.Parse(args);
-            using (var scriptEngine = new ScriptEngine(55555, true))
+            using (var scriptEngine = new ScriptEngine(55555, false))
             {
                 if (!string.IsNullOrEmpty(arguments.Script))
                 {

@@ -14,29 +14,48 @@ namespace CorvusAlba.MyLittleLispy.Hosting
     sealed class RemoteAgent : IDisposable
     {
         private ScriptEngine _scriptEngine;
-        private bool _synchronized;
+        private bool _synchronous;
         private bool _running;
+        private bool _waitingForSync;
         private int _port;
         private Task _task;
-        private ConcurrentQueue<string> _inputLines;
-        private ConcurrentQueue<string> _outputLines;
+        private string _message;
+        private AutoResetEvent _sync;
 
-        public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronized = true)
+        public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronous = true)
         {
             _scriptEngine = scriptEngine;
-            _synchronized = synchronized;
+            _synchronous = synchronous;
             _port = port;
+            if (!_synchronous)
+            {
+                _sync = new AutoResetEvent(false);
+            }
         }
 
         public void Start()
         {
             _running = true;
-            _task = _synchronized
-                ? Task.Run(new Action(ProcessSync))
-                : Task.Run(new Action(ProcessAsync));
+            _task = Task.Run(new Action(Process));
         }
 
-        private async void ProcessSync()
+        private Value Evaluate(string line)
+        {
+            try
+            {
+                return _scriptEngine.Evaluate(line);
+            }
+            catch (HaltException e)
+            {
+                return new String("HALT " + e.Code);
+            }
+            catch (Exception e)
+            {
+                return new String("EXCEPTION " + e.Message);
+            }
+        }
+
+        private async void Process()
         {
             var tcpListener = new TcpListener(IPAddress.Any, _port);
             tcpListener.Start();
@@ -49,21 +68,18 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                 {
                     while (client.Connected && _running)
                     {
-                        Value result = Null.Value;
-                        var line = await reader.ReadLineAsync();
-                        try
+                        _message = await reader.ReadLineAsync();
+                        if (_synchronous)
                         {
-                            result = _scriptEngine.Evaluate(line);
+                            _message = Evaluate(_message).ToString();
                         }
-                        catch (HaltException e)
+                        else
                         {
-                            result = new String("HALT " + e.Code);
+                            _sync.Reset();
+                            _waitingForSync = true;
+                            _sync.WaitOne();
                         }
-                        catch (Exception e)
-                        {
-                            result = new String("EXCEPTION " + e.Message);
-                        }
-                        await writer.WriteLineAsync(result.ToString());
+                        await writer.WriteLineAsync(_message);
                         await writer.FlushAsync();
                     }
                 }
@@ -71,24 +87,14 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             tcpListener.Stop();
         }
 
-        private async void ProcessAsync()
+        public void Sync()
         {
-            var tcpListener = new TcpListener(IPAddress.Any, _port);
-            tcpListener.Start();
-            while (_running)
+            if (_waitingForSync)
             {
-                var client = tcpListener.AcceptSocket();
-                var ns = new NetworkStream(client);
-                using (var writer = new StreamWriter(ns))
-                using (var reader = new StreamReader(ns))
-                {
-                    while (client.Connected && _running)
-                    {
-                        // TODO
-                    }
-                }
+                _message = Evaluate(_message).ToString();
+                _sync.Set();
+                _waitingForSync = false;
             }
-            tcpListener.Stop();
         }
 
         public void Stop()
