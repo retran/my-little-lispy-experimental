@@ -87,6 +87,14 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             return result;
         }
 
+        public void Sync()
+        {
+            if (RemoteEnabled)
+            {
+                _agent.Sync();
+            }
+        }
+
         public void Dispose()
         {
             Dispose(true);
