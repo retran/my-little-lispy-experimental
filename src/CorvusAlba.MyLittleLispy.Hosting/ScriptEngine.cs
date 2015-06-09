@@ -95,6 +95,11 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             }
         }
 
+        public void Import(IModule module)
+        {
+            module.Import(_parser, _context);
+        }
+
         public void Dispose()
         {
             Dispose(true);
