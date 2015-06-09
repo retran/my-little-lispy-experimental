@@ -42,102 +42,102 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             _parser = parser;
             _specialForms = new Dictionary<string, Func<Node[], Value>>
-		    {
-		        {"define", args => Define(args[0], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
-								          Concat(args.Skip(1)).ToArray())) },
-		        {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
-								          Concat(args.Skip(2)).ToArray())) },
-		        {
-		            "macroexpand", args =>
-		            {
-		                _evalMacro = false;
-		                var result = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
-		                _evalMacro = true;
-		                return result;
-		            }
-		        },
-		        {"quote", args => args[0].Quote(this) },
-		        {"quasiquote", Quasiquote },
-		        {"unquote", args => Trampoline(args[0].Eval(this)) },
-		        {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
-		        {"lambda", args => new Closure(this, args[0],
-						       new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
-								      Concat(args.Skip(1)).ToArray())) },
-		        {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
-		             ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
-								      Concat(args.Skip(1)).ToArray()), true)
-		             : (Value) Null.Value },
-		        {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
-		             ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
-								      Concat(args.Skip(1)).ToArray()), true)
-		             : (Value) Null.Value },
-		        {
-			    "cond", args =>  
-			    {
-			        var clauses = args.Cast<Expression>().ToArray();
+            {
+                {"define", args => Define(args[0], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+                                          Concat(args.Skip(1)).ToArray())) },
+                {"defmacro", args => DefineMacro(args[0].Quote(this).To<string>(), args[1], new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+                                          Concat(args.Skip(2)).ToArray())) },
+                {
+                    "macroexpand", args =>
+                    {
+                        _evalMacro = false;
+                        var result = Trampoline(args[0].Eval(this)).ToExpression().Eval(this);
+                        _evalMacro = true;
+                        return result;
+                    }
+                },
+                {"quote", args => args[0].Quote(this) },
+                {"quasiquote", Quasiquote },
+                {"unquote", args => Trampoline(args[0].Eval(this)) },
+                {"unquote-splicing", args => Trampoline(args[0].Eval(this)) },
+                {"lambda", args => new Closure(this, args[0],
+                               new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+                                      Concat(args.Skip(1)).ToArray())) },
+                {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
+                     ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+                                      Concat(args.Skip(1)).ToArray()), true)
+                     : (Value) Null.Value },
+                {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
+                     ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
+                                      Concat(args.Skip(1)).ToArray()), true)
+                     : (Value) Null.Value },
+                {
+                "cond", args =>
+                {
+                    var clauses = args.Cast<Expression>().ToArray();
 
-			        foreach (var clause in clauses.Take(args.Count() - 1))
-			        {
-				        var condition = Trampoline(clause.Head.Eval(this));
-				        if (condition.To<bool>())
-				        {
-				            return InvokeCondClause(clause, condition);
-				        }
-			        }
+                    foreach (var clause in clauses.Take(args.Count() - 1))
+                    {
+                        var condition = Trampoline(clause.Head.Eval(this));
+                        if (condition.To<bool>())
+                        {
+                            return InvokeCondClause(clause, condition);
+                        }
+                    }
 
-			        var lastClause = clauses.Last();
-			        var head = lastClause.Head.Quote(this);
-			        if (head is SymbolValue && head.To<string>() == "else")
-			        {
-				        return InvokeCondClause(lastClause);
-			        }
+                    var lastClause = clauses.Last();
+                    var head = lastClause.Head.Quote(this);
+                    if (head is SymbolValue && head.To<string>() == "else")
+                    {
+                        return InvokeCondClause(lastClause);
+                    }
 
-			        var lastCondition = Trampoline(lastClause.Head.Eval(this));
-			        if (lastCondition.To<bool>())
-			        {
-				        return InvokeCondClause(lastClause, lastCondition);
-			        }
-				
-			        return Null.Value;
-			    }
-		        },
-		        {
-			    "if", args =>
-			    {
-			        var condition = Trampoline(args[0].Eval(this)).To<bool>();
-			        if (condition)
-			        {
-				        return new Closure(this, null, args[1], true);
-			        }
-			        if (args.Length > 2)
-			        {
-				        return new Closure(this, null, args[2], true);
-			        }
-			        return Null.Value;
-			    }
-		        },
-		        {"let", Let},
-		        {"let*", LetSequential},
-		        {"set!", Set},
-		        {
-			    "begin", args =>
-			    {
-			        foreach (var arg in args.Take(args.Count() - 1))
-			        {
+                    var lastCondition = Trampoline(lastClause.Head.Eval(this));
+                    if (lastCondition.To<bool>())
+                    {
+                        return InvokeCondClause(lastClause, lastCondition);
+                    }
+
+                    return Null.Value;
+                }
+                },
+                {
+                "if", args =>
+                {
+                    var condition = Trampoline(args[0].Eval(this)).To<bool>();
+                    if (condition)
+                    {
+                        return new Closure(this, null, args[1], true);
+                    }
+                    if (args.Length > 2)
+                    {
+                        return new Closure(this, null, args[2], true);
+                    }
+                    return Null.Value;
+                }
+                },
+                {"let", Let},
+                {"let*", LetSequential},
+                {"set!", Set},
+                {
+                "begin", args =>
+                {
+                    foreach (var arg in args.Take(args.Count() - 1))
+                    {
                                     Trampoline(arg.Eval(this));
-			        }
-			        return new Closure(this, null, args.Last(), true);
-			    }
-		        },
+                    }
+                    return new Closure(this, null, args.Last(), true);
+                }
+                },
                         {"do", Do},
-		        {"import", Import},
-		        {"and", And},
-		        {"or", Or},
+                {"import", Import},
+                {"and", And},
+                {"or", Or},
 
-		        // TODO for jit-compiler letrec and letrec* will have different implementations
-		        {"letrec", Let},
-		        {"letrec*", LetSequential},
-		    };
+                // TODO for jit-compiler letrec and letrec* will have different implementations
+                {"letrec", Let},
+                {"letrec*", LetSequential},
+            };
 
             _globalFrame = new Frame();
             _callStack.Push(_globalFrame);
@@ -155,7 +155,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             return new Cons(expression.Nodes.SelectMany(node =>
                     {
                         bool isNested = false;
-                    
+
                         var expressionNode = node as Expression;
                         if (expressionNode != null)
                         {
@@ -182,9 +182,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                             }
                             if (isNested)
                             {
-                                return new [] { expressionNode.Quote(this).ToExpression() };
+                                return new[] { expressionNode.Quote(this).ToExpression() };
                             }
-                            return new [] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
+                            return new[] { Quasiquote(new Node[] { expressionNode }).ToExpression() };
                         }
                         return new[] { node };
                     }).Select(node => node.Quote(this)).ToArray());
@@ -236,7 +236,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         private Value Do(Node[] args)
         {
             var variableClauses = args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>().ToArray();
-            var testClause = (Expression) args[1];
+            var testClause = (Expression)args[1];
             var body = new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                       Concat(args.Skip(2)).ToArray());
 
@@ -246,9 +246,9 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 foreach (var clause in variableClauses)
                 {
                     CurrentFrame.Bind(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.First().Eval(this)));
-                }            
+                }
 
-                while(!Trampoline(testClause.Head.Eval(this)).To<bool>())
+                while (!Trampoline(testClause.Head.Eval(this)).To<bool>())
                 {
                     Trampoline(body.Eval(this));
                     foreach (var clause in variableClauses)
@@ -257,7 +257,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                         {
                             CurrentFrame.Set(clause.Head.Quote(this).To<string>(), Trampoline(clause.Tail.Skip(1).First().Eval(this)));
                         }
-                    }       
+                    }
                 }
                 return new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                                               Concat(testClause.Tail).ToArray()), true);
@@ -267,7 +267,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 CurrentFrame.Pop();
             }
         }
-        
+
         private Value Let(Node[] args)
         {
             var frameArgs = new List<string>();
@@ -280,7 +280,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 name = args[0].Quote(this).To<string>();
                 args = args.Skip(1).ToArray();
             }
-            
+
             foreach (var clause in args[0].Quote(this).To<IEnumerable<Value>>().Select(v => v.ToExpression()).Cast<Expression>())
             {
                 frameArgs.Add(clause.Head.Quote(this).To<string>());
@@ -312,7 +312,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             var name = string.Empty;
             var argNodes = new List<Node>();
-            
+
             if (args[0] is Symbol)
             {
                 name = args[0].Quote(this).To<string>();
@@ -335,7 +335,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                         new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                                                        Concat(args.Skip(1)).ToArray()), false));
                 }
-                
+
                 var result = new Closure(this, null, new Expression(new[] { new Symbol(new SymbolValue("begin")) }.
                                                                     Concat(args.Skip(1)).ToArray()), true);
                 return result;
@@ -382,7 +382,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             Value call;
             call = Trampoline(head.Eval(this));
             if (call is Undefined)
-            {            
+            {
                 if (head is Symbol)
                 {
                     call = head.Quote(this);
@@ -466,7 +466,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 Push();
                 CurrentFrame.Import(closure.Scopes);
             }
-            CurrentFrame.Push(closure.Args, arguments);                
+            CurrentFrame.Push(closure.Args, arguments);
             try
             {
                 Value result;
@@ -484,7 +484,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             }
             finally
             {
-                CurrentFrame.Pop();                
+                CurrentFrame.Pop();
                 if (!closure.IsMacro)
                 {
                     if (closure.Scopes != null)
