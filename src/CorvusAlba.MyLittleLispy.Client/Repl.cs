@@ -27,48 +27,56 @@ namespace CorvusAlba.MyLittleLispy.Client
         public async Task<int> Loop()
         {
             var socketForServer = new TcpClient(_host, _port);
-            var ns = socketForServer.GetStream();
-            using (var writer = new StreamWriter(ns))
-            using (var reader = new StreamReader(ns))
+            try
             {
-                while (true)
+                using (var ns = socketForServer.GetStream())
+                using (var writer = new StreamWriter(ns))
+                using (var reader = new StreamReader(ns))
                 {
-                    var lines = new List<string>();
-                    Console.Write(_promptLine);
-                    var line = Console.ReadLine();
-                    if (line == null)
-                    {
-                        break;
-                    }
                     while (true)
                     {
-                        var count = line.Count(c => c == '(') - line.Count(c => c == ')');
-                        if (count == 0)
+                        var lines = new List<string>();
+                        Console.Write(_promptLine);
+                        var line = Console.ReadLine();
+                        if (line == null)
                         {
                             break;
                         }
-                        var newpart = Console.ReadLine();
-                        if (newpart != null)
+                        while (true)
                         {
-                            line = line.TrimEnd('\n', '\r') + " " + newpart;
+                            var count = line.Count(c => c == '(') - line.Count(c => c == ')');
+                            if (count == 0)
+                            {
+                                break;
+                            }
+                            var newpart = Console.ReadLine();
+                            if (newpart != null)
+                            {
+                                line = line.TrimEnd('\n', '\r') + " " + newpart;
+                            }
+                        }
+
+                        if (!string.IsNullOrEmpty(line))
+                        {
+                            lines.Add(line);
+                        }
+
+                        foreach (var l in lines)
+                        {
+                            await writer.WriteLineAsync(line);
+                            await writer.FlushAsync();
+                            var value = await reader.ReadLineAsync();
+                            Console.WriteLine("{0}", value);
                         }
                     }
 
-                    if (!string.IsNullOrEmpty(line))
-                    {
-                        lines.Add(line);
-                    }
-
-                    foreach (var l in lines)
-                    {
-                        await writer.WriteLineAsync(line);
-                        await writer.FlushAsync();
-                        var value = await reader.ReadLineAsync();
-                        Console.WriteLine("{0}", value);
-                    }
                 }
+                socketForServer.Close();
             }
-            socketForServer.Close();
+            catch (IOException)
+            {
+                Console.WriteLine("Socket disconnected.");
+            }
             return 0;
         }
     }

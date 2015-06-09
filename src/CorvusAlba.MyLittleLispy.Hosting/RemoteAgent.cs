@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Net;
 using System.Net.Sockets;
+using System.Runtime.Remoting;
 using System.Threading;
 using System.Threading.Tasks;
 using CorvusAlba.MyLittleLispy.Runtime;
@@ -21,6 +22,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         private Task _task;
         private string _message;
         private AutoResetEvent _sync;
+        private Socket _client;
 
         public RemoteAgent(ScriptEngine scriptEngine, int port, bool synchronous = true)
         {
@@ -61,26 +63,32 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             tcpListener.Start();
             while (_running)
             {
-                var client = tcpListener.AcceptSocket();
-                var ns = new NetworkStream(client);
-                using (var writer = new StreamWriter(ns))
-                using (var reader = new StreamReader(ns))
+                using (_client = await tcpListener.AcceptSocketAsync())
                 {
-                    while (client.Connected && _running)
+                    using (var ns = new NetworkStream(_client))
+                    using (var writer = new StreamWriter(ns))
+                    using (var reader = new StreamReader(ns))
                     {
-                        _message = await reader.ReadLineAsync();
-                        if (_synchronous)
+                        while (_client.Connected && _running)
                         {
-                            _message = Evaluate(_message).ToString();
+                            try
+                            {
+                                _message = await reader.ReadLineAsync();
+                                if (_synchronous)
+                                {
+                                    _message = Evaluate(_message).ToString();
+                                }
+                                else
+                                {
+                                    _sync.Reset();
+                                    _waitingForSync = true;
+                                    _sync.WaitOne();
+                                }
+                                await writer.WriteLineAsync(_message);
+                                await writer.FlushAsync();
+                            }
+                            catch (IOException e) { }
                         }
-                        else
-                        {
-                            _sync.Reset();
-                            _waitingForSync = true;
-                            _sync.WaitOne();
-                        }
-                        await writer.WriteLineAsync(_message);
-                        await writer.FlushAsync();
                     }
                 }
             }
@@ -102,6 +110,10 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             if (_running)
             {
                 _running = false;
+                if (_client.Connected)
+                {
+                    _client.Disconnect(false);
+                }
                 _task.Wait();
             }
         }
