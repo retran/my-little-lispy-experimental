@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.IO;
+using System.Reflection;
 using System.Threading.Tasks;
 using CorvusAlba.MyLittleLispy.Hosting;
 
@@ -63,6 +64,7 @@ namespace CorvusAlba.MyLittleLispy.Client
 
         private static int Main(string[] args)
         {
+            Console.WriteLine("My Little Lispy {0}\nCopyright (C) 2014-2015 Corvus Alba\n", Assembly.GetAssembly(typeof(Repl)).GetName().Version);
             var arguments = new CommandLineArgs();
             arguments.Parse(args);
             if (!arguments.Remote)
@@ -82,7 +84,7 @@ namespace CorvusAlba.MyLittleLispy.Client
                     }
                     if (arguments.Inspect || string.IsNullOrWhiteSpace(arguments.Script))
                     {
-                        var task = new Repl("localhost", arguments.Port).Loop();
+                        var task = new Repl("localhost", arguments.Port, arguments.Remote).Loop();
                         Task.WaitAll(task);
                         return task.Result;
                     }
@@ -90,7 +92,7 @@ namespace CorvusAlba.MyLittleLispy.Client
             }
             else
             {
-                var task = new Repl(arguments.Host, arguments.Port).Loop();
+                var task = new Repl(arguments.Host, arguments.Port, arguments.Remote).Loop();
                 Task.WaitAll(task);
                 return task.Result;
             }
