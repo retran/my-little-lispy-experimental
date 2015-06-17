@@ -4,13 +4,13 @@ using Xunit;
 
 namespace CorvusAlba.MyLittleLispy.Tests
 {
-    public class Arithmetics
+    public class Arithmetic
     {
         private readonly ScriptEngine _engine;
 
-        public Arithmetics()
+        public Arithmetic()
         {
-            _engine = new ScriptEngine();           
+            _engine = new ScriptEngine();
         }
 
         [Theory]
@@ -22,7 +22,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("0.1", 0.1f)]
         public void NumberConstShouldEvaluateToItsValue<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
         [Theory]
@@ -42,7 +42,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(+ 1 2.0 7)", 10f)]
         public void AddOperationShouldAddNumbersProperly<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
         [Theory]
@@ -62,7 +62,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(- 0 -6.1)", 6.1f)]
         public void SubstractOperationShouldSubstractNumbersProperly<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
         [Theory]
@@ -82,7 +82,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(* 2.0 -2)", -4f)]
         public void MultipleOperationShouldMultipleNumbersProperly<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
         [Theory]
@@ -102,13 +102,13 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(/ 15.0 5)", 3f)]
         public void DivideOperationShouldDivideNumbersProperly<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
         [Fact]
         public void DivideOperationShouldThrowExceptionOnNumberDivideByZero()
         {
-            Assert.Throws<DivideByZeroException>(() => 
+            Assert.Throws<DivideByZeroException>(() =>
                 _engine.Evaluate("(/ 10 0)").To<int>());
         }
 
@@ -118,7 +118,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(* (/ 10.0  5) (* 5 5.0))", 50f)]
         public void ComplexExpressionWithNumbersShouldEvaluateProperly<T>(string expression, T expected)
         {
-            Assert.Equal(_engine.Evaluate(expression).To<T>(), expected, Utility.GetEqualityComparerFor<T>());
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
 
     }

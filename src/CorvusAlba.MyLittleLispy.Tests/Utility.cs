@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using CorvusAlba.MyLittleLispy.Hosting;
+using Xunit;
 
 namespace CorvusAlba.MyLittleLispy.Tests
 {
     public static class Utility
     {
-        public class FloatEqualityComparer : EqualityComparer<float> 
+        public class FloatEqualityComparer : EqualityComparer<float>
         {
             public readonly float Epsilon = 0.000001f;
 
@@ -22,12 +24,18 @@ namespace CorvusAlba.MyLittleLispy.Tests
 
         public static IEqualityComparer<T> GetEqualityComparerFor<T>()
         {
-            if (typeof(T) == typeof (Single))
+            if (typeof(T) == typeof(Single))
             {
-                return (IEqualityComparer<T>) new FloatEqualityComparer();
+                return (IEqualityComparer<T>)new FloatEqualityComparer();
             }
 
             return EqualityComparer<T>.Default;
+        }
+
+        public static void EvaluateAndAssertEqual<T>(ScriptEngine engine, string line, T expected)
+        {
+            Assert.Equal(expected, engine.Evaluate(line).To<T>(),
+                         GetEqualityComparerFor<T>());
         }
     }
 }
