@@ -31,7 +31,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         {
             if (!Nodes.Any())
             {
-                return Null.Value;
+                return Cons.Empty;
             }
 
             return new Cons(Nodes.Select(node => node.Quote(context)).ToArray());

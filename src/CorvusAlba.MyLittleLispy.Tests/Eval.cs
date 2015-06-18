@@ -21,7 +21,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
             Assert.Equal(4, _engine.Evaluate("(eval (cons '+ (cons 2 2)))").To<int>());
             Assert.Equal(4, _engine.Evaluate("(eval (list '+ 2 2))").To<int>());
 
-            Assert.Equal(Null.Value, _engine.Evaluate("(eval '(define x 10))"));
+            Assert.Equal(Cons.Empty, _engine.Evaluate("(eval '(define x 10))"));
             Assert.Equal(10, _engine.Evaluate("(eval 'x)").To<int>());
         }
     }

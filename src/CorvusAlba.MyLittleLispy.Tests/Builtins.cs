@@ -24,7 +24,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [Fact]
         public void IfWithFalseExpressionReturnsElseClause()
         {
-            Assert.Equal(Null.Value, _engine.Evaluate("(if #f 'then)"));
+            Assert.Equal(Cons.Empty, _engine.Evaluate("(if #f 'then)"));
             Assert.Equal("else", _engine.Evaluate("(if #f 'then 'else)").To<string>());
         }
 

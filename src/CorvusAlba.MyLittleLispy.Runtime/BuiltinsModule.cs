@@ -108,7 +108,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                   new ClrLambdaBody(c =>
                                                           {
                                                               var b = c.Lookup("b");
-                                                              if (b != Null.Value)
+                                                              if (!b.IsNull())
                                                               {
                                                                   return c.Lookup("a").Substract(b);
                                                               }
@@ -200,7 +200,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                   new ClrLambdaBody(c =>
                                                           {
                                                               System.Console.Write(c.Lookup("a").ToString());
-                                                              return Null.Value;
+                                                              return Cons.Empty;
                                                           })));
 
             context.CurrentFrame.Bind("display-line",
@@ -208,7 +208,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                   new ClrLambdaBody(c =>
                                                           {
                                                               System.Console.WriteLine(c.Lookup("a").ToString());
-                                                              return Null.Value;
+                                                              return Cons.Empty;
                                                           })));
             
             context.CurrentFrame.Bind("map",
@@ -233,7 +233,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                               return new Cons(result);
                                           }
 
-                                          return Null.Value;
+                                          return Cons.Empty;
                                       })));
 
             context.CurrentFrame.Bind("build-list",
@@ -276,7 +276,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                                                               var args = c.Lookup("args").To<IEnumerable<Value>>().ToArray();
                                                               if (args.Length == 0)
                                                               {
-                                                                  return Null.Value;
+                                                                  return Cons.Empty;
                                                               }
                                                               var result = args.First();
                                                               foreach (var value in args.Skip(1))

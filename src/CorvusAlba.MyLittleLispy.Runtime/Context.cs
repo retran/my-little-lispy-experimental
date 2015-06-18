@@ -66,11 +66,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 {"when", args => Trampoline(args[0].Eval(this)).To<bool>()
                      ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
                                       Concat(args.Skip(1)).ToArray()), true)
-                     : (Value) Null.Value },
+                     : (Value) Cons.Empty },
                 {"unless", args => !Trampoline(args[0].Eval(this)).To<bool>()
                      ? (Value) new Closure(this, null, new Expression(new [] { new Symbol(new SymbolValue("begin")) }.
                                       Concat(args.Skip(1)).ToArray()), true)
-                     : (Value) Null.Value },
+                     : (Value) Cons.Empty },
                 {
                 "cond", args =>
                 {
@@ -98,7 +98,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                         return InvokeCondClause(lastClause, lastCondition);
                     }
 
-                    return Null.Value;
+                    return Cons.Empty;
                 }
                 },
                 {
@@ -113,7 +113,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                     {
                         return new Closure(this, null, args[2], true);
                     }
-                    return Null.Value;
+                    return Cons.Empty;
                 }
                 },
                 {"let", Let},
@@ -195,7 +195,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             var name = args[0].Quote(this).To<string>();
             var value = Trampoline(args[1].Eval(this));
             CurrentFrame.Set(name, value);
-            return Null.Value;
+            return Cons.Empty;
         }
 
         private Value Or(Node[] args)
@@ -230,7 +230,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             var alias = args[0].Eval(this).To<string>();
             var module = ModuleAttribute.Find(alias);
             module.Import(_parser, this);
-            return Null.Value;
+            return Cons.Empty;
         }
 
         private Value Do(Node[] args)
@@ -440,13 +440,13 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 CurrentFrame.Bind(name, body.Eval(this));
             }
 
-            return Null.Value;
+            return Cons.Empty;
         }
 
         public Value DefineMacro(string name, Node args, Node body)
         {
             CurrentFrame.Bind(name, new Closure(this, args, body, false, true));
-            return Null.Value;
+            return Cons.Empty;
         }
 
         public Value InvokeClosure(Closure closure, Node[] values)

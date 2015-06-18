@@ -32,9 +32,9 @@ namespace CorvusAlba.MyLittleLispy.Tests
             return EqualityComparer<T>.Default;
         }
 
-        public static void EvaluateAndAssertEqual<T>(ScriptEngine engine, string line, T expected)
+        public static void EvaluateAndAssertEqual<T>(ScriptEngine engine, string expression, T expected)
         {
-            Assert.Equal(expected, engine.Evaluate(line).To<T>(),
+            Assert.Equal(expected, engine.Evaluate(expression).To<T>(),
                          GetEqualityComparerFor<T>());
         }
     }

@@ -19,7 +19,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("1", true)]
         [InlineData("1.2", true)]
         [InlineData("\"HELLO\"", true)]
-        [InlineData("'(1 2 3)'", true)]
+        [InlineData("'(1 2 3)", true)]
         [InlineData("'()", true)]
         public void ConstShouldEvaluateToProperBooleanValue<T>(string expression, T expected)
         {
@@ -30,10 +30,10 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(not #t)", false)]
         [InlineData("(not 1)", false)]
         [InlineData("(not 1.2)", false)]
+        [InlineData("(not #f)", true)]
         [InlineData("(not \"HELLO\")", false)]
         [InlineData("(not '())", false)]
         [InlineData("(not '(1 2 3))", false)]
-        [InlineData("(not #f)", true)]
         public void NotInvertsBooleanValue<T>(string expression, T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
@@ -58,7 +58,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(and #t #t)", true)]
         [InlineData("(and #t #t #t)", true)]
         [InlineData("(and 1 2 3)", 3)]
-        [InlineData("(and 1.1 1.2 1.3)", 1.3)]
+        [InlineData("(and 1.1 1.2 1.3)", 1.3f)]
         [InlineData("(and \"1\" \"2\" \"3\")", "3")]
         [InlineData("(and #t #f)", false)]
         [InlineData("(and #f #t #f)", false)]

@@ -49,7 +49,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
 
         public Value Execute(string script, bool useGlobalFrame = false)
         {
-            Value result = Null.Value;
+            Value result = Cons.Empty;
             var count = 0;
 
             if (!useGlobalFrame)

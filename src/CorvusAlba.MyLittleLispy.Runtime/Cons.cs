@@ -6,23 +6,30 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 {
     public class Cons : Value<Tuple<Value, Value>>
     {
+        public static readonly Value Empty = new Cons();
+
+        private Cons()
+            : base(null)
+        {
+        }
+
         public Cons(Value head, Value tail)
             : base(new Tuple<Value, Value>(head, tail))
         {
         }
 
         public Cons(Value head)
-            : base(new Tuple<Value, Value>(head, Null.Value))
+            : base(new Tuple<Value, Value>(head, Cons.Empty))
         {
         }
 
         public Cons(Value[] values)
             : base(
-                values.Any() 
+                values.Any()
                     ? values.Skip(1).Any()
-                       ? new Tuple<Value, Value>(values.First(), new Cons(values.Skip(1).ToArray()))
-                       : new Tuple<Value, Value>(values.First(), Null.Value)
-                    : new Tuple<Value, Value>(Null.Value, Null.Value))
+                        ? new Tuple<Value, Value>(values.First(), new Cons(values.Skip(1).ToArray()))
+                        : new Tuple<Value, Value>(values.First(), Cons.Empty)
+                    : new Tuple<Value, Value>(Cons.Empty, Cons.Empty))
         {
         }
 
@@ -38,10 +45,15 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public override string ToString()
         {
+            if (IsNull())
+            {
+                return "()";
+            }
+
             var left = Car();
             var right = Cdr();
 
-            if (right == Null.Value)
+            if (right.IsNull())
             {
                 return string.Format("({0})", left);
             }
@@ -51,21 +63,32 @@ namespace CorvusAlba.MyLittleLispy.Runtime
                 return string.Format("({0})", string.Join(" ", Flatten()));
             }
 
-            return string.Format("({0} . {1})", Car(), Cdr());
+            return string.Format("({0} . {1})", left, right);
         }
 
         public override T To<T>()
         {
-            if (typeof(T) == typeof(IEnumerable<Value>))
+            if (typeof (T) == typeof (bool))
             {
-                return (T)Flatten();
+                return (T) (object) true;
             }
-            return ((Value)this).To<T>();
+
+            if (typeof (T) == typeof (string))
+            {
+                return (T) (object) ToString();
+            }
+
+            if (typeof (T) == typeof (IEnumerable<Value>))
+            {
+                return (T) Flatten();
+            }
+
+            throw new InvalidCastException();
         }
 
         public override Value Equal(Value arg)
         {
-            if (arg is Null && this.IsNull())
+            if (arg.IsNull() && IsNull())
             {
                 return new Bool(true);
             }
@@ -73,7 +96,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             var cons = arg as Cons;
             if (cons != null)
             {
-                return new Bool(object.ReferenceEquals(this, cons));
+                return new Bool(ReferenceEquals(this, cons));
             }
 
             return new Bool(false);
@@ -97,7 +120,7 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public override Value Append(Value arg)
         {
-            if (arg is Null)
+            if (arg.IsNull())
             {
                 return new Cons(To<IEnumerable<Value>>().ToArray());
             }
@@ -107,24 +130,24 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             {
                 throw new InvalidOperationException();
             }
-            
+
             return new Cons(To<IEnumerable<Value>>().Concat(cons.To<IEnumerable<Value>>()).ToArray());
         }
 
         public Value EqualRecursive(Cons value)
         {
-            var leftA = this.Car();
+            var leftA = Car();
             var leftB = value.Car();
 
-            var rightA = this.Cdr();
+            var rightA = Cdr();
             var rightB = value.Cdr();
 
             var left = leftA is Cons && leftB is Cons
-                ? ((Cons)leftA).EqualRecursive((Cons)leftB)
+                ? ((Cons) leftA).EqualRecursive((Cons) leftB)
                 : leftA.EqualWithNull(leftB);
 
             var right = rightA is Cons && rightB is Cons
-                ? ((Cons)rightA).EqualRecursive((Cons)rightB)
+                ? ((Cons) rightA).EqualRecursive((Cons) rightB)
                 : rightA.EqualWithNull(rightB);
 
             return new Bool(left.To<bool>() && right.To<bool>());
@@ -136,23 +159,17 @@ namespace CorvusAlba.MyLittleLispy.Runtime
             if (!IsNull())
             {
                 Value current = this;
-                do
+                while (current is Cons && !current.IsNull())
                 {
                     list.Add(current.Car());
                     current = current.Cdr();
-                } while (current is Cons);
-                if (current != Null.Value)
+                }
+                if (!current.IsNull())
                 {
                     list.Add(current);
                 }
             }
             return list;
-        }
-
-        public bool IsNull()
-        {
-            return Car().Equal(Null.Value).To<bool>()
-                && Cdr().Equal(Null.Value).To<bool>();             
         }
 
         public override Node ToExpression()

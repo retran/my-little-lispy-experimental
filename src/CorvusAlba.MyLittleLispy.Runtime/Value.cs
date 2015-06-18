@@ -51,8 +51,8 @@ namespace CorvusAlba.MyLittleLispy.Runtime
 
         public Value EqualWithNull(Value arg)
         {
-            return ReferenceEquals(arg, Null.Value)
-                ? new Bool(ReferenceEquals(this, Null.Value))
+            return ReferenceEquals(arg, Cons.Empty)
+                ? new Bool(ReferenceEquals(this, Cons.Empty))
                 : Equal(arg);
         }
 
@@ -102,6 +102,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         }
         
         public abstract Node ToExpression();
+
+        public virtual bool IsNull()
+        {
+            return false;
+        }
     }
 
     public abstract class Value<T> : Value
@@ -126,6 +131,11 @@ namespace CorvusAlba.MyLittleLispy.Runtime
         public override Node ToExpression()
         {
             return new Constant(this);
+        }
+
+        public override bool IsNull()
+        {
+            return ClrValue == null;
         }
     }
 }
