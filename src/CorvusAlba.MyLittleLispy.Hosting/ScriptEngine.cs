@@ -110,7 +110,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
         {
             if (disposing)
             {
-                if (_agent != null)
+                if (RemoteEnabled)
                 {
                     _agent.Stop();
                 }

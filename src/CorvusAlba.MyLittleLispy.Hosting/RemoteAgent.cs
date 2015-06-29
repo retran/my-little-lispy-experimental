@@ -87,7 +87,7 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                                 await writer.WriteLineAsync(_message);
                                 await writer.FlushAsync();
                             }
-                            catch (IOException e) { }
+                            catch (IOException) { }
                         }
                     }
                 }
@@ -110,10 +110,6 @@ namespace CorvusAlba.MyLittleLispy.Hosting
             if (_running)
             {
                 _running = false;
-                if (_client.Connected)
-                {
-                    _client.Disconnect(false);
-                }
                 _task.Wait();
             }
         }
