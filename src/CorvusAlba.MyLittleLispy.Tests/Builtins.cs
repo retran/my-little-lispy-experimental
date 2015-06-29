@@ -42,14 +42,5 @@ namespace CorvusAlba.MyLittleLispy.Tests
             Assert.Equal(true, _engine.Evaluate("(<= 5 10)").To<bool>());
             Assert.Equal(false, _engine.Evaluate("(<= 10 5)").To<bool>());
         }
-
-        [Fact]
-        public void XorShouldEvaluateProperly()
-        {
-            Assert.Equal(false, _engine.Evaluate("(xor #t #t)").To<bool>());
-            Assert.Equal(true, _engine.Evaluate("(xor #f #t)").To<bool>());
-            Assert.Equal(true, _engine.Evaluate("(xor #t #f)").To<bool>());
-            Assert.Equal(false, _engine.Evaluate("(xor #f #f)").To<bool>());
-        }
     }
 }

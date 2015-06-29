@@ -69,5 +69,15 @@ namespace CorvusAlba.MyLittleLispy.Tests
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
+
+        [Theory]
+        [InlineData("(xor #t #t)", false)]
+        [InlineData("(xor #f #t)", true)]
+        [InlineData("(xor #t #f)", true)]
+        [InlineData("(xor #f #f)", false)]
+        public void XorShouldReturnFalseIfArgumentsEqualOrFalseOtherwise<T>(string expression, T expected)
+        {
+            Utility.EvaluateAndAssertEqual(_engine, expression, expected);
+        }
     }
 }
