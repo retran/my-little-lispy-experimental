@@ -72,7 +72,8 @@ namespace CorvusAlba.MyLittleLispy.Hosting
                     count--;
                     if (count == 0)
                     {
-                        result = _context.Trampoline(_parser.Parse(sb.ToString()).Eval(_context));
+                        result = _context.Trampoline(_parser.Parse(sb.ToString())
+                                                     .Eval(_context));
                         sb = new StringBuilder(); // TODO как-то можно очистить?
                     }
                 }

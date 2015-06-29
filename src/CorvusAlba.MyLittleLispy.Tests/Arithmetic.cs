@@ -60,7 +60,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(- 0.1 -6)", 6.1f)]
         [InlineData("(- 0 6.1)", -6.1f)]
         [InlineData("(- 0 -6.1)", 6.1f)]
-        public void SubstractOperationShouldSubstractNumbersProperly<T>(string expression, T expected)
+        public void SubstractOperationShouldSubstractNumbersProperly<T>(string expression,
+                                                                        T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
@@ -80,7 +81,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(* 1.0 2.0 3.0 4.0 5.0)", 120f)]
         [InlineData("(* 2 -2.0)", -4f)]
         [InlineData("(* 2.0 -2)", -4f)]
-        public void MultipleOperationShouldMultipleNumbersProperly<T>(string expression, T expected)
+        public void MultipleOperationShouldMultipleNumbersProperly<T>(string expression,
+                                                                      T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
@@ -100,7 +102,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(/ 0.0 -5.0)", 0f)]
         [InlineData("(/ 15 5.0)", 3f)]
         [InlineData("(/ 15.0 5)", 3f)]
-        public void DivideOperationShouldDivideNumbersProperly<T>(string expression, T expected)
+        public void DivideOperationShouldDivideNumbersProperly<T>(string expression,
+                                                                  T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
@@ -116,10 +119,10 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(+ (+ (* 10 3) 2) (- 10 (- 20 15)))", 37)]
         [InlineData("(* (/ 10.0  5.0) (* 5.0 5.0))", 50f)]
         [InlineData("(* (/ 10.0  5) (* 5 5.0))", 50f)]
-        public void ComplexExpressionWithNumbersShouldEvaluateProperly<T>(string expression, T expected)
+        public void ComplexExpressionWithNumbersShouldEvaluateProperly<T>(string expression,
+                                                                          T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
-
     }
 }

@@ -48,7 +48,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(or #f 1)", 1)]
         [InlineData("(or #f 1.1)", 1.1f)]
         [InlineData("(or #f \"HELLO\")", "HELLO")]
-        public void OrReturnsFirstTrueValueIfExistOrLastFalseOtherwise<T>(string expression, T expected)
+        public void OrReturnsFirstTrueValueIfExistOrLastFalseOtherwise<T>(string expression,
+                                                                          T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
@@ -65,7 +66,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(and #f 1)", false)]
         [InlineData("(and #f 1.1)", false)]
         [InlineData("(and #f \"HELLO\")", false)]
-        public void AndReturnsFirstFalseValueIfExistOrLastTrueOtherwise<T>(string expression, T expected)
+        public void AndReturnsFirstFalseValueIfExistOrLastTrueOtherwise<T>(string expression,
+                                                                           T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }
@@ -75,7 +77,8 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(xor #f #t)", true)]
         [InlineData("(xor #t #f)", true)]
         [InlineData("(xor #f #f)", false)]
-        public void XorShouldReturnFalseIfArgumentsEqualOrFalseOtherwise<T>(string expression, T expected)
+        public void XorShouldReturnFalseIfArgumentsEqualOrFalseOtherwise<T>(string expression,
+                                                                            T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
         }

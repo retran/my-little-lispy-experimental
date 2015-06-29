@@ -8,7 +8,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
     {
         public Builtins()
         {
-            _engine = new ScriptEngine();           
+            _engine = new ScriptEngine();
         }
 
         private ScriptEngine _engine;
