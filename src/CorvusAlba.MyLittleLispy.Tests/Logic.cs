@@ -77,7 +77,7 @@ namespace CorvusAlba.MyLittleLispy.Tests
         [InlineData("(xor #f #t)", true)]
         [InlineData("(xor #t #f)", true)]
         [InlineData("(xor #f #f)", false)]
-        public void XorShouldReturnFalseIfArgumentsEqualOrFalseOtherwise<T>(string expression,
+        public void XorShouldReturnFalseIfArgumentsEqualOrTrueOtherwise<T>(string expression,
                                                                             T expected)
         {
             Utility.EvaluateAndAssertEqual(_engine, expression, expected);
